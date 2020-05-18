@@ -39,6 +39,8 @@ export const logEth1: Options = {
 
 export const logNode: Options = {
   alias: [
+    "log.level",
+    "logger.level",
     "log.node.level",
     "logger.node.level",
   ],
