@@ -1,0 +1,1443 @@
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Lodestar documentation - Typescript Eth2.0 client"><link rel="canonical" href="https://chainsafe.github.io/lodestar/packages/lodestar/classes/_eth1_impl_retryprovider_.retryprovider/"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.1"><title> eth1 impl retryprovider .retryprovider - Lodestar documentation</title><link rel="stylesheet" href="../../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content=""><script src="../../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../../stylesheets/extras.css"></head><body dir="ltr" data-md-color-primary="black" data-md-color-accent="black"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#class-retryprovider" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-header-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Lodestar documentation</span><span class="md-header-nav__topic"> eth1 impl retryprovider .retryprovider</span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="48" height="48"></a>Lodestar documentation</label><div class="md-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../.." title="Getting started" class="md-nav__link">Getting started</a></li><li class="md-nav__item"><a href="../../../../installation/" title="Installation" class="md-nav__link">Installation</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3"><label class="md-nav__link" for="nav-3">Usage</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-3">Usage</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../../usage/local/" title="Local testnet" class="md-nav__link">Local testnet</a></li><li class="md-nav__item"><a href="../../../../usage/witti/" title="Witti testnet" class="md-nav__link">Witti testnet</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../" title="Packages" class="md-nav__link">Packages</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#hierarchy" title="Hierarchy" class="md-nav__link">Hierarchy</a></li><li class="md-nav__item"><a href="#implements" title="Implements" class="md-nav__link">Implements</a></li><li class="md-nav__item"><a href="#index" title="Index" class="md-nav__link">Index</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#constructors" title="Constructors" class="md-nav__link">Constructors</a></li><li class="md-nav__item"><a href="#properties" title="Properties" class="md-nav__link">Properties</a></li><li class="md-nav__item"><a href="#accessors" title="Accessors" class="md-nav__link">Accessors</a></li><li class="md-nav__item"><a href="#methods" title="Methods" class="md-nav__link">Methods</a></li></ul></nav></li><li class="md-nav__item"><a href="#constructors_1" title="Constructors" class="md-nav__link">Constructors</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#constructor" title="constructor" class="md-nav__link">constructor</a></li></ul></nav></li><li class="md-nav__item"><a href="#properties_1" title="Properties" class="md-nav__link">Properties</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#_bootstrappoll" title="_bootstrapPoll" class="md-nav__link">_bootstrapPoll</a></li><li class="md-nav__item"><a href="#_emitted" title="_emitted" class="md-nav__link">_emitted</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#type-declaration" title="Type declaration:" class="md-nav__link">Type declaration:</a></li></ul></nav></li><li class="md-nav__item"><a href="#_events" title="_events" class="md-nav__link">_events</a></li><li class="md-nav__item"><a href="#_fastblocknumber" title="_fastBlockNumber" class="md-nav__link">_fastBlockNumber</a></li><li class="md-nav__item"><a href="#_fastblocknumberpromise" title="_fastBlockNumberPromise" class="md-nav__link">_fastBlockNumberPromise</a></li><li class="md-nav__item"><a href="#_fastquerydate" title="_fastQueryDate" class="md-nav__link">_fastQueryDate</a></li><li class="md-nav__item"><a href="#_internalblocknumber" title="_internalBlockNumber" class="md-nav__link">_internalBlockNumber</a></li><li class="md-nav__item"><a href="#_isprovider" title="_isProvider" class="md-nav__link">_isProvider</a></li><li class="md-nav__item"><a href="#_lastblocknumber" title="_lastBlockNumber" class="md-nav__link">_lastBlockNumber</a></li><li class="md-nav__item"><a href="#_maxinternalblocknumber" title="_maxInternalBlockNumber" class="md-nav__link">_maxInternalBlockNumber</a></li><li class="md-nav__item"><a href="#_network" title="_network" class="md-nav__link">_network</a></li><li class="md-nav__item"><a href="#_networkpromise" title="_networkPromise" class="md-nav__link">_networkPromise</a></li><li class="md-nav__item"><a href="#_nextid" title="_nextId" class="md-nav__link">_nextId</a></li><li class="md-nav__item"><a href="#_pendingfilter" title="_pendingFilter" class="md-nav__link">_pendingFilter</a></li><li class="md-nav__item"><a href="#_poller" title="_poller" class="md-nav__link">_poller</a></li><li class="md-nav__item"><a href="#_pollinginterval" title="_pollingInterval" class="md-nav__link">_pollingInterval</a></li><li class="md-nav__item"><a href="#anynetwork" title="anyNetwork" class="md-nav__link">anyNetwork</a></li><li class="md-nav__item"><a href="#attempts" title="attempts" class="md-nav__link">attempts</a></li><li class="md-nav__item"><a href="#connection" title="connection" class="md-nav__link">connection</a></li><li class="md-nav__item"><a href="#formatter" title="formatter" class="md-nav__link">formatter</a></li></ul></nav></li><li class="md-nav__item"><a href="#accessors_1" title="Accessors" class="md-nav__link">Accessors</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#blocknumber" title="blockNumber" class="md-nav__link">blockNumber</a></li><li class="md-nav__item"><a href="#network" title="network" class="md-nav__link">network</a></li><li class="md-nav__item"><a href="#polling" title="polling" class="md-nav__link">polling</a></li><li class="md-nav__item"><a href="#pollinginterval" title="pollingInterval" class="md-nav__link">pollingInterval</a></li><li class="md-nav__item"><a href="#ready" title="ready" class="md-nav__link">ready</a></li></ul></nav></li><li class="md-nav__item"><a href="#methods_1" title="Methods" class="md-nav__link">Methods</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#_addeventlistener" title="_addEventListener" class="md-nav__link">_addEventListener</a></li><li class="md-nav__item"><a href="#_getaddress" title="_getAddress" class="md-nav__link">_getAddress</a></li><li class="md-nav__item"><a href="#_getblock" title="_getBlock" class="md-nav__link">_getBlock</a></li><li class="md-nav__item"><a href="#_getblocktag" title="_getBlockTag" class="md-nav__link">_getBlockTag</a></li><li class="md-nav__item"><a href="#_getfastblocknumber" title="_getFastBlockNumber" class="md-nav__link">_getFastBlockNumber</a></li><li class="md-nav__item"><a href="#_getfilter" title="_getFilter" class="md-nav__link">_getFilter</a></li><li class="md-nav__item"><a href="#_getinternalblocknumber" title="_getInternalBlockNumber" class="md-nav__link">_getInternalBlockNumber</a></li><li class="md-nav__item"><a href="#_getresolver" title="_getResolver" class="md-nav__link">_getResolver</a></li><li class="md-nav__item"><a href="#_gettransactionrequest" title="_getTransactionRequest" class="md-nav__link">_getTransactionRequest</a></li><li class="md-nav__item"><a href="#_ready" title="_ready" class="md-nav__link">_ready</a></li><li class="md-nav__item"><a href="#_setfastblocknumber" title="_setFastBlockNumber" class="md-nav__link">_setFastBlockNumber</a></li><li class="md-nav__item"><a href="#_startevent" title="_startEvent" class="md-nav__link">_startEvent</a></li><li class="md-nav__item"><a href="#_startpending" title="_startPending" class="md-nav__link">_startPending</a></li><li class="md-nav__item"><a href="#_stopevent" title="_stopEvent" class="md-nav__link">_stopEvent</a></li><li class="md-nav__item"><a href="#_wraptransaction" title="_wrapTransaction" class="md-nav__link">_wrapTransaction</a></li><li class="md-nav__item"><a href="#addlistener" title="addListener" class="md-nav__link">addListener</a></li><li class="md-nav__item"><a href="#call" title="call" class="md-nav__link">call</a></li><li class="md-nav__item"><a href="#detectnetwork" title="detectNetwork" class="md-nav__link">detectNetwork</a></li><li class="md-nav__item"><a href="#emit" title="emit" class="md-nav__link">emit</a></li><li class="md-nav__item"><a href="#estimategas" title="estimateGas" class="md-nav__link">estimateGas</a></li><li class="md-nav__item"><a href="#getbalance" title="getBalance" class="md-nav__link">getBalance</a></li><li class="md-nav__item"><a href="#getblock" title="getBlock" class="md-nav__link">getBlock</a></li><li class="md-nav__item"><a href="#getblocknumber" title="getBlockNumber" class="md-nav__link">getBlockNumber</a></li><li class="md-nav__item"><a href="#getblockwithtransactions" title="getBlockWithTransactions" class="md-nav__link">getBlockWithTransactions</a></li><li class="md-nav__item"><a href="#getcode" title="getCode" class="md-nav__link">getCode</a></li><li class="md-nav__item"><a href="#getetherprice" title="getEtherPrice" class="md-nav__link">getEtherPrice</a></li><li class="md-nav__item"><a href="#getgasprice" title="getGasPrice" class="md-nav__link">getGasPrice</a></li><li class="md-nav__item"><a href="#getlogs" title="getLogs" class="md-nav__link">getLogs</a></li><li class="md-nav__item"><a href="#getnetwork" title="getNetwork" class="md-nav__link">getNetwork</a></li><li class="md-nav__item"><a href="#getsigner" title="getSigner" class="md-nav__link">getSigner</a></li><li class="md-nav__item"><a href="#getstorageat" title="getStorageAt" class="md-nav__link">getStorageAt</a></li><li class="md-nav__item"><a href="#gettransaction" title="getTransaction" class="md-nav__link">getTransaction</a></li><li class="md-nav__item"><a href="#gettransactioncount" title="getTransactionCount" class="md-nav__link">getTransactionCount</a></li><li class="md-nav__item"><a href="#gettransactionreceipt" title="getTransactionReceipt" class="md-nav__link">getTransactionReceipt</a></li><li class="md-nav__item"><a href="#getuncheckedsigner" title="getUncheckedSigner" class="md-nav__link">getUncheckedSigner</a></li><li class="md-nav__item"><a href="#listaccounts" title="listAccounts" class="md-nav__link">listAccounts</a></li><li class="md-nav__item"><a href="#listenercount" title="listenerCount" class="md-nav__link">listenerCount</a></li><li class="md-nav__item"><a href="#listeners" title="listeners" class="md-nav__link">listeners</a></li><li class="md-nav__item"><a href="#lookupaddress" title="lookupAddress" class="md-nav__link">lookupAddress</a></li><li class="md-nav__item"><a href="#off" title="off" class="md-nav__link">off</a></li><li class="md-nav__item"><a href="#on" title="on" class="md-nav__link">on</a></li><li class="md-nav__item"><a href="#once" title="once" class="md-nav__link">once</a></li><li class="md-nav__item"><a href="#perform" title="perform" class="md-nav__link">perform</a></li><li class="md-nav__item"><a href="#poll" title="poll" class="md-nav__link">poll</a></li><li class="md-nav__item"><a href="#preparerequest" title="prepareRequest" class="md-nav__link">prepareRequest</a></li><li class="md-nav__item"><a href="#removealllisteners" title="removeAllListeners" class="md-nav__link">removeAllListeners</a></li><li class="md-nav__item"><a href="#removelistener" title="removeListener" class="md-nav__link">removeListener</a></li><li class="md-nav__item"><a href="#reseteventsblock" title="resetEventsBlock" class="md-nav__link">resetEventsBlock</a></li><li class="md-nav__item"><a href="#resolvename" title="resolveName" class="md-nav__link">resolveName</a></li><li class="md-nav__item"><a href="#send" title="send" class="md-nav__link">send</a></li><li class="md-nav__item"><a href="#sendtransaction" title="sendTransaction" class="md-nav__link">sendTransaction</a></li><li class="md-nav__item"><a href="#waitfortransaction" title="waitForTransaction" class="md-nav__link">waitForTransaction</a></li><li class="md-nav__item"><a href="#static-defaulturl" title="Static defaultUrl" class="md-nav__link">Static defaultUrl</a></li><li class="md-nav__item"><a href="#static-getformatter" title="Static getFormatter" class="md-nav__link">Static getFormatter</a></li><li class="md-nav__item"><a href="#static-getnetwork" title="Static getNetwork" class="md-nav__link">Static getNetwork</a></li><li class="md-nav__item"><a href="#static-hexlifytransaction" title="Static hexlifyTransaction" class="md-nav__link">Static hexlifyTransaction</a></li><li class="md-nav__item"><a href="#static-isprovider" title="Static isProvider" class="md-nav__link">Static isProvider</a></li></ul></nav></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/chainsafe/lodestar/edit/master/docs/packages/lodestar/classes/_eth1_impl_retryprovider_.retryprovider.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><p><a href="../../">@chainsafe/lodestar</a> › <a href="../../globals/">Globals</a> › <a href="../../modules/_eth1_impl_retryprovider_/">"eth1/impl/retryProvider"</a> › <a href="./">RetryProvider</a></p>
+<h1 id="class-retryprovider">Class: RetryProvider<a class="headerlink" href="#class-retryprovider" title="Permanent link">&para;</a></h1>
+<h2 id="hierarchy">Hierarchy<a class="headerlink" href="#hierarchy" title="Permanent link">&para;</a></h2>
+<ul>
+<li>JsonRpcProvider</li>
+</ul>
+<p>↳ <strong>RetryProvider</strong></p>
+<h2 id="implements">Implements<a class="headerlink" href="#implements" title="Permanent link">&para;</a></h2>
+<ul>
+<li>OnceBlockable</li>
+</ul>
+<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#constructor">constructor</a></li>
+</ul>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#_bootstrappoll">_bootstrapPoll</a></li>
+<li><a href="./#_emitted">_emitted</a></li>
+<li><a href="./#_events">_events</a></li>
+<li><a href="./#_fastblocknumber">_fastBlockNumber</a></li>
+<li><a href="./#_fastblocknumberpromise">_fastBlockNumberPromise</a></li>
+<li><a href="./#_fastquerydate">_fastQueryDate</a></li>
+<li><a href="./#_internalblocknumber">_internalBlockNumber</a></li>
+<li><a href="./#_isprovider">_isProvider</a></li>
+<li><a href="./#_lastblocknumber">_lastBlockNumber</a></li>
+<li><a href="./#_maxinternalblocknumber">_maxInternalBlockNumber</a></li>
+<li><a href="./#_network">_network</a></li>
+<li><a href="./#_networkpromise">_networkPromise</a></li>
+<li><a href="./#_nextid">_nextId</a></li>
+<li><a href="./#_pendingfilter">_pendingFilter</a></li>
+<li><a href="./#_poller">_poller</a></li>
+<li><a href="./#_pollinginterval">_pollingInterval</a></li>
+<li><a href="./#anynetwork">anyNetwork</a></li>
+<li><a href="./#attempts">attempts</a></li>
+<li><a href="./#connection">connection</a></li>
+<li><a href="./#formatter">formatter</a></li>
+</ul>
+<h3 id="accessors">Accessors<a class="headerlink" href="#accessors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#blocknumber">blockNumber</a></li>
+<li><a href="./#network">network</a></li>
+<li><a href="./#polling">polling</a></li>
+<li><a href="./#pollinginterval">pollingInterval</a></li>
+<li><a href="./#ready">ready</a></li>
+</ul>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#_addeventlistener">_addEventListener</a></li>
+<li><a href="./#_getaddress">_getAddress</a></li>
+<li><a href="./#_getblock">_getBlock</a></li>
+<li><a href="./#_getblocktag">_getBlockTag</a></li>
+<li><a href="./#_getfastblocknumber">_getFastBlockNumber</a></li>
+<li><a href="./#_getfilter">_getFilter</a></li>
+<li><a href="./#_getinternalblocknumber">_getInternalBlockNumber</a></li>
+<li><a href="./#_getresolver">_getResolver</a></li>
+<li><a href="./#_gettransactionrequest">_getTransactionRequest</a></li>
+<li><a href="./#_ready">_ready</a></li>
+<li><a href="./#_setfastblocknumber">_setFastBlockNumber</a></li>
+<li><a href="./#_startevent">_startEvent</a></li>
+<li><a href="./#_startpending">_startPending</a></li>
+<li><a href="./#_stopevent">_stopEvent</a></li>
+<li><a href="./#_wraptransaction">_wrapTransaction</a></li>
+<li><a href="./#addlistener">addListener</a></li>
+<li><a href="./#call">call</a></li>
+<li><a href="./#detectnetwork">detectNetwork</a></li>
+<li><a href="./#emit">emit</a></li>
+<li><a href="./#estimategas">estimateGas</a></li>
+<li><a href="./#getbalance">getBalance</a></li>
+<li><a href="./#getblock">getBlock</a></li>
+<li><a href="./#getblocknumber">getBlockNumber</a></li>
+<li><a href="./#getblockwithtransactions">getBlockWithTransactions</a></li>
+<li><a href="./#getcode">getCode</a></li>
+<li><a href="./#getetherprice">getEtherPrice</a></li>
+<li><a href="./#getgasprice">getGasPrice</a></li>
+<li><a href="./#getlogs">getLogs</a></li>
+<li><a href="./#getnetwork">getNetwork</a></li>
+<li><a href="./#getsigner">getSigner</a></li>
+<li><a href="./#getstorageat">getStorageAt</a></li>
+<li><a href="./#gettransaction">getTransaction</a></li>
+<li><a href="./#gettransactioncount">getTransactionCount</a></li>
+<li><a href="./#gettransactionreceipt">getTransactionReceipt</a></li>
+<li><a href="./#getuncheckedsigner">getUncheckedSigner</a></li>
+<li><a href="./#listaccounts">listAccounts</a></li>
+<li><a href="./#listenercount">listenerCount</a></li>
+<li><a href="./#listeners">listeners</a></li>
+<li><a href="./#lookupaddress">lookupAddress</a></li>
+<li><a href="./#off">off</a></li>
+<li><a href="./#on">on</a></li>
+<li><a href="./#once">once</a></li>
+<li><a href="./#perform">perform</a></li>
+<li><a href="./#poll">poll</a></li>
+<li><a href="./#preparerequest">prepareRequest</a></li>
+<li><a href="./#removealllisteners">removeAllListeners</a></li>
+<li><a href="./#removelistener">removeListener</a></li>
+<li><a href="./#reseteventsblock">resetEventsBlock</a></li>
+<li><a href="./#resolvename">resolveName</a></li>
+<li><a href="./#send">send</a></li>
+<li><a href="./#sendtransaction">sendTransaction</a></li>
+<li><a href="./#waitfortransaction">waitForTransaction</a></li>
+<li><a href="./#static-defaulturl">defaultUrl</a></li>
+<li><a href="./#static-getformatter">getFormatter</a></li>
+<li><a href="./#static-getnetwork">getNetwork</a></li>
+<li><a href="./#static-hexlifytransaction">hexlifyTransaction</a></li>
+<li><a href="./#static-isprovider">isProvider</a></li>
+</ul>
+<h2 id="constructors_1">Constructors<a class="headerlink" href="#constructors_1" title="Permanent link">&para;</a></h2>
+<h3 id="constructor">constructor<a class="headerlink" href="#constructor" title="Permanent link">&para;</a></h3>
+<p>+ <strong>new RetryProvider</strong>(<code>attempts</code>: number, <code>url?</code>: ethers.utils.ConnectionInfo | string, <code>network?</code>: ethers.providers.Networkish): <em><a href="./">RetryProvider</a></em></p>
+<p><em>Overrides void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/eth1/impl/retryProvider.ts#L6">packages/lodestar/src/eth1/impl/retryProvider.ts:6</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>attempts</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>url?</code></td>
+<td>ethers.utils.ConnectionInfo &#124; string</td>
+</tr>
+<tr>
+<td><code>network?</code></td>
+<td>ethers.providers.Networkish</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="./">RetryProvider</a></em></p>
+<h2 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h2>
+<h3 id="_bootstrappoll">_bootstrapPoll<a class="headerlink" href="#_bootstrappoll" title="Permanent link">&para;</a></h3>
+<p>• <strong>_bootstrapPoll</strong>: <em>Timer</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_bootstrappoll">_bootstrapPoll</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:29</p>
+<hr />
+<h3 id="_emitted">_emitted<a class="headerlink" href="#_emitted" title="Permanent link">&para;</a></h3>
+<p>• <strong>_emitted</strong>: <em>object</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_emitted">_emitted</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:24</p>
+<h4 id="type-declaration">Type declaration:<a class="headerlink" href="#type-declaration" title="Permanent link">&para;</a></h4>
+<ul>
+<li>[ <strong>eventName</strong>: <em>string</em>]: number | "pending"</li>
+</ul>
+<hr />
+<h3 id="_events">_events<a class="headerlink" href="#_events" title="Permanent link">&para;</a></h3>
+<p>• <strong>_events</strong>: <em>Array‹Event›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_events">_events</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:22</p>
+<hr />
+<h3 id="_fastblocknumber">_fastBlockNumber<a class="headerlink" href="#_fastblocknumber" title="Permanent link">&para;</a></h3>
+<p>• <strong>_fastBlockNumber</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_fastblocknumber">_fastBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:31</p>
+<hr />
+<h3 id="_fastblocknumberpromise">_fastBlockNumberPromise<a class="headerlink" href="#_fastblocknumberpromise" title="Permanent link">&para;</a></h3>
+<p>• <strong>_fastBlockNumberPromise</strong>: <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_fastblocknumberpromise">_fastBlockNumberPromise</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:32</p>
+<hr />
+<h3 id="_fastquerydate">_fastQueryDate<a class="headerlink" href="#_fastquerydate" title="Permanent link">&para;</a></h3>
+<p>• <strong>_fastQueryDate</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_fastquerydate">_fastQueryDate</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:33</p>
+<hr />
+<h3 id="_internalblocknumber">_internalBlockNumber<a class="headerlink" href="#_internalblocknumber" title="Permanent link">&para;</a></h3>
+<p>• <strong>_internalBlockNumber</strong>: <em>Promise‹object›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_internalblocknumber">_internalBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:35</p>
+<hr />
+<h3 id="_isprovider">_isProvider<a class="headerlink" href="#_isprovider" title="Permanent link">&para;</a></h3>
+<p>• <strong>_isProvider</strong>: <em>boolean</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_isprovider">_isProvider</a></em></p>
+<p>Defined in node_modules/@ethersproject/abstract-provider/lib/index.d.ts:135</p>
+<hr />
+<h3 id="_lastblocknumber">_lastBlockNumber<a class="headerlink" href="#_lastblocknumber" title="Permanent link">&para;</a></h3>
+<p>• <strong>_lastBlockNumber</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_lastblocknumber">_lastBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:30</p>
+<hr />
+<h3 id="_maxinternalblocknumber">_maxInternalBlockNumber<a class="headerlink" href="#_maxinternalblocknumber" title="Permanent link">&para;</a></h3>
+<p>• <strong>_maxInternalBlockNumber</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_maxinternalblocknumber">_maxInternalBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:34</p>
+<hr />
+<h3 id="_network">_network<a class="headerlink" href="#_network" title="Permanent link">&para;</a></h3>
+<p>• <strong>_network</strong>: <em>Network</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_network">_network</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:21</p>
+<hr />
+<h3 id="_networkpromise">_networkPromise<a class="headerlink" href="#_networkpromise" title="Permanent link">&para;</a></h3>
+<p>• <strong>_networkPromise</strong>: <em>Promise‹Network›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_networkpromise">_networkPromise</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:20</p>
+<hr />
+<h3 id="_nextid">_nextId<a class="headerlink" href="#_nextid" title="Permanent link">&para;</a></h3>
+<p>• <strong>_nextId</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_nextid">_nextId</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:28</p>
+<hr />
+<h3 id="_pendingfilter">_pendingFilter<a class="headerlink" href="#_pendingfilter" title="Permanent link">&para;</a></h3>
+<p>• <strong>_pendingFilter</strong>: <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_pendingfilter">_pendingFilter</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:27</p>
+<hr />
+<h3 id="_poller">_poller<a class="headerlink" href="#_poller" title="Permanent link">&para;</a></h3>
+<p>• <strong>_poller</strong>: <em>Timer</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_poller">_poller</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:28</p>
+<hr />
+<h3 id="_pollinginterval">_pollingInterval<a class="headerlink" href="#_pollinginterval" title="Permanent link">&para;</a></h3>
+<p>• <strong>_pollingInterval</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_pollinginterval">_pollingInterval</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:27</p>
+<hr />
+<h3 id="anynetwork">anyNetwork<a class="headerlink" href="#anynetwork" title="Permanent link">&para;</a></h3>
+<p>• <strong>anyNetwork</strong>: <em>boolean</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#anynetwork">anyNetwork</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:40</p>
+<hr />
+<h3 id="attempts">attempts<a class="headerlink" href="#attempts" title="Permanent link">&para;</a></h3>
+<p>• <strong>attempts</strong>: <em>number</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/eth1/impl/retryProvider.ts#L6">packages/lodestar/src/eth1/impl/retryProvider.ts:6</a></em></p>
+<hr />
+<h3 id="connection">connection<a class="headerlink" href="#connection" title="Permanent link">&para;</a></h3>
+<p>• <strong>connection</strong>: <em>ConnectionInfo</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#connection">connection</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:26</p>
+<hr />
+<h3 id="formatter">formatter<a class="headerlink" href="#formatter" title="Permanent link">&para;</a></h3>
+<p>• <strong>formatter</strong>: <em>Formatter</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#formatter">formatter</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:23</p>
+<h2 id="accessors_1">Accessors<a class="headerlink" href="#accessors_1" title="Permanent link">&para;</a></h2>
+<h3 id="blocknumber">blockNumber<a class="headerlink" href="#blocknumber" title="Permanent link">&para;</a></h3>
+<p>• <strong>get blockNumber</strong>(): <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#blocknumber">blockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:61</p>
+<p><strong>Returns:</strong> <em>number</em></p>
+<hr />
+<h3 id="network">network<a class="headerlink" href="#network" title="Permanent link">&para;</a></h3>
+<p>• <strong>get network</strong>(): <em>Network</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#network">network</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:58</p>
+<p><strong>Returns:</strong> <em>Network</em></p>
+<hr />
+<h3 id="polling">polling<a class="headerlink" href="#polling" title="Permanent link">&para;</a></h3>
+<p>• <strong>get polling</strong>(): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#polling">polling</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:62</p>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>• <strong>set polling</strong>(<code>value</code>: boolean): <em>any</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#polling">polling</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:63</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>boolean</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>any</em></p>
+<hr />
+<h3 id="pollinginterval">pollingInterval<a class="headerlink" href="#pollinginterval" title="Permanent link">&para;</a></h3>
+<p>• <strong>get pollingInterval</strong>(): <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#pollinginterval">pollingInterval</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:64</p>
+<p><strong>Returns:</strong> <em>number</em></p>
+<p>• <strong>set pollingInterval</strong>(<code>value</code>: number): <em>any</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#pollinginterval">pollingInterval</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:65</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>any</em></p>
+<hr />
+<h3 id="ready">ready<a class="headerlink" href="#ready" title="Permanent link">&para;</a></h3>
+<p>• <strong>get ready</strong>(): <em>Promise‹Network›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#ready">ready</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:52</p>
+<p><strong>Returns:</strong> <em>Promise‹Network›</em></p>
+<h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
+<h3 id="_addeventlistener">_addEventListener<a class="headerlink" href="#_addeventlistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_addEventListener</strong>(<code>eventName</code>: EventType, <code>listener</code>: Listener, <code>once</code>: boolean): <em>this</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_addeventlistener">_addEventListener</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:96</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>listener</code></td>
+<td>Listener</td>
+</tr>
+<tr>
+<td><code>once</code></td>
+<td>boolean</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="_getaddress">_getAddress<a class="headerlink" href="#_getaddress" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getAddress</strong>(<code>addressOrName</code>: string | Promise‹string›): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getaddress">_getAddress</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:81</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrName</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="_getblock">_getBlock<a class="headerlink" href="#_getblock" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getBlock</strong>(<code>blockHashOrBlockTag</code>: BlockTag | string | Promise‹BlockTag | string›, <code>includeTransactions?</code>: boolean): <em>Promise‹Block | BlockWithTransactions›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getblock">_getBlock</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:82</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blockHashOrBlockTag</code></td>
+<td>BlockTag &#124; string &#124; Promise‹BlockTag &#124; string›</td>
+</tr>
+<tr>
+<td><code>includeTransactions?</code></td>
+<td>boolean</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Block | BlockWithTransactions›</em></p>
+<hr />
+<h3 id="_getblocktag">_getBlockTag<a class="headerlink" href="#_getblocktag" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getBlockTag</strong>(<code>blockTag</code>: BlockTag | Promise‹BlockTag›): <em>Promise‹BlockTag›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getblocktag">_getBlockTag</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:89</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blockTag</code></td>
+<td>BlockTag &#124; Promise‹BlockTag›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹BlockTag›</em></p>
+<hr />
+<h3 id="_getfastblocknumber">_getFastBlockNumber<a class="headerlink" href="#_getfastblocknumber" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getFastBlockNumber</strong>(): <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getfastblocknumber">_getFastBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:66</p>
+<p><strong>Returns:</strong> <em>Promise‹number›</em></p>
+<hr />
+<h3 id="_getfilter">_getFilter<a class="headerlink" href="#_getfilter" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getFilter</strong>(<code>filter</code>: Filter | FilterByBlockHash | Promise‹Filter | FilterByBlockHash›): <em>Promise‹Filter | FilterByBlockHash›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getfilter">_getFilter</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:78</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filter</code></td>
+<td>Filter &#124; FilterByBlockHash &#124; Promise‹Filter &#124; FilterByBlockHash›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Filter | FilterByBlockHash›</em></p>
+<hr />
+<h3 id="_getinternalblocknumber">_getInternalBlockNumber<a class="headerlink" href="#_getinternalblocknumber" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getInternalBlockNumber</strong>(<code>maxAge</code>: number): <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getinternalblocknumber">_getInternalBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:55</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>maxAge</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹number›</em></p>
+<hr />
+<h3 id="_getresolver">_getResolver<a class="headerlink" href="#_getresolver" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getResolver</strong>(<code>name</code>: string): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_getresolver">_getResolver</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:90</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="_gettransactionrequest">_getTransactionRequest<a class="headerlink" href="#_gettransactionrequest" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_getTransactionRequest</strong>(<code>transaction</code>: Deferrable‹TransactionRequest›): <em>Promise‹Transaction›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_gettransactionrequest">_getTransactionRequest</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:77</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transaction</code></td>
+<td>Deferrable‹TransactionRequest›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Transaction›</em></p>
+<hr />
+<h3 id="_ready">_ready<a class="headerlink" href="#_ready" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_ready</strong>(): <em>Promise‹Network›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_ready">_ready</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:51</p>
+<p><strong>Returns:</strong> <em>Promise‹Network›</em></p>
+<hr />
+<h3 id="_setfastblocknumber">_setFastBlockNumber<a class="headerlink" href="#_setfastblocknumber" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_setFastBlockNumber</strong>(<code>blockNumber</code>: number): <em>void</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_setfastblocknumber">_setFastBlockNumber</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:67</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blockNumber</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="_startevent">_startEvent<a class="headerlink" href="#_startevent" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_startEvent</strong>(<code>event</code>: Event): <em>void</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_startevent">_startEvent</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:38</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>Event</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="_startpending">_startPending<a class="headerlink" href="#_startpending" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_startPending</strong>(): <em>void</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_startpending">_startPending</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:39</p>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="_stopevent">_stopEvent<a class="headerlink" href="#_stopevent" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_stopEvent</strong>(<code>event</code>: Event): <em>void</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_stopevent">_stopEvent</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:40</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>Event</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="_wraptransaction">_wrapTransaction<a class="headerlink" href="#_wraptransaction" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_wrapTransaction</strong>(<code>tx</code>: Transaction, <code>hash?</code>: string): <em>TransactionResponse</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#_wraptransaction">_wrapTransaction</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:75</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tx</code></td>
+<td>Transaction</td>
+</tr>
+<tr>
+<td><code>hash?</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>TransactionResponse</em></p>
+<hr />
+<h3 id="addlistener">addListener<a class="headerlink" href="#addlistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>addListener</strong>(<code>eventName</code>: EventType, <code>listener</code>: Listener): <em>Provider</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@ethersproject/abstract-provider/lib/index.d.ts:132</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>listener</code></td>
+<td>Listener</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Provider</em></p>
+<hr />
+<h3 id="call">call<a class="headerlink" href="#call" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>call</strong>(<code>transaction</code>: Deferrable‹TransactionRequest›, <code>blockTag?</code>: BlockTag | Promise‹BlockTag›): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#call">call</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:79</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transaction</code></td>
+<td>Deferrable‹TransactionRequest›</td>
+</tr>
+<tr>
+<td><code>blockTag?</code></td>
+<td>BlockTag &#124; Promise‹BlockTag›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="detectnetwork">detectNetwork<a class="headerlink" href="#detectnetwork" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>detectNetwork</strong>(): <em>Promise‹Network›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#detectnetwork">detectNetwork</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:31</p>
+<p><strong>Returns:</strong> <em>Promise‹Network›</em></p>
+<hr />
+<h3 id="emit">emit<a class="headerlink" href="#emit" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>emit</strong>(<code>eventName</code>: EventType, ...<code>args</code>: Array‹any›): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:99</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>...args</code></td>
+<td>Array‹any›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<hr />
+<h3 id="estimategas">estimateGas<a class="headerlink" href="#estimategas" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>estimateGas</strong>(<code>transaction</code>: Deferrable‹TransactionRequest›): <em>Promise‹BigNumber›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#estimategas">estimateGas</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:80</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transaction</code></td>
+<td>Deferrable‹TransactionRequest›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹BigNumber›</em></p>
+<hr />
+<h3 id="getbalance">getBalance<a class="headerlink" href="#getbalance" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getBalance</strong>(<code>addressOrName</code>: string | Promise‹string›, <code>blockTag?</code>: BlockTag | Promise‹BlockTag›): <em>Promise‹BigNumber›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getbalance">getBalance</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:71</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrName</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+<tr>
+<td><code>blockTag?</code></td>
+<td>BlockTag &#124; Promise‹BlockTag›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹BigNumber›</em></p>
+<hr />
+<h3 id="getblock">getBlock<a class="headerlink" href="#getblock" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getBlock</strong>(<code>blockHashOrBlockTag</code>: BlockTag | string | Promise‹BlockTag | string›): <em>Promise‹Block›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getblock">getBlock</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:83</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blockHashOrBlockTag</code></td>
+<td>BlockTag &#124; string &#124; Promise‹BlockTag &#124; string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Block›</em></p>
+<hr />
+<h3 id="getblocknumber">getBlockNumber<a class="headerlink" href="#getblocknumber" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getBlockNumber</strong>(): <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getblocknumber">getBlockNumber</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:69</p>
+<p><strong>Returns:</strong> <em>Promise‹number›</em></p>
+<hr />
+<h3 id="getblockwithtransactions">getBlockWithTransactions<a class="headerlink" href="#getblockwithtransactions" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getBlockWithTransactions</strong>(<code>blockHashOrBlockTag</code>: BlockTag | string | Promise‹BlockTag | string›): <em>Promise‹BlockWithTransactions›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getblockwithtransactions">getBlockWithTransactions</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:84</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blockHashOrBlockTag</code></td>
+<td>BlockTag &#124; string &#124; Promise‹BlockTag &#124; string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹BlockWithTransactions›</em></p>
+<hr />
+<h3 id="getcode">getCode<a class="headerlink" href="#getcode" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getCode</strong>(<code>addressOrName</code>: string | Promise‹string›, <code>blockTag?</code>: BlockTag | Promise‹BlockTag›): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getcode">getCode</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:73</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrName</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+<tr>
+<td><code>blockTag?</code></td>
+<td>BlockTag &#124; Promise‹BlockTag›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="getetherprice">getEtherPrice<a class="headerlink" href="#getetherprice" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getEtherPrice</strong>(): <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getetherprice">getEtherPrice</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:88</p>
+<p><strong>Returns:</strong> <em>Promise‹number›</em></p>
+<hr />
+<h3 id="getgasprice">getGasPrice<a class="headerlink" href="#getgasprice" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getGasPrice</strong>(): <em>Promise‹BigNumber›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getgasprice">getGasPrice</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:70</p>
+<p><strong>Returns:</strong> <em>Promise‹BigNumber›</em></p>
+<hr />
+<h3 id="getlogs">getLogs<a class="headerlink" href="#getlogs" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getLogs</strong>(<code>filter</code>: Filter | FilterByBlockHash | Promise‹Filter | FilterByBlockHash›): <em>Promise‹Array‹Log››</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getlogs">getLogs</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:87</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>filter</code></td>
+<td>Filter &#124; FilterByBlockHash &#124; Promise‹Filter &#124; FilterByBlockHash›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Array‹Log››</em></p>
+<hr />
+<h3 id="getnetwork">getNetwork<a class="headerlink" href="#getnetwork" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getNetwork</strong>(): <em>Promise‹Network›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#static-getnetwork">getNetwork</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:60</p>
+<p><strong>Returns:</strong> <em>Promise‹Network›</em></p>
+<hr />
+<h3 id="getsigner">getSigner<a class="headerlink" href="#getsigner" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getSigner</strong>(<code>addressOrIndex?</code>: string | number): <em>JsonRpcSigner</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getsigner">getSigner</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:32</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrIndex?</code></td>
+<td>string &#124; number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>JsonRpcSigner</em></p>
+<hr />
+<h3 id="getstorageat">getStorageAt<a class="headerlink" href="#getstorageat" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getStorageAt</strong>(<code>addressOrName</code>: string | Promise‹string›, <code>position</code>: BigNumberish | Promise‹BigNumberish›, <code>blockTag?</code>: BlockTag | Promise‹BlockTag›): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getstorageat">getStorageAt</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:74</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrName</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+<tr>
+<td><code>position</code></td>
+<td>BigNumberish &#124; Promise‹BigNumberish›</td>
+</tr>
+<tr>
+<td><code>blockTag?</code></td>
+<td>BlockTag &#124; Promise‹BlockTag›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="gettransaction">getTransaction<a class="headerlink" href="#gettransaction" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getTransaction</strong>(<code>transactionHash</code>: string | Promise‹string›): <em>Promise‹TransactionResponse›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#gettransaction">getTransaction</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:85</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transactionHash</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹TransactionResponse›</em></p>
+<hr />
+<h3 id="gettransactioncount">getTransactionCount<a class="headerlink" href="#gettransactioncount" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getTransactionCount</strong>(<code>addressOrName</code>: string | Promise‹string›, <code>blockTag?</code>: BlockTag | Promise‹BlockTag›): <em>Promise‹number›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#gettransactioncount">getTransactionCount</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:72</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrName</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+<tr>
+<td><code>blockTag?</code></td>
+<td>BlockTag &#124; Promise‹BlockTag›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹number›</em></p>
+<hr />
+<h3 id="gettransactionreceipt">getTransactionReceipt<a class="headerlink" href="#gettransactionreceipt" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getTransactionReceipt</strong>(<code>transactionHash</code>: string | Promise‹string›): <em>Promise‹TransactionReceipt›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#gettransactionreceipt">getTransactionReceipt</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:86</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transactionHash</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹TransactionReceipt›</em></p>
+<hr />
+<h3 id="getuncheckedsigner">getUncheckedSigner<a class="headerlink" href="#getuncheckedsigner" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getUncheckedSigner</strong>(<code>addressOrIndex?</code>: string | number): <em>UncheckedJsonRpcSigner</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#getuncheckedsigner">getUncheckedSigner</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:33</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>addressOrIndex?</code></td>
+<td>string &#124; number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>UncheckedJsonRpcSigner</em></p>
+<hr />
+<h3 id="listaccounts">listAccounts<a class="headerlink" href="#listaccounts" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>listAccounts</strong>(): <em>Promise‹Array‹string››</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#listaccounts">listAccounts</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:34</p>
+<p><strong>Returns:</strong> <em>Promise‹Array‹string››</em></p>
+<hr />
+<h3 id="listenercount">listenerCount<a class="headerlink" href="#listenercount" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>listenerCount</strong>(<code>eventName?</code>: EventType): <em>number</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#listenercount">listenerCount</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:100</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName?</code></td>
+<td>EventType</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>number</em></p>
+<hr />
+<h3 id="listeners">listeners<a class="headerlink" href="#listeners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>listeners</strong>(<code>eventName?</code>: EventType): <em>Array‹Listener›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#listeners">listeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:101</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName?</code></td>
+<td>EventType</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Array‹Listener›</em></p>
+<hr />
+<h3 id="lookupaddress">lookupAddress<a class="headerlink" href="#lookupaddress" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>lookupAddress</strong>(<code>address</code>: string | Promise‹string›): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#lookupaddress">lookupAddress</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:92</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>address</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="off">off<a class="headerlink" href="#off" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>off</strong>(<code>eventName</code>: EventType, <code>listener?</code>: Listener): <em>this</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#off">off</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:102</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>listener?</code></td>
+<td>Listener</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="on">on<a class="headerlink" href="#on" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>on</strong>(<code>eventName</code>: EventType, <code>listener</code>: Listener): <em>this</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:97</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>listener</code></td>
+<td>Listener</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="once">once<a class="headerlink" href="#once" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>once</strong>(<code>eventName</code>: EventType, <code>listener</code>: Listener): <em>this</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:98</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>listener</code></td>
+<td>Listener</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="perform">perform<a class="headerlink" href="#perform" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>perform</strong>(<code>method</code>: string, <code>params</code>: any): <em>any</em></p>
+<p><em>Overrides void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/eth1/impl/retryProvider.ts#L18">packages/lodestar/src/eth1/impl/retryProvider.ts:18</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td>any</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>any</em></p>
+<hr />
+<h3 id="poll">poll<a class="headerlink" href="#poll" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>poll</strong>(): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#poll">poll</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:56</p>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="preparerequest">prepareRequest<a class="headerlink" href="#preparerequest" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>prepareRequest</strong>(<code>method</code>: string, <code>params</code>: any): <em>[string, Array‹any›]</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#preparerequest">prepareRequest</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:36</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td>any</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>[string, Array‹any›]</em></p>
+<hr />
+<h3 id="removealllisteners">removeAllListeners<a class="headerlink" href="#removealllisteners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>removeAllListeners</strong>(<code>eventName?</code>: EventType): <em>this</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#removealllisteners">removeAllListeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:103</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName?</code></td>
+<td>EventType</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="removelistener">removeListener<a class="headerlink" href="#removelistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>removeListener</strong>(<code>eventName</code>: EventType, <code>listener</code>: Listener): <em>Provider</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#removelistener">removeListener</a></em></p>
+<p>Defined in node_modules/@ethersproject/abstract-provider/lib/index.d.ts:133</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventName</code></td>
+<td>EventType</td>
+</tr>
+<tr>
+<td><code>listener</code></td>
+<td>Listener</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Provider</em></p>
+<hr />
+<h3 id="reseteventsblock">resetEventsBlock<a class="headerlink" href="#reseteventsblock" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>resetEventsBlock</strong>(<code>blockNumber</code>: number): <em>void</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#reseteventsblock">resetEventsBlock</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:57</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blockNumber</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="resolvename">resolveName<a class="headerlink" href="#resolvename" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>resolveName</strong>(<code>name</code>: string | Promise‹string›): <em>Promise‹string›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#resolvename">resolveName</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:91</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹string›</em></p>
+<hr />
+<h3 id="send">send<a class="headerlink" href="#send" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>send</strong>(<code>method</code>: string, <code>params</code>: Array‹any›): <em>Promise‹any›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#send">send</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:35</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>method</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>params</code></td>
+<td>Array‹any›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹any›</em></p>
+<hr />
+<h3 id="sendtransaction">sendTransaction<a class="headerlink" href="#sendtransaction" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>sendTransaction</strong>(<code>signedTransaction</code>: string | Promise‹string›): <em>Promise‹TransactionResponse›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#sendtransaction">sendTransaction</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:76</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>signedTransaction</code></td>
+<td>string &#124; Promise‹string›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹TransactionResponse›</em></p>
+<hr />
+<h3 id="waitfortransaction">waitForTransaction<a class="headerlink" href="#waitfortransaction" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>waitForTransaction</strong>(<code>transactionHash</code>: string, <code>confirmations?</code>: number, <code>timeout?</code>: number): <em>Promise‹TransactionReceipt›</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#waitfortransaction">waitForTransaction</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:68</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transactionHash</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>confirmations?</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>timeout?</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹TransactionReceipt›</em></p>
+<hr />
+<h3 id="static-defaulturl"><code>Static</code> defaultUrl<a class="headerlink" href="#static-defaulturl" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>defaultUrl</strong>(): <em>string</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#static-defaulturl">defaultUrl</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:30</p>
+<p><strong>Returns:</strong> <em>string</em></p>
+<hr />
+<h3 id="static-getformatter"><code>Static</code> getFormatter<a class="headerlink" href="#static-getformatter" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getFormatter</strong>(): <em>Formatter</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#static-getformatter">getFormatter</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:53</p>
+<p><strong>Returns:</strong> <em>Formatter</em></p>
+<hr />
+<h3 id="static-getnetwork"><code>Static</code> getNetwork<a class="headerlink" href="#static-getnetwork" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getNetwork</strong>(<code>network</code>: Networkish): <em>Network</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#static-getnetwork">getNetwork</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/base-provider.d.ts:54</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>network</code></td>
+<td>Networkish</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Network</em></p>
+<hr />
+<h3 id="static-hexlifytransaction"><code>Static</code> hexlifyTransaction<a class="headerlink" href="#static-hexlifytransaction" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>hexlifyTransaction</strong>(<code>transaction</code>: TransactionRequest, <code>allowExtra?</code>: object): <em>object</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#static-hexlifytransaction">hexlifyTransaction</a></em></p>
+<p>Defined in node_modules/@ethersproject/providers/lib/json-rpc-provider.d.ts:41</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>transaction</code></td>
+<td>TransactionRequest</td>
+</tr>
+<tr>
+<td><code>allowExtra?</code></td>
+<td>object</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>object</em></p>
+<ul>
+<li>[ <strong>key</strong>: <em>string</em>]: string</li>
+</ul>
+<hr />
+<h3 id="static-isprovider"><code>Static</code> isProvider<a class="headerlink" href="#static-isprovider" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>isProvider</strong>(<code>value</code>: any): <em>value is Provider</em></p>
+<p><em>Inherited from <a href="./">RetryProvider</a>.<a href="./#static-isprovider">isProvider</a></em></p>
+<p>Defined in node_modules/@ethersproject/abstract-provider/lib/index.d.ts:137</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>any</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>value is Provider</em></p></article></div></div></main><footer class="md-footer"><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright">powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../../assets/fonts/font-awesome.css"> <a href="https://github.com/ChainSafe/lodestar" class="md-footer-social__link fa fa-github"></a>  <a href="https://twitter.com/ChainSafe" class="md-footer-social__link fa fa-twitter"></a>  <a href="https://discord.gg/yjyvFRP" class="md-footer-social__link fa fa-comments"></a>  <a href="https://medium.com/ChainSafe" class="md-footer-social__link fa fa-medium"></a> </div></div></div></footer></div><script src="../../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../../.."}})</script></body></html>

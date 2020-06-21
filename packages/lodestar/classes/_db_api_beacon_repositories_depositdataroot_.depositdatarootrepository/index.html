@@ -1,0 +1,630 @@
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Lodestar documentation - Typescript Eth2.0 client"><link rel="canonical" href="https://chainsafe.github.io/lodestar/packages/lodestar/classes/_db_api_beacon_repositories_depositdataroot_.depositdatarootrepository/"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.1"><title> db api beacon repositories depositdataroot .depositdatarootrepository - Lodestar documentation</title><link rel="stylesheet" href="../../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content=""><script src="../../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../../stylesheets/extras.css"></head><body dir="ltr" data-md-color-primary="black" data-md-color-accent="black"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#class-depositdatarootrepository" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-header-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Lodestar documentation</span><span class="md-header-nav__topic"> db api beacon repositories depositdataroot .depositdatarootrepository</span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="48" height="48"></a>Lodestar documentation</label><div class="md-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../.." title="Getting started" class="md-nav__link">Getting started</a></li><li class="md-nav__item"><a href="../../../../installation/" title="Installation" class="md-nav__link">Installation</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3"><label class="md-nav__link" for="nav-3">Usage</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-3">Usage</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../../usage/local/" title="Local testnet" class="md-nav__link">Local testnet</a></li><li class="md-nav__item"><a href="../../../../usage/witti/" title="Witti testnet" class="md-nav__link">Witti testnet</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../" title="Packages" class="md-nav__link">Packages</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#hierarchy" title="Hierarchy" class="md-nav__link">Hierarchy</a></li><li class="md-nav__item"><a href="#index" title="Index" class="md-nav__link">Index</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#constructors" title="Constructors" class="md-nav__link">Constructors</a></li><li class="md-nav__item"><a href="#properties" title="Properties" class="md-nav__link">Properties</a></li><li class="md-nav__item"><a href="#methods" title="Methods" class="md-nav__link">Methods</a></li></ul></nav></li><li class="md-nav__item"><a href="#constructors_1" title="Constructors" class="md-nav__link">Constructors</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#constructor" title="constructor" class="md-nav__link">constructor</a></li></ul></nav></li><li class="md-nav__item"><a href="#properties_1" title="Properties" class="md-nav__link">Properties</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#protected-bucket" title="Protected bucket" class="md-nav__link">Protected bucket</a></li><li class="md-nav__item"><a href="#protected-config" title="Protected config" class="md-nav__link">Protected config</a></li><li class="md-nav__item"><a href="#protected-db" title="Protected db" class="md-nav__link">Protected db</a></li><li class="md-nav__item"><a href="#private-depositroottree" title="Private depositRootTree" class="md-nav__link">Private depositRootTree</a></li><li class="md-nav__item"><a href="#protected-type" title="Protected type" class="md-nav__link">Protected type</a></li></ul></nav></li><li class="md-nav__item"><a href="#methods_1" title="Methods" class="md-nav__link">Methods</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#add" title="add" class="md-nav__link">add</a></li><li class="md-nav__item"><a href="#batchadd" title="batchAdd" class="md-nav__link">batchAdd</a></li><li class="md-nav__item"><a href="#batchdelete" title="batchDelete" class="md-nav__link">batchDelete</a></li><li class="md-nav__item"><a href="#batchput" title="batchPut" class="md-nav__link">batchPut</a></li><li class="md-nav__item"><a href="#batchremove" title="batchRemove" class="md-nav__link">batchRemove</a></li><li class="md-nav__item"><a href="#protected-dbfilteroptions" title="Protected dbFilterOptions" class="md-nav__link">Protected dbFilterOptions</a></li><li class="md-nav__item"><a href="#decodekey" title="decodeKey" class="md-nav__link">decodeKey</a></li><li class="md-nav__item"><a href="#decodevalue" title="decodeValue" class="md-nav__link">decodeValue</a></li><li class="md-nav__item"><a href="#delete" title="delete" class="md-nav__link">delete</a></li><li class="md-nav__item"><a href="#encodekey" title="encodeKey" class="md-nav__link">encodeKey</a></li><li class="md-nav__item"><a href="#encodevalue" title="encodeValue" class="md-nav__link">encodeValue</a></li><li class="md-nav__item"><a href="#entries" title="entries" class="md-nav__link">entries</a></li><li class="md-nav__item"><a href="#entriesstream" title="entriesStream" class="md-nav__link">entriesStream</a></li><li class="md-nav__item"><a href="#firstentry" title="firstEntry" class="md-nav__link">firstEntry</a></li><li class="md-nav__item"><a href="#firstkey" title="firstKey" class="md-nav__link">firstKey</a></li><li class="md-nav__item"><a href="#firstvalue" title="firstValue" class="md-nav__link">firstValue</a></li><li class="md-nav__item"><a href="#get" title="get" class="md-nav__link">get</a></li><li class="md-nav__item"><a href="#getid" title="getId" class="md-nav__link">getId</a></li><li class="md-nav__item"><a href="#gettreebacked" title="getTreeBacked" class="md-nav__link">getTreeBacked</a></li><li class="md-nav__item"><a href="#has" title="has" class="md-nav__link">has</a></li><li class="md-nav__item"><a href="#private-inittree" title="Private initTree" class="md-nav__link">Private initTree</a></li><li class="md-nav__item"><a href="#keys" title="keys" class="md-nav__link">keys</a></li><li class="md-nav__item"><a href="#keysstream" title="keysStream" class="md-nav__link">keysStream</a></li><li class="md-nav__item"><a href="#lastentry" title="lastEntry" class="md-nav__link">lastEntry</a></li><li class="md-nav__item"><a href="#lastkey" title="lastKey" class="md-nav__link">lastKey</a></li><li class="md-nav__item"><a href="#lastvalue" title="lastValue" class="md-nav__link">lastValue</a></li><li class="md-nav__item"><a href="#put" title="put" class="md-nav__link">put</a></li><li class="md-nav__item"><a href="#remove" title="remove" class="md-nav__link">remove</a></li><li class="md-nav__item"><a href="#values" title="values" class="md-nav__link">values</a></li><li class="md-nav__item"><a href="#valuesstream" title="valuesStream" class="md-nav__link">valuesStream</a></li></ul></nav></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/chainsafe/lodestar/edit/master/docs/packages/lodestar/classes/_db_api_beacon_repositories_depositdataroot_.depositdatarootrepository.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><p><a href="../../">@chainsafe/lodestar</a> › <a href="../../globals/">Globals</a> › <a href="../../modules/_db_api_beacon_repositories_depositdataroot_/">"db/api/beacon/repositories/depositDataRoot"</a> › <a href="./">DepositDataRootRepository</a></p>
+<h1 id="class-depositdatarootrepository">Class: DepositDataRootRepository<a class="headerlink" href="#class-depositdatarootrepository" title="Permanent link">&para;</a></h1>
+<h2 id="hierarchy">Hierarchy<a class="headerlink" href="#hierarchy" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>‹number, Root›</li>
+</ul>
+<p>↳ <strong>DepositDataRootRepository</strong></p>
+<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#constructor">constructor</a></li>
+</ul>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#protected-bucket">bucket</a></li>
+<li><a href="./#protected-config">config</a></li>
+<li><a href="./#protected-db">db</a></li>
+<li><a href="./#private-depositroottree">depositRootTree</a></li>
+<li><a href="./#protected-type">type</a></li>
+</ul>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#add">add</a></li>
+<li><a href="./#batchadd">batchAdd</a></li>
+<li><a href="./#batchdelete">batchDelete</a></li>
+<li><a href="./#batchput">batchPut</a></li>
+<li><a href="./#batchremove">batchRemove</a></li>
+<li><a href="./#protected-dbfilteroptions">dbFilterOptions</a></li>
+<li><a href="./#decodekey">decodeKey</a></li>
+<li><a href="./#decodevalue">decodeValue</a></li>
+<li><a href="./#delete">delete</a></li>
+<li><a href="./#encodekey">encodeKey</a></li>
+<li><a href="./#encodevalue">encodeValue</a></li>
+<li><a href="./#entries">entries</a></li>
+<li><a href="./#entriesstream">entriesStream</a></li>
+<li><a href="./#firstentry">firstEntry</a></li>
+<li><a href="./#firstkey">firstKey</a></li>
+<li><a href="./#firstvalue">firstValue</a></li>
+<li><a href="./#get">get</a></li>
+<li><a href="./#getid">getId</a></li>
+<li><a href="./#gettreebacked">getTreeBacked</a></li>
+<li><a href="./#has">has</a></li>
+<li><a href="./#private-inittree">initTree</a></li>
+<li><a href="./#keys">keys</a></li>
+<li><a href="./#keysstream">keysStream</a></li>
+<li><a href="./#lastentry">lastEntry</a></li>
+<li><a href="./#lastkey">lastKey</a></li>
+<li><a href="./#lastvalue">lastValue</a></li>
+<li><a href="./#put">put</a></li>
+<li><a href="./#remove">remove</a></li>
+<li><a href="./#values">values</a></li>
+<li><a href="./#valuesstream">valuesStream</a></li>
+</ul>
+<h2 id="constructors_1">Constructors<a class="headerlink" href="#constructors_1" title="Permanent link">&para;</a></h2>
+<h3 id="constructor">constructor<a class="headerlink" href="#constructor" title="Permanent link">&para;</a></h3>
+<p>+ <strong>new DepositDataRootRepository</strong>(<code>config</code>: IBeaconConfig, <code>db</code>: <a href="../../interfaces/_db_controller_interface_.idatabasecontroller/">IDatabaseController</a>‹Buffer, Buffer›): <em><a href="./">DepositDataRootRepository</a></em></p>
+<p><em>Overrides <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#protected-constructor">constructor</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L12">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:12</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td>IBeaconConfig</td>
+</tr>
+<tr>
+<td><code>db</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.idatabasecontroller/">IDatabaseController</a>‹Buffer, Buffer›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="./">DepositDataRootRepository</a></em></p>
+<h2 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h2>
+<h3 id="protected-bucket"><code>Protected</code> bucket<a class="headerlink" href="#protected-bucket" title="Permanent link">&para;</a></h3>
+<p>• <strong>bucket</strong>: <em><a href="../../enums/_db_api_schema_.bucket/">Bucket</a></em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#protected-bucket">bucket</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L22">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:22</a></em></p>
+<hr />
+<h3 id="protected-config"><code>Protected</code> config<a class="headerlink" href="#protected-config" title="Permanent link">&para;</a></h3>
+<p>• <strong>config</strong>: <em>IBeaconConfig</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#protected-config">config</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L18">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:18</a></em></p>
+<hr />
+<h3 id="protected-db"><code>Protected</code> db<a class="headerlink" href="#protected-db" title="Permanent link">&para;</a></h3>
+<p>• <strong>db</strong>: <em><a href="../../interfaces/_db_controller_interface_.idatabasecontroller/">IDatabaseController</a>‹Buffer, Buffer›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#protected-db">db</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L20">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:20</a></em></p>
+<hr />
+<h3 id="private-depositroottree"><code>Private</code> depositRootTree<a class="headerlink" href="#private-depositroottree" title="Permanent link">&para;</a></h3>
+<p>• <strong>depositRootTree</strong>: <em>TreeBacked‹List‹Root››</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L12">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:12</a></em></p>
+<hr />
+<h3 id="protected-type"><code>Protected</code> type<a class="headerlink" href="#protected-type" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>Type‹Root›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#protected-type">type</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L24">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:24</a></em></p>
+<h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
+<h3 id="add">add<a class="headerlink" href="#add" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>add</strong>(<code>value</code>: Root): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#add">add</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L80">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:80</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>Root</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="batchadd">batchAdd<a class="headerlink" href="#batchadd" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>batchAdd</strong>(<code>values</code>: ArrayLike‹Root›): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#batchadd">batchAdd</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L99">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:99</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>values</code></td>
+<td>ArrayLike‹Root›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="batchdelete">batchDelete<a class="headerlink" href="#batchdelete" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>batchDelete</strong>(<code>ids</code>: ArrayLike‹number›): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#batchdelete">batchDelete</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L95">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:95</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ids</code></td>
+<td>ArrayLike‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="batchput">batchPut<a class="headerlink" href="#batchput" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>batchPut</strong>(<code>items</code>: <a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root›[]): <em>Promise‹void›</em></p>
+<p><em>Overrides <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#batchput">batchPut</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L39">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:39</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>items</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root›[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="batchremove">batchRemove<a class="headerlink" href="#batchremove" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>batchRemove</strong>(<code>values</code>: ArrayLike‹Root›): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#batchremove">batchRemove</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L106">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:106</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>values</code></td>
+<td>ArrayLike‹Root›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="protected-dbfilteroptions"><code>Protected</code> dbFilterOptions<a class="headerlink" href="#protected-dbfilteroptions" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>dbFilterOptions</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹Buffer›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#protected-dbfilteroptions">dbFilterOptions</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L208">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:208</a></em></p>
+<p>Transforms opts from I to Buffer</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹Buffer›</em></p>
+<hr />
+<h3 id="decodekey">decodeKey<a class="headerlink" href="#decodekey" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>decodeKey</strong>(<code>data</code>: Buffer): <em>number</em></p>
+<p><em>Overrides <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#decodekey">decodeKey</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L21">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:21</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>Buffer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>number</em></p>
+<hr />
+<h3 id="decodevalue">decodeValue<a class="headerlink" href="#decodevalue" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>decodeValue</strong>(<code>data</code>: Buffer): <em>Root</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#decodevalue">decodeValue</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L41">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:41</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>Buffer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Root</em></p>
+<hr />
+<h3 id="delete">delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>delete</strong>(<code>id</code>: number): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#delete">delete</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L71">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:71</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="encodekey">encodeKey<a class="headerlink" href="#encodekey" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>encodeKey</strong>(<code>id</code>: number): <em>Buffer</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#encodekey">encodeKey</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L45">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:45</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Buffer</em></p>
+<hr />
+<h3 id="encodevalue">encodeValue<a class="headerlink" href="#encodevalue" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>encodeValue</strong>(<code>value</code>: Root): <em>Buffer</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#encodevalue">encodeValue</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L37">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:37</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>Root</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Buffer</em></p>
+<hr />
+<h3 id="entries">entries<a class="headerlink" href="#entries" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>entries</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em>Promise‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root›[]›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#entries">entries</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L136">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:136</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root›[]›</em></p>
+<hr />
+<h3 id="entriesstream">entriesStream<a class="headerlink" href="#entriesstream" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>entriesStream</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em>AsyncIterable‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root››</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#entriesstream">entriesStream</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L143">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:143</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>AsyncIterable‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root››</em></p>
+<hr />
+<h3 id="firstentry">firstEntry<a class="headerlink" href="#firstentry" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>firstEntry</strong>(): <em>Promise‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root› | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#firstentry">firstEntry</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L189">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:189</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root› | null›</em></p>
+<hr />
+<h3 id="firstkey">firstKey<a class="headerlink" href="#firstkey" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>firstKey</strong>(): <em>Promise‹number | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#firstkey">firstKey</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L157">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:157</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹number | null›</em></p>
+<hr />
+<h3 id="firstvalue">firstValue<a class="headerlink" href="#firstvalue" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>firstValue</strong>(): <em>Promise‹Root | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#firstvalue">firstValue</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L173">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:173</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹Root | null›</em></p>
+<hr />
+<h3 id="get">get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>get</strong>(<code>id</code>: number): <em>Promise‹Root | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#get">get</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L53">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:53</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Root | null›</em></p>
+<hr />
+<h3 id="getid">getId<a class="headerlink" href="#getid" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getId</strong>(<code>value</code>: Root): <em>number</em></p>
+<p><em>Overrides <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#getid">getId</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L27">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:27</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>Root</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>number</em></p>
+<hr />
+<h3 id="gettreebacked">getTreeBacked<a class="headerlink" href="#gettreebacked" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getTreeBacked</strong>(<code>depositIndex</code>: number): <em>Promise‹TreeBacked‹List‹Root›››</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L49">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:49</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>depositIndex</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹TreeBacked‹List‹Root›››</em></p>
+<hr />
+<h3 id="has">has<a class="headerlink" href="#has" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>has</strong>(<code>id</code>: number): <em>Promise‹boolean›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#has">has</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L63">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:63</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹boolean›</em></p>
+<hr />
+<h3 id="private-inittree"><code>Private</code> initTree<a class="headerlink" href="#private-inittree" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>initTree</strong>(): <em>Promise‹void›</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L65">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:65</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="keys">keys<a class="headerlink" href="#keys" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>keys</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em>Promise‹number[]›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#keys">keys</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L110">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:110</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹number[]›</em></p>
+<hr />
+<h3 id="keysstream">keysStream<a class="headerlink" href="#keysstream" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>keysStream</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em>AsyncIterable‹number›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#keysstream">keysStream</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L114">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:114</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>AsyncIterable‹number›</em></p>
+<hr />
+<h3 id="lastentry">lastEntry<a class="headerlink" href="#lastentry" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>lastEntry</strong>(): <em>Promise‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root› | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#lastentry">lastEntry</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L197">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:197</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹<a href="../../interfaces/_db_controller_interface_.ikeyvalue/">IKeyValue</a>‹number, Root› | null›</em></p>
+<hr />
+<h3 id="lastkey">lastKey<a class="headerlink" href="#lastkey" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>lastKey</strong>(): <em>Promise‹number | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#lastkey">lastKey</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L165">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:165</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹number | null›</em></p>
+<hr />
+<h3 id="lastvalue">lastValue<a class="headerlink" href="#lastvalue" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>lastValue</strong>(): <em>Promise‹Root | null›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#lastvalue">lastValue</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L181">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:181</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹Root | null›</em></p>
+<hr />
+<h3 id="put">put<a class="headerlink" href="#put" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>put</strong>(<code>id</code>: number, <code>value</code>: Root): <em>Promise‹void›</em></p>
+<p><em>Overrides <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#put">put</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts#L31">packages/lodestar/src/db/api/beacon/repositories/depositDataRoot.ts:31</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>Root</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="remove">remove<a class="headerlink" href="#remove" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>remove</strong>(<code>value</code>: Root): <em>Promise‹void›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#remove">remove</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L84">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:84</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td>Root</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="values">values<a class="headerlink" href="#values" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>values</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em>Promise‹Root[]›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#values">values</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L123">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:123</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Promise‹Root[]›</em></p>
+<hr />
+<h3 id="valuesstream">valuesStream<a class="headerlink" href="#valuesstream" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>valuesStream</strong>(<code>opts?</code>: <a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›): <em>AsyncIterable‹Root›</em></p>
+<p><em>Inherited from <a href="../_db_api_beacon_repositories_abstract_.repository/">Repository</a>.<a href="../_db_api_beacon_repositories_abstract_.repository/#valuesstream">valuesStream</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/db/api/beacon/repositories/abstract.ts#L127">packages/lodestar/src/db/api/beacon/repositories/abstract.ts:127</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opts?</code></td>
+<td><a href="../../interfaces/_db_controller_interface_.ifilteroptions/">IFilterOptions</a>‹number›</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>AsyncIterable‹Root›</em></p></article></div></div></main><footer class="md-footer"><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright">powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../../assets/fonts/font-awesome.css"> <a href="https://github.com/ChainSafe/lodestar" class="md-footer-social__link fa fa-github"></a>  <a href="https://twitter.com/ChainSafe" class="md-footer-social__link fa fa-twitter"></a>  <a href="https://discord.gg/yjyvFRP" class="md-footer-social__link fa fa-comments"></a>  <a href="https://medium.com/ChainSafe" class="md-footer-social__link fa fa-medium"></a> </div></div></div></footer></div><script src="../../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../../.."}})</script></body></html>

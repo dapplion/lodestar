@@ -1,0 +1,246 @@
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Lodestar documentation - Typescript Eth2.0 client"><link rel="canonical" href="https://chainsafe.github.io/lodestar/packages/lodestar-validator/classes/_api_abstract_.abstractapiclient/"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.1"><title> api abstract .abstractapiclient - Lodestar documentation</title><link rel="stylesheet" href="../../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content=""><script src="../../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../../stylesheets/extras.css"></head><body dir="ltr" data-md-color-primary="black" data-md-color-accent="black"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#class-abstractapiclient-t-u-v" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-header-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Lodestar documentation</span><span class="md-header-nav__topic"> api abstract .abstractapiclient</span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="48" height="48"></a>Lodestar documentation</label><div class="md-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../.." title="Getting started" class="md-nav__link">Getting started</a></li><li class="md-nav__item"><a href="../../../../installation/" title="Installation" class="md-nav__link">Installation</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3"><label class="md-nav__link" for="nav-3">Usage</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-3">Usage</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../../usage/local/" title="Local testnet" class="md-nav__link">Local testnet</a></li><li class="md-nav__item"><a href="../../../../usage/witti/" title="Witti testnet" class="md-nav__link">Witti testnet</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../" title="Packages" class="md-nav__link">Packages</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#type-parameters" title="Type parameters" class="md-nav__link">Type parameters</a></li><li class="md-nav__item"><a href="#hierarchy" title="Hierarchy" class="md-nav__link">Hierarchy</a></li><li class="md-nav__item"><a href="#implements" title="Implements" class="md-nav__link">Implements</a></li><li class="md-nav__item"><a href="#index" title="Index" class="md-nav__link">Index</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#constructors" title="Constructors" class="md-nav__link">Constructors</a></li><li class="md-nav__item"><a href="#properties" title="Properties" class="md-nav__link">Properties</a></li><li class="md-nav__item"><a href="#methods" title="Methods" class="md-nav__link">Methods</a></li></ul></nav></li><li class="md-nav__item"><a href="#constructors_1" title="Constructors" class="md-nav__link">Constructors</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#protected-constructor" title="Protected constructor" class="md-nav__link">Protected constructor</a></li></ul></nav></li><li class="md-nav__item"><a href="#properties_1" title="Properties" class="md-nav__link">Properties</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#optional-_emittype" title="Optional  _emitType" class="md-nav__link">Optional  _emitType</a></li><li class="md-nav__item"><a href="#optional-_emittertype" title="Optional  _emitterType" class="md-nav__link">Optional  _emitterType</a></li><li class="md-nav__item"><a href="#optional-_eventstype" title="Optional  _eventsType" class="md-nav__link">Optional  _eventsType</a></li><li class="md-nav__item"><a href="#abstract-beacon" title="Abstract beacon" class="md-nav__link">Abstract beacon</a></li><li class="md-nav__item"><a href="#private-beaconnodeinterval" title="Private beaconNodeInterval" class="md-nav__link">Private beaconNodeInterval</a></li><li class="md-nav__item"><a href="#protected-config" title="Protected config" class="md-nav__link">Protected config</a></li><li class="md-nav__item"><a href="#private-currentepoch" title="Private currentEpoch" class="md-nav__link">Private currentEpoch</a></li><li class="md-nav__item"><a href="#private-currentslot" title="Private currentSlot" class="md-nav__link">Private currentSlot</a></li><li class="md-nav__item"><a href="#private-newepochcallbacks" title="Private newEpochCallbacks" class="md-nav__link">Private newEpochCallbacks</a></li><li class="md-nav__item"><a href="#private-newslotcallbacks" title="Private newSlotCallbacks" class="md-nav__link">Private newSlotCallbacks</a></li><li class="md-nav__item"><a href="#private-running" title="Private running" class="md-nav__link">Private running</a></li><li class="md-nav__item"><a href="#private-slotcountingtimeout" title="Private slotCountingTimeout" class="md-nav__link">Private slotCountingTimeout</a></li><li class="md-nav__item"><a href="#abstract-url" title="Abstract url" class="md-nav__link">Abstract url</a></li><li class="md-nav__item"><a href="#abstract-validator" title="Abstract validator" class="md-nav__link">Abstract validator</a></li></ul></nav></li><li class="md-nav__item"><a href="#methods_1" title="Methods" class="md-nav__link">Methods</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#connect" title="connect" class="md-nav__link">connect</a></li><li class="md-nav__item"><a href="#disconnect" title="disconnect" class="md-nav__link">disconnect</a></li><li class="md-nav__item"><a href="#getcurrentslot" title="getCurrentSlot" class="md-nav__link">getCurrentSlot</a></li><li class="md-nav__item"><a href="#onnewepoch" title="onNewEpoch" class="md-nav__link">onNewEpoch</a></li><li class="md-nav__item"><a href="#onnewslot" title="onNewSlot" class="md-nav__link">onNewSlot</a></li><li class="md-nav__item"><a href="#private-pollbeaconnode" title="Private pollBeaconNode" class="md-nav__link">Private pollBeaconNode</a></li><li class="md-nav__item"><a href="#private-startslotcounting" title="Private startSlotCounting" class="md-nav__link">Private startSlotCounting</a></li><li class="md-nav__item"><a href="#private-updateepoch" title="Private updateEpoch" class="md-nav__link">Private updateEpoch</a></li><li class="md-nav__item"><a href="#private-updateslot" title="Private updateSlot" class="md-nav__link">Private updateSlot</a></li></ul></nav></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/chainsafe/lodestar/edit/master/docs/packages/lodestar-validator/classes/_api_abstract_.abstractapiclient.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><p><a href="../../">@chainsafe/lodestar-validator</a> › <a href="../../globals/">Globals</a> › <a href="../../modules/_api_abstract_/">"api/abstract"</a> › <a href="./">AbstractApiClient</a></p>
+<h1 id="class-abstractapiclient-t-u-v">Class: AbstractApiClient &lt;<strong>T, U, V</strong>&gt;<a class="headerlink" href="#class-abstractapiclient-t-u-v" title="Permanent link">&para;</a></h1>
+<h2 id="type-parameters">Type parameters<a class="headerlink" href="#type-parameters" title="Permanent link">&para;</a></h2>
+<p>▪ <strong>T</strong></p>
+<p>▪ <strong>U</strong></p>
+<p>▪ <strong>V</strong></p>
+<h2 id="hierarchy">Hierarchy<a class="headerlink" href="#hierarchy" title="Permanent link">&para;</a></h2>
+<ul>
+<li>TypeRecord‹EventEmitter‹›, <a href="../../interfaces/_api_interface_.iapiclientevents/">IApiClientEvents</a>, <a href="../../interfaces/_api_interface_.iapiclientevents/">IApiClientEvents</a>, this› &amp; object &amp; object</li>
+</ul>
+<p>↳ <strong>AbstractApiClient</strong></p>
+<p>↳ <a href="../_api_impl_instance_.apiclientoverinstance/">ApiClientOverInstance</a></p>
+<p>↳ <a href="../_api_impl_rest_apiclient_.apiclientoverrest/">ApiClientOverRest</a></p>
+<h2 id="implements">Implements<a class="headerlink" href="#implements" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></li>
+</ul>
+<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#protected-constructor">constructor</a></li>
+</ul>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#optional--_emittype"> _emitType</a></li>
+<li><a href="./#optional--_emittertype"> _emitterType</a></li>
+<li><a href="./#optional--_eventstype"> _eventsType</a></li>
+<li><a href="./#abstract-beacon">beacon</a></li>
+<li><a href="./#private-beaconnodeinterval">beaconNodeInterval</a></li>
+<li><a href="./#protected-config">config</a></li>
+<li><a href="./#private-currentepoch">currentEpoch</a></li>
+<li><a href="./#private-currentslot">currentSlot</a></li>
+<li><a href="./#private-newepochcallbacks">newEpochCallbacks</a></li>
+<li><a href="./#private-newslotcallbacks">newSlotCallbacks</a></li>
+<li><a href="./#private-running">running</a></li>
+<li><a href="./#private-slotcountingtimeout">slotCountingTimeout</a></li>
+<li><a href="./#abstract-url">url</a></li>
+<li><a href="./#abstract-validator">validator</a></li>
+</ul>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#connect">connect</a></li>
+<li><a href="./#disconnect">disconnect</a></li>
+<li><a href="./#getcurrentslot">getCurrentSlot</a></li>
+<li><a href="./#onnewepoch">onNewEpoch</a></li>
+<li><a href="./#onnewslot">onNewSlot</a></li>
+<li><a href="./#private-pollbeaconnode">pollBeaconNode</a></li>
+<li><a href="./#private-startslotcounting">startSlotCounting</a></li>
+<li><a href="./#private-updateepoch">updateEpoch</a></li>
+<li><a href="./#private-updateslot">updateSlot</a></li>
+</ul>
+<h2 id="constructors_1">Constructors<a class="headerlink" href="#constructors_1" title="Permanent link">&para;</a></h2>
+<h3 id="protected-constructor"><code>Protected</code> constructor<a class="headerlink" href="#protected-constructor" title="Permanent link">&para;</a></h3>
+<p>+ <strong>new AbstractApiClient</strong>(<code>config</code>: IBeaconConfig): <em><a href="./">AbstractApiClient</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L27">packages/lodestar-validator/src/api/abstract.ts:27</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td>IBeaconConfig</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="./">AbstractApiClient</a></em></p>
+<h2 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h2>
+<h3 id="optional-_emittype"><code>Optional</code>  _emitType<a class="headerlink" href="#optional-_emittype" title="Permanent link">&para;</a></h3>
+<p>• <strong> _emitType</strong>? : <em>V</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#optional--_emittype"> _emitType</a></em></p>
+<p><em>Inherited from <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#optional--_emittype"> _emitType</a></em></p>
+<p>Defined in node_modules/strict-event-emitter-types/types/src/index.d.ts:7</p>
+<hr />
+<h3 id="optional-_emittertype"><code>Optional</code>  _emitterType<a class="headerlink" href="#optional-_emittertype" title="Permanent link">&para;</a></h3>
+<p>• <strong> _emitterType</strong>? : <em>T</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#optional--_emittertype"> _emitterType</a></em></p>
+<p><em>Inherited from <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#optional--_emittertype"> _emitterType</a></em></p>
+<p>Defined in node_modules/strict-event-emitter-types/types/src/index.d.ts:5</p>
+<hr />
+<h3 id="optional-_eventstype"><code>Optional</code>  _eventsType<a class="headerlink" href="#optional-_eventstype" title="Permanent link">&para;</a></h3>
+<p>• <strong> _eventsType</strong>? : <em>U</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#optional--_eventstype"> _eventsType</a></em></p>
+<p><em>Inherited from <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#optional--_eventstype"> _eventsType</a></em></p>
+<p>Defined in node_modules/strict-event-emitter-types/types/src/index.d.ts:6</p>
+<hr />
+<h3 id="abstract-beacon"><code>Abstract</code> beacon<a class="headerlink" href="#abstract-beacon" title="Permanent link">&para;</a></h3>
+<p>• <strong>beacon</strong>: <em><a href="../../interfaces/_api_interface_beacon_.ibeaconapi/">IBeaconApi</a></em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#beacon">beacon</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L26">packages/lodestar-validator/src/api/abstract.ts:26</a></em></p>
+<hr />
+<h3 id="private-beaconnodeinterval"><code>Private</code> beaconNodeInterval<a class="headerlink" href="#private-beaconnodeinterval" title="Permanent link">&para;</a></h3>
+<p>• <strong>beaconNodeInterval</strong>: <em>Timeout</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L22">packages/lodestar-validator/src/api/abstract.ts:22</a></em></p>
+<hr />
+<h3 id="protected-config"><code>Protected</code> config<a class="headerlink" href="#protected-config" title="Permanent link">&para;</a></h3>
+<p>• <strong>config</strong>: <em>IBeaconConfig</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L15">packages/lodestar-validator/src/api/abstract.ts:15</a></em></p>
+<hr />
+<h3 id="private-currentepoch"><code>Private</code> currentEpoch<a class="headerlink" href="#private-currentepoch" title="Permanent link">&para;</a></h3>
+<p>• <strong>currentEpoch</strong>: <em>Epoch</em> = 0</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L18">packages/lodestar-validator/src/api/abstract.ts:18</a></em></p>
+<hr />
+<h3 id="private-currentslot"><code>Private</code> currentSlot<a class="headerlink" href="#private-currentslot" title="Permanent link">&para;</a></h3>
+<p>• <strong>currentSlot</strong>: <em>Slot</em> = 0</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L17">packages/lodestar-validator/src/api/abstract.ts:17</a></em></p>
+<hr />
+<h3 id="private-newepochcallbacks"><code>Private</code> newEpochCallbacks<a class="headerlink" href="#private-newepochcallbacks" title="Permanent link">&para;</a></h3>
+<p>• <strong>newEpochCallbacks</strong>: <em><a href="../../interfaces/_api_interface_.inewepochcallback/">INewEpochCallback</a>[]</em> = []</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L20">packages/lodestar-validator/src/api/abstract.ts:20</a></em></p>
+<hr />
+<h3 id="private-newslotcallbacks"><code>Private</code> newSlotCallbacks<a class="headerlink" href="#private-newslotcallbacks" title="Permanent link">&para;</a></h3>
+<p>• <strong>newSlotCallbacks</strong>: <em><a href="../../interfaces/_api_interface_.inewslotcallback/">INewSlotCallback</a>[]</em> = []</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L19">packages/lodestar-validator/src/api/abstract.ts:19</a></em></p>
+<hr />
+<h3 id="private-running"><code>Private</code> running<a class="headerlink" href="#private-running" title="Permanent link">&para;</a></h3>
+<p>• <strong>running</strong>: <em>boolean</em> = false</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L21">packages/lodestar-validator/src/api/abstract.ts:21</a></em></p>
+<hr />
+<h3 id="private-slotcountingtimeout"><code>Private</code> slotCountingTimeout<a class="headerlink" href="#private-slotcountingtimeout" title="Permanent link">&para;</a></h3>
+<p>• <strong>slotCountingTimeout</strong>: <em>Timeout</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L23">packages/lodestar-validator/src/api/abstract.ts:23</a></em></p>
+<hr />
+<h3 id="abstract-url"><code>Abstract</code> url<a class="headerlink" href="#abstract-url" title="Permanent link">&para;</a></h3>
+<p>• <strong>url</strong>: <em>string</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#url">url</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L25">packages/lodestar-validator/src/api/abstract.ts:25</a></em></p>
+<hr />
+<h3 id="abstract-validator"><code>Abstract</code> validator<a class="headerlink" href="#abstract-validator" title="Permanent link">&para;</a></h3>
+<p>• <strong>validator</strong>: <em><a href="../../interfaces/_api_interface_validators_.ivalidatorapi/">IValidatorApi</a></em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#validator">validator</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L27">packages/lodestar-validator/src/api/abstract.ts:27</a></em></p>
+<h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
+<h3 id="connect">connect<a class="headerlink" href="#connect" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>connect</strong>(): <em>Promise‹void›</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L46">packages/lodestar-validator/src/api/abstract.ts:46</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="disconnect">disconnect<a class="headerlink" href="#disconnect" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>disconnect</strong>(): <em>Promise‹void›</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L54">packages/lodestar-validator/src/api/abstract.ts:54</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="getcurrentslot">getCurrentSlot<a class="headerlink" href="#getcurrentslot" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getCurrentSlot</strong>(): <em>Slot</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L64">packages/lodestar-validator/src/api/abstract.ts:64</a></em></p>
+<p><strong>Returns:</strong> <em>Slot</em></p>
+<hr />
+<h3 id="onnewepoch">onNewEpoch<a class="headerlink" href="#onnewepoch" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>onNewEpoch</strong>(<code>cb</code>: <a href="../../interfaces/_api_interface_.inewepochcallback/">INewEpochCallback</a>): <em>void</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L34">packages/lodestar-validator/src/api/abstract.ts:34</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cb</code></td>
+<td><a href="../../interfaces/_api_interface_.inewepochcallback/">INewEpochCallback</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="onnewslot">onNewSlot<a class="headerlink" href="#onnewslot" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>onNewSlot</strong>(<code>cb</code>: <a href="../../interfaces/_api_interface_.inewslotcallback/">INewSlotCallback</a>): <em>void</em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L40">packages/lodestar-validator/src/api/abstract.ts:40</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cb</code></td>
+<td><a href="../../interfaces/_api_interface_.inewslotcallback/">INewSlotCallback</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="private-pollbeaconnode"><code>Private</code> pollBeaconNode<a class="headerlink" href="#private-pollbeaconnode" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>pollBeaconNode</strong>(): <em>Promise‹void›</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L68">packages/lodestar-validator/src/api/abstract.ts:68</a></em></p>
+<p><strong>Returns:</strong> <em>Promise‹void›</em></p>
+<hr />
+<h3 id="private-startslotcounting"><code>Private</code> startSlotCounting<a class="headerlink" href="#private-startslotcounting" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>startSlotCounting</strong>(<code>genesisTime</code>: number): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L80">packages/lodestar-validator/src/api/abstract.ts:80</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>genesisTime</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="private-updateepoch"><code>Private</code> updateEpoch<a class="headerlink" href="#private-updateepoch" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>updateEpoch</strong>(<code>slot</code>: Slot): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L111">packages/lodestar-validator/src/api/abstract.ts:111</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>slot</code></td>
+<td>Slot</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="private-updateslot"><code>Private</code> updateSlot<a class="headerlink" href="#private-updateslot" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>updateSlot</strong>(): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-validator/src/api/abstract.ts#L96">packages/lodestar-validator/src/api/abstract.ts:96</a></em></p>
+<p><strong>Returns:</strong> <em>void</em></p></article></div></div></main><footer class="md-footer"><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright">powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../../assets/fonts/font-awesome.css"> <a href="https://github.com/ChainSafe/lodestar" class="md-footer-social__link fa fa-github"></a>  <a href="https://twitter.com/ChainSafe" class="md-footer-social__link fa fa-twitter"></a>  <a href="https://discord.gg/yjyvFRP" class="md-footer-social__link fa fa-comments"></a>  <a href="https://medium.com/ChainSafe" class="md-footer-social__link fa fa-medium"></a> </div></div></div></footer></div><script src="../../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../../.."}})</script></body></html>

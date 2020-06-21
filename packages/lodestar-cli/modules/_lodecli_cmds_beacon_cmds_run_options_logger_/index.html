@@ -1,0 +1,214 @@
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Lodestar documentation - Typescript Eth2.0 client"><link rel="canonical" href="https://chainsafe.github.io/lodestar/packages/lodestar-cli/modules/_lodecli_cmds_beacon_cmds_run_options_logger_/"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.1"><title> lodecli cmds beacon cmds run options logger  - Lodestar documentation</title><link rel="stylesheet" href="../../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content=""><script src="../../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../../stylesheets/extras.css"></head><body dir="ltr" data-md-color-primary="black" data-md-color-accent="black"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#external-module-lodeclicmdsbeaconcmdsrunoptionslogger" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-header-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Lodestar documentation</span><span class="md-header-nav__topic"> lodecli cmds beacon cmds run options logger </span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="48" height="48"></a>Lodestar documentation</label><div class="md-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../.." title="Getting started" class="md-nav__link">Getting started</a></li><li class="md-nav__item"><a href="../../../../installation/" title="Installation" class="md-nav__link">Installation</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3"><label class="md-nav__link" for="nav-3">Usage</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-3">Usage</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../../usage/local/" title="Local testnet" class="md-nav__link">Local testnet</a></li><li class="md-nav__item"><a href="../../../../usage/witti/" title="Witti testnet" class="md-nav__link">Witti testnet</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../" title="Packages" class="md-nav__link">Packages</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#index" title="Index" class="md-nav__link">Index</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#object-literals" title="Object literals" class="md-nav__link">Object literals</a></li></ul></nav></li><li class="md-nav__item"><a href="#object-literals_1" title="Object literals" class="md-nav__link">Object literals</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#const-logchain" title="Const logChain" class="md-nav__link">Const logChain</a></li><li class="md-nav__item"><a href="#logchain-object" title="▪ logChain: object" class="md-nav__link">▪ logChain: object</a></li><li class="md-nav__item"><a href="#alias" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-logchores" title="Const logChores" class="md-nav__link">Const logChores</a></li><li class="md-nav__item"><a href="#logchores-object" title="▪ logChores: object" class="md-nav__link">▪ logChores: object</a></li><li class="md-nav__item"><a href="#alias_1" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_1" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_1" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_1" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_1" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_1" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-logdb" title="Const logDb" class="md-nav__link">Const logDb</a></li><li class="md-nav__item"><a href="#logdb-object" title="▪ logDb: object" class="md-nav__link">▪ logDb: object</a></li><li class="md-nav__item"><a href="#alias_2" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_2" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_2" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_2" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_2" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_2" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-logeth1" title="Const logEth1" class="md-nav__link">Const logEth1</a></li><li class="md-nav__item"><a href="#logeth1-object" title="▪ logEth1: object" class="md-nav__link">▪ logEth1: object</a></li><li class="md-nav__item"><a href="#alias_3" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_3" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_3" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_3" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_3" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_3" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-logmetrics" title="Const logMetrics" class="md-nav__link">Const logMetrics</a></li><li class="md-nav__item"><a href="#logmetrics-object" title="▪ logMetrics: object" class="md-nav__link">▪ logMetrics: object</a></li><li class="md-nav__item"><a href="#alias_4" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_4" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_4" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_4" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_4" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_4" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-lognetwork" title="Const logNetwork" class="md-nav__link">Const logNetwork</a></li><li class="md-nav__item"><a href="#lognetwork-object" title="▪ logNetwork: object" class="md-nav__link">▪ logNetwork: object</a></li><li class="md-nav__item"><a href="#alias_5" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_5" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_5" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_5" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_5" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_5" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-lognode" title="Const logNode" class="md-nav__link">Const logNode</a></li><li class="md-nav__item"><a href="#lognode-object" title="▪ logNode: object" class="md-nav__link">▪ logNode: object</a></li><li class="md-nav__item"><a href="#alias_6" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_6" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_6" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_6" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_6" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_6" title="type" class="md-nav__link">type</a></li><li class="md-nav__item"><a href="#const-logsync" title="Const logSync" class="md-nav__link">Const logSync</a></li><li class="md-nav__item"><a href="#logsync-object" title="▪ logSync: object" class="md-nav__link">▪ logSync: object</a></li><li class="md-nav__item"><a href="#alias_7" title="alias" class="md-nav__link">alias</a></li><li class="md-nav__item"><a href="#choices_7" title="choices" class="md-nav__link">choices</a></li><li class="md-nav__item"><a href="#default_7" title="default" class="md-nav__link">default</a></li><li class="md-nav__item"><a href="#group_7" title="group" class="md-nav__link">group</a></li><li class="md-nav__item"><a href="#hidden_7" title="hidden" class="md-nav__link">hidden</a></li><li class="md-nav__item"><a href="#type_7" title="type" class="md-nav__link">type</a></li></ul></nav></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/chainsafe/lodestar/edit/master/docs/packages/lodestar-cli/modules/_lodecli_cmds_beacon_cmds_run_options_logger_.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><p><a href="../../">@chainsafe/lodestar-cli</a> › <a href="../../globals/">Globals</a> › <a href="./">"lodecli/cmds/beacon/cmds/run/options/logger"</a></p>
+<h1 id="external-module-lodeclicmdsbeaconcmdsrunoptionslogger">External module: "lodecli/cmds/beacon/cmds/run/options/logger"<a class="headerlink" href="#external-module-lodeclicmdsbeaconcmdsrunoptionslogger" title="Permanent link">&para;</a></h1>
+<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
+<h3 id="object-literals">Object literals<a class="headerlink" href="#object-literals" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#const-logchain">logChain</a></li>
+<li><a href="./#const-logchores">logChores</a></li>
+<li><a href="./#const-logdb">logDb</a></li>
+<li><a href="./#const-logeth1">logEth1</a></li>
+<li><a href="./#const-logmetrics">logMetrics</a></li>
+<li><a href="./#const-lognetwork">logNetwork</a></li>
+<li><a href="./#const-lognode">logNode</a></li>
+<li><a href="./#const-logsync">logSync</a></li>
+</ul>
+<h2 id="object-literals_1">Object literals<a class="headerlink" href="#object-literals_1" title="Permanent link">&para;</a></h2>
+<h3 id="const-logchain"><code>Const</code> logChain<a class="headerlink" href="#const-logchain" title="Permanent link">&para;</a></h3>
+<h3 id="logchain-object">▪ <strong>logChain</strong>: <em>object</em><a class="headerlink" href="#logchain-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L4">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:4</a></em></p>
+<h3 id="alias">alias<a class="headerlink" href="#alias" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.chain.level",
+    "logger.chain.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L5">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:5</a></em></p>
+<h3 id="choices">choices<a class="headerlink" href="#choices" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L11">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:11</a></em></p>
+<h3 id="default">default<a class="headerlink" href="#default" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L12">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:12</a></em></p>
+<h3 id="group">group<a class="headerlink" href="#group" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L13">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:13</a></em></p>
+<h3 id="hidden">hidden<a class="headerlink" href="#hidden" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L9">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:9</a></em></p>
+<h3 id="type">type<a class="headerlink" href="#type" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L10">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:10</a></em></p>
+<hr />
+<h3 id="const-logchores"><code>Const</code> logChores<a class="headerlink" href="#const-logchores" title="Permanent link">&para;</a></h3>
+<h3 id="logchores-object">▪ <strong>logChores</strong>: <em>object</em><a class="headerlink" href="#logchores-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L88">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:88</a></em></p>
+<h3 id="alias_1">alias<a class="headerlink" href="#alias_1" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.chores.level",
+    "logger.chores.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L89">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:89</a></em></p>
+<h3 id="choices_1">choices<a class="headerlink" href="#choices_1" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L95">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:95</a></em></p>
+<h3 id="default_1">default<a class="headerlink" href="#default_1" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L96">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:96</a></em></p>
+<h3 id="group_1">group<a class="headerlink" href="#group_1" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L97">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:97</a></em></p>
+<h3 id="hidden_1">hidden<a class="headerlink" href="#hidden_1" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L93">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:93</a></em></p>
+<h3 id="type_1">type<a class="headerlink" href="#type_1" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L94">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:94</a></em></p>
+<hr />
+<h3 id="const-logdb"><code>Const</code> logDb<a class="headerlink" href="#const-logdb" title="Permanent link">&para;</a></h3>
+<h3 id="logdb-object">▪ <strong>logDb</strong>: <em>object</em><a class="headerlink" href="#logdb-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L16">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:16</a></em></p>
+<h3 id="alias_2">alias<a class="headerlink" href="#alias_2" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.db.level",
+    "logger.db.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L17">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:17</a></em></p>
+<h3 id="choices_2">choices<a class="headerlink" href="#choices_2" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L23">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:23</a></em></p>
+<h3 id="default_2">default<a class="headerlink" href="#default_2" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L24">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:24</a></em></p>
+<h3 id="group_2">group<a class="headerlink" href="#group_2" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L25">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:25</a></em></p>
+<h3 id="hidden_2">hidden<a class="headerlink" href="#hidden_2" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L21">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:21</a></em></p>
+<h3 id="type_2">type<a class="headerlink" href="#type_2" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L22">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:22</a></em></p>
+<hr />
+<h3 id="const-logeth1"><code>Const</code> logEth1<a class="headerlink" href="#const-logeth1" title="Permanent link">&para;</a></h3>
+<h3 id="logeth1-object">▪ <strong>logEth1</strong>: <em>object</em><a class="headerlink" href="#logeth1-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L28">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:28</a></em></p>
+<h3 id="alias_3">alias<a class="headerlink" href="#alias_3" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.eth1.level",
+    "logger.eth1.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L29">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:29</a></em></p>
+<h3 id="choices_3">choices<a class="headerlink" href="#choices_3" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L35">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:35</a></em></p>
+<h3 id="default_3">default<a class="headerlink" href="#default_3" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L36">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:36</a></em></p>
+<h3 id="group_3">group<a class="headerlink" href="#group_3" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L37">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:37</a></em></p>
+<h3 id="hidden_3">hidden<a class="headerlink" href="#hidden_3" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L33">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:33</a></em></p>
+<h3 id="type_3">type<a class="headerlink" href="#type_3" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L34">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:34</a></em></p>
+<hr />
+<h3 id="const-logmetrics"><code>Const</code> logMetrics<a class="headerlink" href="#const-logmetrics" title="Permanent link">&para;</a></h3>
+<h3 id="logmetrics-object">▪ <strong>logMetrics</strong>: <em>object</em><a class="headerlink" href="#logmetrics-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L76">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:76</a></em></p>
+<h3 id="alias_4">alias<a class="headerlink" href="#alias_4" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.metrics.level",
+    "logger.metrics.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L77">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:77</a></em></p>
+<h3 id="choices_4">choices<a class="headerlink" href="#choices_4" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L83">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:83</a></em></p>
+<h3 id="default_4">default<a class="headerlink" href="#default_4" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L84">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:84</a></em></p>
+<h3 id="group_4">group<a class="headerlink" href="#group_4" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L85">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:85</a></em></p>
+<h3 id="hidden_4">hidden<a class="headerlink" href="#hidden_4" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L81">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:81</a></em></p>
+<h3 id="type_4">type<a class="headerlink" href="#type_4" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L82">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:82</a></em></p>
+<hr />
+<h3 id="const-lognetwork"><code>Const</code> logNetwork<a class="headerlink" href="#const-lognetwork" title="Permanent link">&para;</a></h3>
+<h3 id="lognetwork-object">▪ <strong>logNetwork</strong>: <em>object</em><a class="headerlink" href="#lognetwork-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L52">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:52</a></em></p>
+<h3 id="alias_5">alias<a class="headerlink" href="#alias_5" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.network.level",
+    "logger.network.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L53">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:53</a></em></p>
+<h3 id="choices_5">choices<a class="headerlink" href="#choices_5" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L59">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:59</a></em></p>
+<h3 id="default_5">default<a class="headerlink" href="#default_5" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L60">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:60</a></em></p>
+<h3 id="group_5">group<a class="headerlink" href="#group_5" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L61">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:61</a></em></p>
+<h3 id="hidden_5">hidden<a class="headerlink" href="#hidden_5" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L57">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:57</a></em></p>
+<h3 id="type_5">type<a class="headerlink" href="#type_5" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L58">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:58</a></em></p>
+<hr />
+<h3 id="const-lognode"><code>Const</code> logNode<a class="headerlink" href="#const-lognode" title="Permanent link">&para;</a></h3>
+<h3 id="lognode-object">▪ <strong>logNode</strong>: <em>object</em><a class="headerlink" href="#lognode-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L40">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:40</a></em></p>
+<h3 id="alias_6">alias<a class="headerlink" href="#alias_6" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.node.level",
+    "logger.node.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L41">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:41</a></em></p>
+<h3 id="choices_6">choices<a class="headerlink" href="#choices_6" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L47">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:47</a></em></p>
+<h3 id="default_6">default<a class="headerlink" href="#default_6" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L48">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:48</a></em></p>
+<h3 id="group_6">group<a class="headerlink" href="#group_6" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L49">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:49</a></em></p>
+<h3 id="hidden_6">hidden<a class="headerlink" href="#hidden_6" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L45">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:45</a></em></p>
+<h3 id="type_6">type<a class="headerlink" href="#type_6" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L46">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:46</a></em></p>
+<hr />
+<h3 id="const-logsync"><code>Const</code> logSync<a class="headerlink" href="#const-logsync" title="Permanent link">&para;</a></h3>
+<h3 id="logsync-object">▪ <strong>logSync</strong>: <em>object</em><a class="headerlink" href="#logsync-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L64">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:64</a></em></p>
+<h3 id="alias_7">alias<a class="headerlink" href="#alias_7" title="Permanent link">&para;</a></h3>
+<p>• <strong>alias</strong>: <em>string[]</em> = [
+    "log.sync.level",
+    "logger.sync.level",
+  ]</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L65">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:65</a></em></p>
+<h3 id="choices_7">choices<a class="headerlink" href="#choices_7" title="Permanent link">&para;</a></h3>
+<p>• <strong>choices</strong>: <em>any[]</em> = LogLevels</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L71">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:71</a></em></p>
+<h3 id="default_7">default<a class="headerlink" href="#default_7" title="Permanent link">&para;</a></h3>
+<p>• <strong>default</strong>: <em>LogLevel</em> = LogLevel.info</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L72">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:72</a></em></p>
+<h3 id="group_7">group<a class="headerlink" href="#group_7" title="Permanent link">&para;</a></h3>
+<p>• <strong>group</strong>: <em>string</em> = "log"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L73">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:73</a></em></p>
+<h3 id="hidden_7">hidden<a class="headerlink" href="#hidden_7" title="Permanent link">&para;</a></h3>
+<p>• <strong>hidden</strong>: <em>true</em> = true</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L69">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:69</a></em></p>
+<h3 id="type_7">type<a class="headerlink" href="#type_7" title="Permanent link">&para;</a></h3>
+<p>• <strong>type</strong>: <em>"string"</em> = "string"</p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts#L70">packages/lodestar-cli/src/lodecli/cmds/beacon/cmds/run/options/logger.ts:70</a></em></p></article></div></div></main><footer class="md-footer"><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright">powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../../assets/fonts/font-awesome.css"> <a href="https://github.com/ChainSafe/lodestar" class="md-footer-social__link fa fa-github"></a>  <a href="https://twitter.com/ChainSafe" class="md-footer-social__link fa fa-twitter"></a>  <a href="https://discord.gg/yjyvFRP" class="md-footer-social__link fa fa-comments"></a>  <a href="https://medium.com/ChainSafe" class="md-footer-social__link fa fa-medium"></a> </div></div></div></footer></div><script src="../../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../../.."}})</script></body></html>

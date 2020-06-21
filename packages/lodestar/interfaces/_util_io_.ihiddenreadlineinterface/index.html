@@ -1,0 +1,1174 @@
+<!doctype html><html lang="en" class="no-js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="description" content="Lodestar documentation - Typescript Eth2.0 client"><link rel="canonical" href="https://chainsafe.github.io/lodestar/packages/lodestar/interfaces/_util_io_.ihiddenreadlineinterface/"><meta name="lang:clipboard.copy" content="Copy to clipboard"><meta name="lang:clipboard.copied" content="Copied to clipboard"><meta name="lang:search.language" content="en"><meta name="lang:search.pipeline.stopwords" content="True"><meta name="lang:search.pipeline.trimmer" content="True"><meta name="lang:search.result.none" content="No matching documents"><meta name="lang:search.result.one" content="1 matching document"><meta name="lang:search.result.other" content="# matching documents"><meta name="lang:search.tokenizer" content="[\s\-]+"><link rel="shortcut icon" href="../../../../images/favicon.ico"><meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.3.1"><title> util io .ihiddenreadlineinterface - Lodestar documentation</title><link rel="stylesheet" href="../../../../assets/stylesheets/application.4031d38b.css"><link rel="stylesheet" href="../../../../assets/stylesheets/application-palette.224b79ff.css"><meta name="theme-color" content=""><script src="../../../../assets/javascripts/modernizr.74668098.js"></script><link href="https://fonts.gstatic.com" rel="preconnect" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono&display=swap"><style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style><link rel="stylesheet" href="../../../../assets/fonts/material-icons.css"><link rel="stylesheet" href="../../../../stylesheets/extras.css"></head><body dir="ltr" data-md-color-primary="black" data-md-color-accent="black"><svg class="md-svg"><defs><svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg></defs></svg> <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off"> <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off"> <label class="md-overlay" data-md-component="overlay" for="__drawer"></label><a href="#interface-ihiddenreadlineinterface" tabindex="1" class="md-skip">Skip to content </a><header class="md-header" data-md-component="header"><nav class="md-header-nav md-grid"><div class="md-flex"><div class="md-flex__cell md-flex__cell--shrink"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-header-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="24" height="24"></a></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label></div><div class="md-flex__cell md-flex__cell--stretch"><div class="md-flex__ellipsis md-header-nav__title" data-md-component="title"><span class="md-header-nav__topic">Lodestar documentation</span><span class="md-header-nav__topic"> util io .ihiddenreadlineinterface</span></div></div><div class="md-flex__cell md-flex__cell--shrink"><label class="md-icon md-icon--search md-header-nav__button" for="__search"></label><div class="md-search" data-md-component="search" role="dialog"><label class="md-search__overlay" for="__search"></label><div class="md-search__inner" role="search"><form class="md-search__form" name="search"><input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active"> <label class="md-icon md-search__icon" for="__search"></label> <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">&#xE5CD;</button></form><div class="md-search__output"><div class="md-search__scrollwrap" data-md-scrollfix><div class="md-search-result" data-md-component="result"><div class="md-search-result__meta">Type to start searching</div><ol class="md-search-result__list"></ol></div></div></div></div></div></div><div class="md-flex__cell md-flex__cell--shrink"><div class="md-header-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div></div></div></nav></header><div class="md-container"><main class="md-main"><div class="md-main__inner md-grid" data-md-component="container"><div class="md-sidebar md-sidebar--primary" data-md-component="navigation"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--primary" data-md-level="0"><label class="md-nav__title md-nav__title--site" for="__drawer"><a href="https://chainsafe.github.io/lodestar" title="Lodestar documentation" class="md-nav__button md-logo"><img src="../../../../assets/300ppi/short-LS-hookS-WHITE.png" width="48" height="48"></a>Lodestar documentation</label><div class="md-nav__source"><a href="https://github.com/chainsafe/lodestar/" title="Go to repository" class="md-source" data-md-source="github"><div class="md-source__icon"><svg viewBox="0 0 24 24" width="24" height="24"><use xlink:href="#__github" width="24" height="24"></use></svg></div><div class="md-source__repository">chainsafe/lodestar</div></a></div><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../.." title="Getting started" class="md-nav__link">Getting started</a></li><li class="md-nav__item"><a href="../../../../installation/" title="Installation" class="md-nav__link">Installation</a></li><li class="md-nav__item md-nav__item--nested"><input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3"><label class="md-nav__link" for="nav-3">Usage</label><nav class="md-nav" data-md-component="collapsible" data-md-level="1"><label class="md-nav__title" for="nav-3">Usage</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="../../../../usage/local/" title="Local testnet" class="md-nav__link">Local testnet</a></li><li class="md-nav__item"><a href="../../../../usage/witti/" title="Witti testnet" class="md-nav__link">Witti testnet</a></li></ul></nav></li><li class="md-nav__item"><a href="../../../" title="Packages" class="md-nav__link">Packages</a></li></ul></nav></div></div></div><div class="md-sidebar md-sidebar--secondary" data-md-component="toc"><div class="md-sidebar__scrollwrap"><div class="md-sidebar__inner"><nav class="md-nav md-nav--secondary"><label class="md-nav__title" for="__toc">Table of contents</label><ul class="md-nav__list" data-md-scrollfix><li class="md-nav__item"><a href="#hierarchy" title="Hierarchy" class="md-nav__link">Hierarchy</a></li><li class="md-nav__item"><a href="#index" title="Index" class="md-nav__link">Index</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#constructors" title="Constructors" class="md-nav__link">Constructors</a></li><li class="md-nav__item"><a href="#properties" title="Properties" class="md-nav__link">Properties</a></li><li class="md-nav__item"><a href="#methods" title="Methods" class="md-nav__link">Methods</a></li></ul></nav></li><li class="md-nav__item"><a href="#constructors_1" title="Constructors" class="md-nav__link">Constructors</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#protected-constructor" title="Protected constructor" class="md-nav__link">Protected constructor</a></li></ul></nav></li><li class="md-nav__item"><a href="#properties_1" title="Properties" class="md-nav__link">Properties</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#cursor" title="cursor" class="md-nav__link">cursor</a></li><li class="md-nav__item"><a href="#line" title="line" class="md-nav__link">line</a></li><li class="md-nav__item"><a href="#optional-output" title="Optional output" class="md-nav__link">Optional output</a></li><li class="md-nav__item"><a href="#terminal" title="terminal" class="md-nav__link">terminal</a></li><li class="md-nav__item"><a href="#static-defaultmaxlisteners" title="Static defaultMaxListeners" class="md-nav__link">Static defaultMaxListeners</a></li></ul></nav></li><li class="md-nav__item"><a href="#methods_1" title="Methods" class="md-nav__link">Methods</a><nav class="md-nav"><ul class="md-nav__list"><li class="md-nav__item"><a href="#symbolasynciterator" title="[Symbol.asyncIterator]" class="md-nav__link">[Symbol.asyncIterator]</a></li><li class="md-nav__item"><a href="#optional-_writetooutput" title="Optional _writeToOutput" class="md-nav__link">Optional _writeToOutput</a></li><li class="md-nav__item"><a href="#addlistener" title="addListener" class="md-nav__link">addListener</a></li><li class="md-nav__item"><a href="#close" title="close" class="md-nav__link">close</a></li><li class="md-nav__item"><a href="#emit" title="emit" class="md-nav__link">emit</a></li><li class="md-nav__item"><a href="#eventnames" title="eventNames" class="md-nav__link">eventNames</a></li><li class="md-nav__item"><a href="#getmaxlisteners" title="getMaxListeners" class="md-nav__link">getMaxListeners</a></li><li class="md-nav__item"><a href="#listenercount" title="listenerCount" class="md-nav__link">listenerCount</a></li><li class="md-nav__item"><a href="#listeners" title="listeners" class="md-nav__link">listeners</a></li><li class="md-nav__item"><a href="#off" title="off" class="md-nav__link">off</a></li><li class="md-nav__item"><a href="#on" title="on" class="md-nav__link">on</a></li><li class="md-nav__item"><a href="#once" title="once" class="md-nav__link">once</a></li><li class="md-nav__item"><a href="#pause" title="pause" class="md-nav__link">pause</a></li><li class="md-nav__item"><a href="#prependlistener" title="prependListener" class="md-nav__link">prependListener</a></li><li class="md-nav__item"><a href="#prependoncelistener" title="prependOnceListener" class="md-nav__link">prependOnceListener</a></li><li class="md-nav__item"><a href="#prompt" title="prompt" class="md-nav__link">prompt</a></li><li class="md-nav__item"><a href="#question" title="question" class="md-nav__link">question</a></li><li class="md-nav__item"><a href="#rawlisteners" title="rawListeners" class="md-nav__link">rawListeners</a></li><li class="md-nav__item"><a href="#removealllisteners" title="removeAllListeners" class="md-nav__link">removeAllListeners</a></li><li class="md-nav__item"><a href="#removelistener" title="removeListener" class="md-nav__link">removeListener</a></li><li class="md-nav__item"><a href="#resume" title="resume" class="md-nav__link">resume</a></li><li class="md-nav__item"><a href="#setmaxlisteners" title="setMaxListeners" class="md-nav__link">setMaxListeners</a></li><li class="md-nav__item"><a href="#setprompt" title="setPrompt" class="md-nav__link">setPrompt</a></li><li class="md-nav__item"><a href="#write" title="write" class="md-nav__link">write</a></li><li class="md-nav__item"><a href="#static-listenercount" title="Static listenerCount" class="md-nav__link">Static listenerCount</a></li></ul></nav></li></ul></nav></div></div></div><div class="md-content"><article class="md-content__inner md-typeset"><a href="https://github.com/chainsafe/lodestar/edit/master/docs/packages/lodestar/interfaces/_util_io_.ihiddenreadlineinterface.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a><p><a href="../../">@chainsafe/lodestar</a> › <a href="../../globals/">Globals</a> › <a href="../../modules/_util_io_/">"util/io"</a> › <a href="./">IHiddenReadlineInterface</a></p>
+<h1 id="interface-ihiddenreadlineinterface">Interface: IHiddenReadlineInterface<a class="headerlink" href="#interface-ihiddenreadlineinterface" title="Permanent link">&para;</a></h1>
+<h2 id="hierarchy">Hierarchy<a class="headerlink" href="#hierarchy" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Interface</li>
+</ul>
+<p>↳ <strong>IHiddenReadlineInterface</strong></p>
+<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#protected-constructor">constructor</a></li>
+</ul>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#cursor">cursor</a></li>
+<li><a href="./#line">line</a></li>
+<li><a href="./#optional-output">output</a></li>
+<li><a href="./#terminal">terminal</a></li>
+<li><a href="./#static-defaultmaxlisteners">defaultMaxListeners</a></li>
+</ul>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="./#[symbol.asynciterator]">[Symbol.asyncIterator]</a></li>
+<li><a href="./#optional-_writetooutput">_writeToOutput</a></li>
+<li><a href="./#addlistener">addListener</a></li>
+<li><a href="./#close">close</a></li>
+<li><a href="./#emit">emit</a></li>
+<li><a href="./#eventnames">eventNames</a></li>
+<li><a href="./#getmaxlisteners">getMaxListeners</a></li>
+<li><a href="./#listenercount">listenerCount</a></li>
+<li><a href="./#listeners">listeners</a></li>
+<li><a href="./#off">off</a></li>
+<li><a href="./#on">on</a></li>
+<li><a href="./#once">once</a></li>
+<li><a href="./#pause">pause</a></li>
+<li><a href="./#prependlistener">prependListener</a></li>
+<li><a href="./#prependoncelistener">prependOnceListener</a></li>
+<li><a href="./#prompt">prompt</a></li>
+<li><a href="./#question">question</a></li>
+<li><a href="./#rawlisteners">rawListeners</a></li>
+<li><a href="./#removealllisteners">removeAllListeners</a></li>
+<li><a href="./#removelistener">removeListener</a></li>
+<li><a href="./#resume">resume</a></li>
+<li><a href="./#setmaxlisteners">setMaxListeners</a></li>
+<li><a href="./#setprompt">setPrompt</a></li>
+<li><a href="./#write">write</a></li>
+<li><a href="./#static-listenercount">listenerCount</a></li>
+</ul>
+<h2 id="constructors_1">Constructors<a class="headerlink" href="#constructors_1" title="Permanent link">&para;</a></h2>
+<h3 id="protected-constructor"><code>Protected</code> constructor<a class="headerlink" href="#protected-constructor" title="Permanent link">&para;</a></h3>
+<p>+ <strong>new IHiddenReadlineInterface</strong>(<code>input</code>: ReadableStream, <code>output?</code>: WritableStream, <code>completer?</code>: Completer | AsyncCompleter, <code>terminal?</code>: boolean): <em><a href="./">IHiddenReadlineInterface</a></em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#protected-constructor">constructor</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:21</p>
+<p>NOTE: According to the documentation:</p>
+<blockquote>
+<p>Instances of the <code>readline.Interface</code> class are constructed using the
+<code>readline.createInterface()</code> method.</p>
+</blockquote>
+<p><strong><code>see</code></strong> https://nodejs.org/dist/latest-v10.x/docs/api/readline.html#readline_class_interface</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>ReadableStream</td>
+</tr>
+<tr>
+<td><code>output?</code></td>
+<td>WritableStream</td>
+</tr>
+<tr>
+<td><code>completer?</code></td>
+<td>Completer &#124; AsyncCompleter</td>
+</tr>
+<tr>
+<td><code>terminal?</code></td>
+<td>boolean</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="./">IHiddenReadlineInterface</a></em></p>
+<p>+ <strong>new IHiddenReadlineInterface</strong>(<code>options</code>: ReadLineOptions): <em><a href="./">IHiddenReadlineInterface</a></em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#protected-constructor">constructor</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:31</p>
+<p>NOTE: According to the documentation:</p>
+<blockquote>
+<p>Instances of the <code>readline.Interface</code> class are constructed using the
+<code>readline.createInterface()</code> method.</p>
+</blockquote>
+<p><strong><code>see</code></strong> https://nodejs.org/dist/latest-v10.x/docs/api/readline.html#readline_class_interface</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>options</code></td>
+<td>ReadLineOptions</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em><a href="./">IHiddenReadlineInterface</a></em></p>
+<h2 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h2>
+<h3 id="cursor">cursor<a class="headerlink" href="#cursor" title="Permanent link">&para;</a></h3>
+<p>• <strong>cursor</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#cursor">cursor</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:21</p>
+<p>The current cursor position in the input line</p>
+<hr />
+<h3 id="line">line<a class="headerlink" href="#line" title="Permanent link">&para;</a></h3>
+<p>• <strong>line</strong>: <em>string</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#line">line</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:19</p>
+<p>The current input data</p>
+<hr />
+<h3 id="optional-output"><code>Optional</code> output<a class="headerlink" href="#optional-output" title="Permanent link">&para;</a></h3>
+<p>• <strong>output</strong>? : <em>any</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/util/io.ts#L9">packages/lodestar/src/util/io.ts:9</a></em></p>
+<hr />
+<h3 id="terminal">terminal<a class="headerlink" href="#terminal" title="Permanent link">&para;</a></h3>
+<p>• <strong>terminal</strong>: <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#terminal">terminal</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:14</p>
+<hr />
+<h3 id="static-defaultmaxlisteners"><code>Static</code> defaultMaxListeners<a class="headerlink" href="#static-defaultmaxlisteners" title="Permanent link">&para;</a></h3>
+<p>▪ <strong>defaultMaxListeners</strong>: <em>number</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#static-defaultmaxlisteners">defaultMaxListeners</a></em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:18</p>
+<h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
+<h3 id="symbolasynciterator">[Symbol.asyncIterator]<a class="headerlink" href="#symbolasynciterator" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>[Symbol.asyncIterator]</strong>(): <em>AsyncIterableIterator‹string›</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#[symbol.asynciterator]">[Symbol.asyncIterator]</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:114</p>
+<p><strong>Returns:</strong> <em>AsyncIterableIterator‹string›</em></p>
+<hr />
+<h3 id="optional-_writetooutput"><code>Optional</code> _writeToOutput<a class="headerlink" href="#optional-_writetooutput" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>_writeToOutput</strong>(<code>stringToWrite</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/2ab01e4b9/packages/lodestar/src/util/io.ts#L10">packages/lodestar/src/util/io.ts:10</a></em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stringToWrite</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="addlistener">addListener<a class="headerlink" href="#addlistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>addListener</strong>(<code>event</code>: string, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:61</p>
+<p>events.EventEmitter
+1. close
+2. line
+3. pause
+4. resume
+5. SIGCONT
+6. SIGINT
+7. SIGTSTP</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "close", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:62</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"close"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "line", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:63</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"line"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (<code>input</code>: string): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "pause", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:64</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"pause"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "resume", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:65</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"resume"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "SIGCONT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:66</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGCONT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "SIGINT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:67</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGINT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>addListener</strong>(<code>event</code>: "SIGTSTP", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#addlistener">addListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#addlistener">addListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:68</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGTSTP"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="close">close<a class="headerlink" href="#close" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>close</strong>(): <em>void</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#close">close</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:47</p>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="emit">emit<a class="headerlink" href="#emit" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>emit</strong>(<code>event</code>: string | symbol, ...<code>args</code>: any[]): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:70</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>string &#124; symbol</td>
+</tr>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "close"): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:71</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"close"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "line", <code>input</code>: string): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:72</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"line"</td>
+</tr>
+<tr>
+<td><code>input</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "pause"): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:73</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"pause"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "resume"): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:74</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"resume"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "SIGCONT"): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:75</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"SIGCONT"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "SIGINT"): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:76</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"SIGINT"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<p>▸ <strong>emit</strong>(<code>event</code>: "SIGTSTP"): <em>boolean</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#emit">emit</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#emit">emit</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:77</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>"SIGTSTP"</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>boolean</em></p>
+<hr />
+<h3 id="eventnames">eventNames<a class="headerlink" href="#eventnames" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>eventNames</strong>(): <em>Array‹string | symbol›</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#eventnames">eventNames</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:33</p>
+<p><strong>Returns:</strong> <em>Array‹string | symbol›</em></p>
+<hr />
+<h3 id="getmaxlisteners">getMaxListeners<a class="headerlink" href="#getmaxlisteners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>getMaxListeners</strong>(): <em>number</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#getmaxlisteners">getMaxListeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:29</p>
+<p><strong>Returns:</strong> <em>number</em></p>
+<hr />
+<h3 id="listenercount">listenerCount<a class="headerlink" href="#listenercount" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>listenerCount</strong>(<code>type</code>: string | symbol): <em>number</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#static-listenercount">listenerCount</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:34</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>string &#124; symbol</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>number</em></p>
+<hr />
+<h3 id="listeners">listeners<a class="headerlink" href="#listeners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>listeners</strong>(<code>event</code>: string | symbol): <em>Function[]</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#listeners">listeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:30</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>string &#124; symbol</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Function[]</em></p>
+<hr />
+<h3 id="off">off<a class="headerlink" href="#off" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>off</strong>(<code>event</code>: string | symbol, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#off">off</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:26</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string | symbol</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="on">on<a class="headerlink" href="#on" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>on</strong>(<code>event</code>: string, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:79</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "close", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:80</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"close"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "line", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:81</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"line"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (<code>input</code>: string): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "pause", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:82</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"pause"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "resume", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:83</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"resume"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "SIGCONT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:84</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGCONT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "SIGINT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:85</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGINT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>on</strong>(<code>event</code>: "SIGTSTP", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#on">on</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#on">on</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:86</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGTSTP"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="once">once<a class="headerlink" href="#once" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>once</strong>(<code>event</code>: string, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:88</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "close", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:89</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"close"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "line", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:90</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"line"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (<code>input</code>: string): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "pause", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:91</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"pause"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "resume", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:92</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"resume"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "SIGCONT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:93</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGCONT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "SIGINT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:94</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGINT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>once</strong>(<code>event</code>: "SIGTSTP", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#once">once</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#once">once</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:95</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGTSTP"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="pause">pause<a class="headerlink" href="#pause" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>pause</strong>(): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#pause">pause</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:45</p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="prependlistener">prependListener<a class="headerlink" href="#prependlistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: string, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:97</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "close", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:98</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"close"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "line", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:99</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"line"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (<code>input</code>: string): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "pause", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:100</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"pause"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "resume", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:101</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"resume"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "SIGCONT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:102</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGCONT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "SIGINT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:103</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGINT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependListener</strong>(<code>event</code>: "SIGTSTP", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependlistener">prependListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependlistener">prependListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:104</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGTSTP"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="prependoncelistener">prependOnceListener<a class="headerlink" href="#prependoncelistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: string, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:106</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "close", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:107</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"close"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "line", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:108</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"line"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (<code>input</code>: string): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "pause", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:109</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"pause"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "resume", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:110</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"resume"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "SIGCONT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:111</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGCONT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "SIGINT", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:112</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGINT"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<p>▸ <strong>prependOnceListener</strong>(<code>event</code>: "SIGTSTP", <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prependoncelistener">prependOnceListener</a></em></p>
+<p><em>Overrides <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#prependoncelistener">prependOnceListener</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:113</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>"SIGTSTP"</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (): <em>void</em></p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="prompt">prompt<a class="headerlink" href="#prompt" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>prompt</strong>(<code>preserveCursor?</code>: boolean): <em>void</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#prompt">prompt</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:43</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>preserveCursor?</code></td>
+<td>boolean</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="question">question<a class="headerlink" href="#question" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>question</strong>(<code>query</code>: string, <code>callback</code>: function): <em>void</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#question">question</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:44</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>query</strong>: <em>string</em></p>
+<p>▪ <strong>callback</strong>: <em>function</em></p>
+<p>▸ (<code>answer</code>: string): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>answer</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="rawlisteners">rawListeners<a class="headerlink" href="#rawlisteners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>rawListeners</strong>(<code>event</code>: string | symbol): <em>Function[]</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#rawlisteners">rawListeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:31</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event</code></td>
+<td>string &#124; symbol</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>Function[]</em></p>
+<hr />
+<h3 id="removealllisteners">removeAllListeners<a class="headerlink" href="#removealllisteners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>removeAllListeners</strong>(<code>event?</code>: string | symbol): <em>this</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#removealllisteners">removeAllListeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:27</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event?</code></td>
+<td>string &#124; symbol</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="removelistener">removeListener<a class="headerlink" href="#removelistener" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>removeListener</strong>(<code>event</code>: string | symbol, <code>listener</code>: function): <em>this</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#removelistener">removeListener</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:25</p>
+<p><strong>Parameters:</strong></p>
+<p>▪ <strong>event</strong>: <em>string | symbol</em></p>
+<p>▪ <strong>listener</strong>: <em>function</em></p>
+<p>▸ (...<code>args</code>: any[]): <em>void</em></p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...args</code></td>
+<td>any[]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="resume">resume<a class="headerlink" href="#resume" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>resume</strong>(): <em>this</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#resume">resume</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:46</p>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="setmaxlisteners">setMaxListeners<a class="headerlink" href="#setmaxlisteners" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>setMaxListeners</strong>(<code>n</code>: number): <em>this</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#setmaxlisteners">setMaxListeners</a></em></p>
+<p><em>Overrides void</em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:28</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n</code></td>
+<td>number</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>this</em></p>
+<hr />
+<h3 id="setprompt">setPrompt<a class="headerlink" href="#setprompt" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>setPrompt</strong>(<code>prompt</code>: string): <em>void</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#setprompt">setPrompt</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:42</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prompt</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="write">write<a class="headerlink" href="#write" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>write</strong>(<code>data</code>: string | Buffer, <code>key?</code>: Key): <em>void</em></p>
+<p><em>Inherited from <a href="./">IHiddenReadlineInterface</a>.<a href="./#write">write</a></em></p>
+<p>Defined in node_modules/@types/node/readline.d.ts:48</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data</code></td>
+<td>string &#124; Buffer</td>
+</tr>
+<tr>
+<td><code>key?</code></td>
+<td>Key</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<hr />
+<h3 id="static-listenercount"><code>Static</code> listenerCount<a class="headerlink" href="#static-listenercount" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>listenerCount</strong>(<code>emitter</code>: EventEmitter, <code>event</code>: string | symbol): <em>number</em></p>
+<p><em>Inherited from <a href="../_network_gossip_interface_.igossipsub/">IGossipSub</a>.<a href="../_network_gossip_interface_.igossipsub/#static-listenercount">listenerCount</a></em></p>
+<p>Defined in node_modules/@types/node/events.d.ts:17</p>
+<p><strong><code>deprecated</code></strong> since v4.0.0</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emitter</code></td>
+<td>EventEmitter</td>
+</tr>
+<tr>
+<td><code>event</code></td>
+<td>string &#124; symbol</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>number</em></p></article></div></div></main><footer class="md-footer"><div class="md-footer-meta md-typeset"><div class="md-footer-meta__inner md-grid"><div class="md-footer-copyright">powered by <a href="https://www.mkdocs.org">MkDocs</a> and <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a></div><div class="md-footer-social"><link rel="stylesheet" href="../../../../assets/fonts/font-awesome.css"> <a href="https://github.com/ChainSafe/lodestar" class="md-footer-social__link fa fa-github"></a>  <a href="https://twitter.com/ChainSafe" class="md-footer-social__link fa fa-twitter"></a>  <a href="https://discord.gg/yjyvFRP" class="md-footer-social__link fa fa-comments"></a>  <a href="https://medium.com/ChainSafe" class="md-footer-social__link fa fa-medium"></a> </div></div></div></footer></div><script src="../../../../assets/javascripts/application.b260a35d.js"></script><script>app.initialize({version:"1.0.4",url:{base:"../../../.."}})</script></body></html>
