@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -491,7 +503,7 @@ as well as aggregated attestations per block root</p>
 <h2 id="constructors_1">Constructors<a class="headerlink" href="#constructors_1" title="Permanent link">&para;</a></h2>
 <h3 id="constructor">constructor<a class="headerlink" href="#constructor" title="Permanent link">&para;</a></h3>
 <p>+ <strong>new AttestationAggregator</strong>(<code>slotLookup</code>: function): <em><a href="./">AttestationAggregator</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L28">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:28</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L28">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:28</a></em></p>
 <p><strong>Parameters:</strong></p>
 <p>▪ <strong>slotLookup</strong>: <em>function</em></p>
 <p>▸ (<code>Root</code>: string): <em>Slot | null</em></p>
@@ -514,17 +526,17 @@ as well as aggregated attestations per block root</p>
 <h2 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h2>
 <h3 id="latestaggregates">latestAggregates<a class="headerlink" href="#latestaggregates" title="Permanent link">&para;</a></h3>
 <p>• <strong>latestAggregates</strong>: <em>Record‹<a href="../../modules/_chain_forkchoice_interface_/#roothex">RootHex</a>, <a href="../../interfaces/_chain_forkchoice_interface_.aggregatedattestation/">AggregatedAttestation</a>›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L18">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:18</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L18">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:18</a></em></p>
 <p>aggregation: target -&gt; sum of all attestations</p>
 <hr />
 <h3 id="latestattestations">latestAttestations<a class="headerlink" href="#latestattestations" title="Permanent link">&para;</a></h3>
 <p>• <strong>latestAttestations</strong>: <em>Record‹ValidatorIndex, <a href="../../interfaces/_chain_forkchoice_interface_.forkchoiceattestation/">ForkChoiceAttestation</a>›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L23">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:23</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L23">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:23</a></em></p>
 <p>lookup: validator -&gt; target + weight contributed by validator</p>
 <hr />
 <h3 id="private-slotlookup"><code>Private</code> slotLookup<a class="headerlink" href="#private-slotlookup" title="Permanent link">&para;</a></h3>
 <p>• <strong>slotLookup</strong>: <em>function</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L28">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:28</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L28">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:28</a></em></p>
 <p>Rather than storing the slot on every attestation, a lookup function is required</p>
 <h4 id="type-declaration">Type declaration:<a class="headerlink" href="#type-declaration" title="Permanent link">&para;</a></h4>
 <p>▸ (<code>Root</code>: string): <em>Slot | null</em></p>
@@ -546,7 +558,7 @@ as well as aggregated attestations per block root</p>
 <h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
 <h3 id="addattestation">addAttestation<a class="headerlink" href="#addattestation" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>addAttestation</strong>(<code>a</code>: <a href="../../interfaces/_chain_forkchoice_interface_.forkchoiceattestation/">ForkChoiceAttestation</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L39">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:39</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L39">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:39</a></em></p>
 <p>Add an attestion into the aggregator</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -567,7 +579,7 @@ as well as aggregated attestations per block root</p>
 <hr />
 <h3 id="private-ensureaggregate"><code>Private</code> ensureAggregate<a class="headerlink" href="#private-ensureaggregate" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>ensureAggregate</strong>(<code>target</code>: <a href="../../modules/_chain_forkchoice_interface_/#roothex">RootHex</a>): <em><a href="../../interfaces/_chain_forkchoice_interface_.aggregatedattestation/">AggregatedAttestation</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L83">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:83</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L83">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:83</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -587,7 +599,7 @@ as well as aggregated attestations per block root</p>
 <hr />
 <h3 id="prune">prune<a class="headerlink" href="#prune" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>prune</strong>(): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L73">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:73</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/chain/forkChoice/attestationAggregator.ts#L73">packages/lodestar/src/chain/forkChoice/attestationAggregator.ts:73</a></em></p>
 <p>Remove all unused aggregations</p>
 <p>Note: latestAttestations is currently never pruned</p>
 <p><strong>Returns:</strong> <em>void</em></p>

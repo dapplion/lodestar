@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -403,7 +415,7 @@
 <h2 id="functions_1">Functions<a class="headerlink" href="#functions_1" title="Permanent link">&para;</a></h2>
 <h3 id="chunkify">chunkify<a class="headerlink" href="#chunkify" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>chunkify</strong>(<code>blocksPerChunk</code>: number, <code>currentSlot</code>: Slot, <code>targetSlot</code>: Slot): <em><a href="../../interfaces/_sync_interface_.islotrange/">ISlotRange</a>[]</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/blocks.ts#L16">packages/lodestar/src/sync/utils/blocks.ts:16</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/blocks.ts#L16">packages/lodestar/src/sync/utils/blocks.ts:16</a></em></p>
 <p>Creates slot chunks returned chunks represents (inclusive) start and (inclusive) end slot
 which should be fetched along all slotS(blocks) in between</p>
 <p><strong>Parameters:</strong></p>
@@ -437,7 +449,7 @@ which should be fetched along all slotS(blocks) in between</p>
 <hr />
 <h3 id="getblockrange">getBlockRange<a class="headerlink" href="#getblockrange" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getBlockRange</strong>(<code>logger</code>: ILogger, <code>rpc</code>: <a href="../../interfaces/_network_interface_.ireqresp/">IReqResp</a>, <code>peers</code>: PeerInfo[], <code>range</code>: <a href="../../interfaces/_sync_interface_.islotrange/">ISlotRange</a>, <code>blocksPerChunk?</code>: number, <code>maxRetry</code>: number): <em>Promise‹SignedBeaconBlock[]›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/blocks.ts#L53">packages/lodestar/src/sync/utils/blocks.ts:53</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/blocks.ts#L53">packages/lodestar/src/sync/utils/blocks.ts:53</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -484,7 +496,7 @@ which should be fetched along all slotS(blocks) in between</p>
 <hr />
 <h3 id="getblockrangefrompeer">getBlockRangeFromPeer<a class="headerlink" href="#getblockrangefrompeer" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getBlockRangeFromPeer</strong>(<code>rpc</code>: <a href="../../interfaces/_network_interface_.ireqresp/">IReqResp</a>, <code>peer</code>: PeerInfo, <code>chunk</code>: <a href="../../interfaces/_sync_interface_.islotrange/">ISlotRange</a>): <em>Promise‹SignedBeaconBlock[] | null›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/blocks.ts#L38">packages/lodestar/src/sync/utils/blocks.ts:38</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/blocks.ts#L38">packages/lodestar/src/sync/utils/blocks.ts:38</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -512,7 +524,7 @@ which should be fetched along all slotS(blocks) in between</p>
 <hr />
 <h3 id="isvalidchainofblocks">isValidChainOfBlocks<a class="headerlink" href="#isvalidchainofblocks" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>isValidChainOfBlocks</strong>(<code>config</code>: IBeaconConfig, <code>start</code>: BeaconBlockHeader, <code>signedBlocks</code>: SignedBeaconBlock[]): <em>boolean</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/blocks.ts#L102">packages/lodestar/src/sync/utils/blocks.ts:102</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/blocks.ts#L102">packages/lodestar/src/sync/utils/blocks.ts:102</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -540,7 +552,7 @@ which should be fetched along all slotS(blocks) in between</p>
 <hr />
 <h3 id="sortblocks">sortBlocks<a class="headerlink" href="#sortblocks" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>sortBlocks</strong>(<code>blocks</code>: SignedBeaconBlock[]): <em>SignedBeaconBlock[]</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/blocks.ts#L97">packages/lodestar/src/sync/utils/blocks.ts:97</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/blocks.ts#L97">packages/lodestar/src/sync/utils/blocks.ts:97</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>

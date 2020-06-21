@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -490,17 +502,17 @@
 <h2 id="variables_1">Variables<a class="headerlink" href="#variables_1" title="Permanent link">&para;</a></h2>
 <h3 id="const-req_protocol"><code>Const</code> REQ_PROTOCOL<a class="headerlink" href="#const-req_protocol" title="Permanent link">&para;</a></h3>
 <p>• <strong>REQ_PROTOCOL</strong>: <em>"/eth2/beacon_chain/req/{method}/{version}/{encoding}"</em> = "/eth2/beacon_chain/req/{method}/{version}/{encoding}"</p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L28">packages/lodestar/src/network/util.ts:28</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L28">packages/lodestar/src/network/util.ts:28</a></em></p>
 <h2 id="functions_1">Functions<a class="headerlink" href="#functions_1" title="Permanent link">&para;</a></h2>
 <h3 id="createpeerid">createPeerId<a class="headerlink" href="#createpeerid" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>createPeerId</strong>(): <em>Promise‹PeerId›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L48">packages/lodestar/src/network/util.ts:48</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L48">packages/lodestar/src/network/util.ts:48</a></em></p>
 <p>Return a fresh PeerId instance</p>
 <p><strong>Returns:</strong> <em>Promise‹PeerId›</em></p>
 <hr />
 <h3 id="createpeerinfo">createPeerInfo<a class="headerlink" href="#createpeerinfo" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>createPeerInfo</strong>(<code>peerId</code>: PeerId): <em>Promise‹PeerInfo›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L41">packages/lodestar/src/network/util.ts:41</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L41">packages/lodestar/src/network/util.ts:41</a></em></p>
 <p>Return a fresh PeerInfo instance</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -521,7 +533,7 @@
 <hr />
 <h3 id="createresponseevent">createResponseEvent<a class="headerlink" href="#createresponseevent" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>createResponseEvent</strong>(<code>id</code>: <a href="../_constants_network_/#requestid">RequestId</a>): <em>string</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L24">packages/lodestar/src/network/util.ts:24</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L24">packages/lodestar/src/network/util.ts:24</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -541,7 +553,7 @@
 <hr />
 <h3 id="createrpcprotocol">createRpcProtocol<a class="headerlink" href="#createrpcprotocol" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>createRpcProtocol</strong>(<code>method</code>: string, <code>encoding</code>: string, <code>version</code>: number): <em>string</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L29">packages/lodestar/src/network/util.ts:29</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L29">packages/lodestar/src/network/util.ts:29</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -573,7 +585,7 @@
 <hr />
 <h3 id="eth2responsetimer">eth2ResponseTimer<a class="headerlink" href="#eth2responsetimer" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>eth2ResponseTimer</strong>&lt;<strong>T</strong>&gt;(): <em>function</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L78">packages/lodestar/src/network/util.ts:78</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L78">packages/lodestar/src/network/util.ts:78</a></em></p>
 <p><strong>Type parameters:</strong></p>
 <p>▪ <strong>T</strong></p>
 <p><strong>Returns:</strong> <em>function</em></p>
@@ -596,7 +608,7 @@
 <hr />
 <h3 id="getrequestmethodssztype">getRequestMethodSSZType<a class="headerlink" href="#getrequestmethodssztype" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getRequestMethodSSZType</strong>(<code>config</code>: IBeaconConfig, <code>method</code>: <a href="../../enums/_constants_network_.method/">Method</a>): <em>Type‹any›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L58">packages/lodestar/src/network/util.ts:58</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L58">packages/lodestar/src/network/util.ts:58</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -620,7 +632,7 @@
 <hr />
 <h3 id="getresponsemethodssztype">getResponseMethodSSZType<a class="headerlink" href="#getresponsemethodssztype" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getResponseMethodSSZType</strong>(<code>config</code>: IBeaconConfig, <code>method</code>: <a href="../../enums/_constants_network_.method/">Method</a>): <em>Type‹any›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L64">packages/lodestar/src/network/util.ts:64</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L64">packages/lodestar/src/network/util.ts:64</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -644,7 +656,7 @@
 <hr />
 <h3 id="initializepeerinfo">initializePeerInfo<a class="headerlink" href="#initializepeerinfo" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>initializePeerInfo</strong>(<code>peerId</code>: PeerId, <code>multiaddrs</code>: string[]): <em>Promise‹PeerInfo›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L52">packages/lodestar/src/network/util.ts:52</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L52">packages/lodestar/src/network/util.ts:52</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -668,7 +680,7 @@
 <hr />
 <h3 id="isrequestonly">isRequestOnly<a class="headerlink" href="#isrequestonly" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>isRequestOnly</strong>(<code>method</code>: <a href="../../enums/_constants_network_.method/">Method</a>): <em>boolean</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L70">packages/lodestar/src/network/util.ts:70</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L70">packages/lodestar/src/network/util.ts:70</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -688,7 +700,7 @@
 <hr />
 <h3 id="isrequestsinglechunk">isRequestSingleChunk<a class="headerlink" href="#isrequestsinglechunk" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>isRequestSingleChunk</strong>(<code>method</code>: <a href="../../enums/_constants_network_.method/">Method</a>): <em>boolean</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L74">packages/lodestar/src/network/util.ts:74</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L74">packages/lodestar/src/network/util.ts:74</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -708,12 +720,12 @@
 <hr />
 <h3 id="randomnibble">randomNibble<a class="headerlink" href="#randomnibble" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>randomNibble</strong>(): <em>string</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L16">packages/lodestar/src/network/util.ts:16</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L16">packages/lodestar/src/network/util.ts:16</a></em></p>
 <p><strong>Returns:</strong> <em>string</em></p>
 <hr />
 <h3 id="randomrequestid">randomRequestId<a class="headerlink" href="#randomrequestid" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>randomRequestId</strong>(): <em><a href="../_constants_network_/#requestid">RequestId</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/network/util.ts#L20">packages/lodestar/src/network/util.ts:20</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/network/util.ts#L20">packages/lodestar/src/network/util.ts:20</a></em></p>
 <p><strong>Returns:</strong> <em><a href="../_constants_network_/#requestid">RequestId</a></em></p>
                 
               

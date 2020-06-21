@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -499,12 +511,12 @@
 <h3 id="namespace">namespace<a class="headerlink" href="#namespace" title="Permanent link">&para;</a></h3>
 <p>• <strong>namespace</strong>: <em><a href="../../enums/_api_index_.apinamespace/">ApiNamespace</a></em></p>
 <p><em>Inherited from <a href="./">IValidatorApi</a>.<a href="./#namespace">namespace</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/interface.ts#L33">packages/lodestar/src/api/interface.ts:33</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/interface.ts#L33">packages/lodestar/src/api/interface.ts:33</a></em></p>
 <p>Name space for API commands</p>
 <h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
 <h3 id="getattesterduties">getAttesterDuties<a class="headerlink" href="#getattesterduties" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getAttesterDuties</strong>(<code>epoch</code>: Epoch, <code>validatorPubKey</code>: BLSPubkey[]): <em>Promise‹AttesterDuty[]›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L26">packages/lodestar/src/api/impl/validator/interface.ts:26</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L26">packages/lodestar/src/api/impl/validator/interface.ts:26</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -528,7 +540,7 @@
 <hr />
 <h3 id="getproposerduties">getProposerDuties<a class="headerlink" href="#getproposerduties" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getProposerDuties</strong>(<code>epoch</code>: Epoch): <em>Promise‹ProposerDuty[]›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L24">packages/lodestar/src/api/impl/validator/interface.ts:24</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L24">packages/lodestar/src/api/impl/validator/interface.ts:24</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -548,7 +560,7 @@
 <hr />
 <h3 id="getwireattestations">getWireAttestations<a class="headerlink" href="#getwireattestations" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getWireAttestations</strong>(<code>epoch</code>: Epoch, <code>committeeIndex</code>: CommitteeIndex): <em>Promise‹Attestation[]›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L60">packages/lodestar/src/api/impl/validator/interface.ts:60</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L60">packages/lodestar/src/api/impl/validator/interface.ts:60</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -572,7 +584,7 @@
 <hr />
 <h3 id="produceaggregateandproof">produceAggregateAndProof<a class="headerlink" href="#produceaggregateandproof" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>produceAggregateAndProof</strong>(<code>attestationData</code>: AttestationData, <code>aggregator</code>: BLSPubkey): <em>Promise‹AggregateAndProof›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L58">packages/lodestar/src/api/impl/validator/interface.ts:58</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L58">packages/lodestar/src/api/impl/validator/interface.ts:58</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -596,7 +608,7 @@
 <hr />
 <h3 id="produceattestation">produceAttestation<a class="headerlink" href="#produceattestation" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>produceAttestation</strong>(<code>validatorPubKey</code>: BLSPubkey, <code>index</code>: CommitteeIndex, <code>slot</code>: Slot): <em>Promise‹Attestation›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L39">packages/lodestar/src/api/impl/validator/interface.ts:39</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L39">packages/lodestar/src/api/impl/validator/interface.ts:39</a></em></p>
 <p>Requests that the BeaconNode produce an IndexedAttestation,
 with a blank signature field, which the ValidatorClient will then sign.</p>
 <p><strong>Parameters:</strong></p>
@@ -626,7 +638,7 @@ with a blank signature field, which the ValidatorClient will then sign.</p>
 <hr />
 <h3 id="produceblock">produceBlock<a class="headerlink" href="#produceblock" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>produceBlock</strong>(<code>slot</code>: Slot, <code>proposerPubkey</code>: BLSPubkey, <code>randaoReveal</code>: BLSSignature): <em>Promise‹BeaconBlock›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L33">packages/lodestar/src/api/impl/validator/interface.ts:33</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L33">packages/lodestar/src/api/impl/validator/interface.ts:33</a></em></p>
 <p>Requests a BeaconNode to produce a valid block,
 which can then be signed by a ValidatorClient.</p>
 <p><strong>Parameters:</strong></p>
@@ -657,7 +669,7 @@ which can then be signed by a ValidatorClient.</p>
 <hr />
 <h3 id="publishaggregateandproof">publishAggregateAndProof<a class="headerlink" href="#publishaggregateandproof" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>publishAggregateAndProof</strong>(<code>signedAggregateAndProof</code>: SignedAggregateAndProof): <em>Promise‹void›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L54">packages/lodestar/src/api/impl/validator/interface.ts:54</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L54">packages/lodestar/src/api/impl/validator/interface.ts:54</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -677,7 +689,7 @@ which can then be signed by a ValidatorClient.</p>
 <hr />
 <h3 id="publishattestation">publishAttestation<a class="headerlink" href="#publishattestation" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>publishAttestation</strong>(<code>attestation</code>: Attestation): <em>Promise‹void›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L52">packages/lodestar/src/api/impl/validator/interface.ts:52</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L52">packages/lodestar/src/api/impl/validator/interface.ts:52</a></em></p>
 <p>Instructs the BeaconNode to publish a newly signed IndexedAttestation object,
 to be incorporated into the beacon chain.</p>
 <p><strong>Parameters:</strong></p>
@@ -699,7 +711,7 @@ to be incorporated into the beacon chain.</p>
 <hr />
 <h3 id="publishblock">publishBlock<a class="headerlink" href="#publishblock" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>publishBlock</strong>(<code>signedBlock</code>: SignedBeaconBlock): <em>Promise‹void›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L46">packages/lodestar/src/api/impl/validator/interface.ts:46</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L46">packages/lodestar/src/api/impl/validator/interface.ts:46</a></em></p>
 <p>Instructs the BeaconNode to publish a newly signed beacon block
 to the beacon network, to be included in the beacon chain.</p>
 <p><strong>Parameters:</strong></p>
@@ -721,7 +733,7 @@ to the beacon network, to be included in the beacon chain.</p>
 <hr />
 <h3 id="subscribecommitteesubnet">subscribeCommitteeSubnet<a class="headerlink" href="#subscribecommitteesubnet" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>subscribeCommitteeSubnet</strong>(<code>slot</code>: Slot, <code>slotSignature</code>: BLSSignature, <code>committeeIndex</code>: CommitteeIndex, <code>aggregatorPubkey</code>: BLSPubkey): <em>Promise‹void›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/api/impl/validator/interface.ts#L62">packages/lodestar/src/api/impl/validator/interface.ts:62</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/api/impl/validator/interface.ts#L62">packages/lodestar/src/api/impl/validator/interface.ts:62</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>

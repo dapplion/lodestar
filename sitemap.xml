@@ -19,5 +19,9 @@
      <loc>https://chainsafe.github.io/lodestar/packages/</loc>
      <lastmod>2020-06-21</lastmod>
      <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://chainsafe.github.io/lodestar/contributing/</loc>
+     <lastmod>2020-06-21</lastmod>
+     <changefreq>daily</changefreq>
     </url>
 </urlset>

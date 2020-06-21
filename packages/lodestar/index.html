@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -324,60 +336,14 @@
 </ul>
 <h2 id="what-you-need">What you need<a class="headerlink" href="#what-you-need" title="Permanent link">&para;</a></h2>
 <p>You will need to go over the <a href="https://github.com/ethereum/eth2.0-specs">specification</a>. You will also need to have a <a href="https://github.com/ethereum/wiki/wiki/Sharding-FAQs">basic understanding of sharding</a>. </p>
-<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
-<p>To get an instance of Lodestar up &amp; running, start a terminal from the root of the this repo:</p>
-<ol>
-<li>Install dependencies accross all packages:</li>
-</ol>
-<div class="codehilite"><pre><span></span><code>yarn install
-</code></pre></div>
-
-
-<ol>
-<li>Run the build script:</li>
-</ol>
-<div class="codehilite"><pre><span></span><code>yarn run build
-</code></pre></div>
-
-
-<ol>
-<li>Lodestar should now be ready for use:</li>
-</ol>
-<div class="codehilite"><pre><span></span><code>yarn run cli --help
-</code></pre></div>
-
-
-<p>Note:</p>
-<p>Spec test cases are optional dependency which can be skipped by adding <code>--ignore-optional</code> when installing dependencies.
-You can always download spec test cases by running <code>yarn install --force</code>.</p>
-<h3 id="development">Development<a class="headerlink" href="#development" title="Permanent link">&para;</a></h3>
-<h4 id="connect-two-beacon-nodes">Connect two beacon nodes<a class="headerlink" href="#connect-two-beacon-nodes" title="Permanent link">&para;</a></h4>
-<p><code>cd packages/lodestar-cli</code></p>
-<p>Terminal 1:
-<code>bin/lodecli dev  --dev.genesisValidators 8 --dev.reset</code> - It will run beacon node and 8 validators with all the default settings. State will be written to .tmp/state.ssz</p>
-<p>Terminal 2:
-<code>bin/lodecli dev --dev.startValidators 0:0 --chain.genesisStateFile ./dev/genesis.ssz --network.localMultiaddrs /ip4/127.0.0.1/tcp/30607 --sync.minPeers 1</code> - Will connect to bootnode (node 1 default multiaddrs) and won't start validators.</p>
-<!---
-### Starting private eth1 chain
-
-`./bin/lodestar eth1:dev -m "vast thought differ pull jewel broom cook wrist tribe word before omit"`
-
-This will start ganache server on `http://127.0.0.1:8545`. For more configuration check `./bin/lodestar eth1:dev --help`
-
-### Starting lodestar beacon chain
-
-`./bin/lodestar beacon --db test-db --eth1RpcUrl http://127.0.0.1:8545 --depositContract <depositContractAddress>`
-
-You will see deposit contract address in console if you used `./bin/lodestar eth1:dev`.  
-
-### Making validator deposit
-
-`./bin/lodestar deposit -m "vast thought differ pull jewel broom cook wrist tribe word before omit" -n http://127.0.0.1:8545 -c <depositContractAddress>>`
-
-This will trigger 10 deposits to deposit contract which will trigger beacon chain initialization. Make sure to use same mnemonic which you used to start eth1 network.  
-
-**NOTE:** If you'd like to silence the client's logs, set the `LODESTAR_SILENCE` environment variable to `true`.
--->
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Follow the <a href="https://chainsafe.github.io/lodestar/installation">installation guide</a> to install Lodestar.</li>
+<li>Quickly try out the whole stack by <a href="https://chainsafe.github.io/lodestar/usage">starting a local testnet</a>.</li>
+<li>View the <a href="https://chainsafe.github.io/lodestar/packages">typedoc code docs</a>.</li>
+</ul>
+<h2 id="contributors">Contributors<a class="headerlink" href="#contributors" title="Permanent link">&para;</a></h2>
+<p>Read our <a href="/CONTRIBUTING.md">contributors document</a>, <a href="https://github.com/ChainSafe/lodestar/issues/new/choose">submit an issue</a> or talk to us on our <a href="https://discord.gg/yjyvFRP">discord</a>!</p>
                 
               
               

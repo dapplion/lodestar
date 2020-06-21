@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -425,7 +437,7 @@
 <h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
 <h3 id="getclientversion">getClientVersion<a class="headerlink" href="#getclientversion" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getClientVersion</strong>(): <em>Promise‹Bytes32›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar-validator/src/api/interface/beacon.ts#L12">packages/lodestar-validator/src/api/interface/beacon.ts:12</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/interface/beacon.ts#L12">packages/lodestar-validator/src/api/interface/beacon.ts:12</a></em></p>
 <p>Requests that the BeaconNode identify information about its
 implementation in a format similar to a HTTP User-Agent field.</p>
 <p><strong>Returns:</strong> <em>Promise‹Bytes32›</em></p>
@@ -434,13 +446,13 @@ uniquely defines the implementation of the BeaconNode and its current software v
 <hr />
 <h3 id="getfork">getFork<a class="headerlink" href="#getfork" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getFork</strong>(): <em>Promise‹object›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar-validator/src/api/interface/beacon.ts#L17">packages/lodestar-validator/src/api/interface/beacon.ts:17</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/interface/beacon.ts#L17">packages/lodestar-validator/src/api/interface/beacon.ts:17</a></em></p>
 <p>Requests the BeaconNode to provide which fork version it is currently on.</p>
 <p><strong>Returns:</strong> <em>Promise‹object›</em></p>
 <hr />
 <h3 id="getgenesistime">getGenesisTime<a class="headerlink" href="#getgenesistime" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getGenesisTime</strong>(): <em>Promise‹Number64›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar-validator/src/api/interface/beacon.ts#L30">packages/lodestar-validator/src/api/interface/beacon.ts:30</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/interface/beacon.ts#L30">packages/lodestar-validator/src/api/interface/beacon.ts:30</a></em></p>
 <p>Requests the genesis_time parameter from the BeaconNode,
 which should be consistent across all BeaconNodes that follow the same beacon chain.</p>
 <p><strong>Returns:</strong> <em>Promise‹Number64›</em></p>
@@ -449,7 +461,7 @@ which is a fairly static configuration option for the BeaconNode.</p>
 <hr />
 <h3 id="getsyncingstatus">getSyncingStatus<a class="headerlink" href="#getsyncingstatus" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getSyncingStatus</strong>(): <em>Promise‹boolean | SyncingStatus›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar-validator/src/api/interface/beacon.ts#L39">packages/lodestar-validator/src/api/interface/beacon.ts:39</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/interface/beacon.ts#L39">packages/lodestar-validator/src/api/interface/beacon.ts:39</a></em></p>
 <p>Requests the BeaconNode to describe if it's currently syncing or not,
 and if it is, what block it is up to.
 This is modelled after the Eth1.0 JSON-RPC eth_syncing call.</p>
@@ -459,7 +471,7 @@ or a SyncingStatus object if it is.</p>
 <hr />
 <h3 id="getvalidator">getValidator<a class="headerlink" href="#getvalidator" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getValidator</strong>(<code>pubkey</code>: BLSPubkey): <em>Promise‹ValidatorResponse | null›</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar-validator/src/api/interface/beacon.ts#L22">packages/lodestar-validator/src/api/interface/beacon.ts:22</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/interface/beacon.ts#L22">packages/lodestar-validator/src/api/interface/beacon.ts:22</a></em></p>
 <p>Requests the BeaconNode to provide validator details for given public key.</p>
 <p><strong>Parameters:</strong></p>
 <table>

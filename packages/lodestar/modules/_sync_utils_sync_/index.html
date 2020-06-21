@@ -276,6 +276,18 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../../../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -419,7 +431,7 @@
 <h2 id="functions_1">Functions<a class="headerlink" href="#functions_1" title="Permanent link">&para;</a></h2>
 <h3 id="fetchblockchunks">fetchBlockChunks<a class="headerlink" href="#fetchblockchunks" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>fetchBlockChunks</strong>(<code>logger</code>: ILogger, <code>chain</code>: <a href="../../interfaces/_chain_interface_.ibeaconchain/">IBeaconChain</a>, <code>reqResp</code>: <a href="../../interfaces/_network_interface_.ireqresp/">IReqResp</a>, <code>getPeers</code>: function, <code>maxBlocksPerChunk?</code>: number): <em>function</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L78">packages/lodestar/src/sync/utils/sync.ts:78</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L78">packages/lodestar/src/sync/utils/sync.ts:78</a></em></p>
 <p><strong>Parameters:</strong></p>
 <p>▪ <strong>logger</strong>: <em>ILogger</em></p>
 <p>▪ <strong>chain</strong>: <em><a href="../../interfaces/_chain_interface_.ibeaconchain/">IBeaconChain</a></em></p>
@@ -462,7 +474,7 @@
 <hr />
 <h3 id="getcommonfinalizedcheckpoint">getCommonFinalizedCheckpoint<a class="headerlink" href="#getcommonfinalizedcheckpoint" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getCommonFinalizedCheckpoint</strong>(<code>config</code>: IBeaconConfig, <code>peers</code>: <a href="../../interfaces/_sync_ireputation_.ireputation/">IReputation</a>[]): <em>Checkpoint | null</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L35">packages/lodestar/src/sync/utils/sync.ts:35</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L35">packages/lodestar/src/sync/utils/sync.ts:35</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -486,7 +498,7 @@
 <hr />
 <h3 id="gethighestcommonslot">getHighestCommonSlot<a class="headerlink" href="#gethighestcommonslot" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getHighestCommonSlot</strong>(<code>peers</code>: <a href="../../interfaces/_sync_ireputation_.ireputation/">IReputation</a>[]): <em>Slot</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L13">packages/lodestar/src/sync/utils/sync.ts:13</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L13">packages/lodestar/src/sync/utils/sync.ts:13</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -506,7 +518,7 @@
 <hr />
 <h3 id="getstatusfinalizedcheckpoint">getStatusFinalizedCheckpoint<a class="headerlink" href="#getstatusfinalizedcheckpoint" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getStatusFinalizedCheckpoint</strong>(<code>status</code>: Status): <em>Checkpoint</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L31">packages/lodestar/src/sync/utils/sync.ts:31</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L31">packages/lodestar/src/sync/utils/sync.ts:31</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -526,7 +538,7 @@
 <hr />
 <h3 id="processsyncblocks">processSyncBlocks<a class="headerlink" href="#processsyncblocks" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>processSyncBlocks</strong>(<code>config</code>: IBeaconConfig, <code>chain</code>: <a href="../../interfaces/_chain_interface_.ibeaconchain/">IBeaconChain</a>, <code>logger</code>: ILogger, <code>trusted</code>: boolean): <em>function</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L161">packages/lodestar/src/sync/utils/sync.ts:161</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L161">packages/lodestar/src/sync/utils/sync.ts:161</a></em></p>
 <p>Bufferes and orders block and passes them to chain.
 Returns last processed slot.</p>
 <p><strong>Parameters:</strong></p>
@@ -586,7 +598,7 @@ Returns last processed slot.</p>
 <hr />
 <h3 id="targetslottoblockchunks">targetSlotToBlockChunks<a class="headerlink" href="#targetslottoblockchunks" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>targetSlotToBlockChunks</strong>(<code>config</code>: IBeaconConfig, <code>chain</code>: <a href="../../interfaces/_chain_interface_.ibeaconchain/">IBeaconChain</a>, <code>getInitialSyncPeers</code>: function): <em>function</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L63">packages/lodestar/src/sync/utils/sync.ts:63</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L63">packages/lodestar/src/sync/utils/sync.ts:63</a></em></p>
 <p><strong>Parameters:</strong></p>
 <p>▪ <strong>config</strong>: <em>IBeaconConfig</em></p>
 <p>▪ <strong>chain</strong>: <em><a href="../../interfaces/_chain_interface_.ibeaconchain/">IBeaconChain</a></em></p>
@@ -627,7 +639,7 @@ Returns last processed slot.</p>
 <hr />
 <h3 id="validateblocks">validateBlocks<a class="headerlink" href="#validateblocks" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>validateBlocks</strong>(<code>config</code>: IBeaconConfig, <code>chain</code>: <a href="../../interfaces/_chain_interface_.ibeaconchain/">IBeaconChain</a>, <code>logger</code>: ILogger, <code>onBlockVerificationFail</code>: Function): <em>function</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/96ef29933/packages/lodestar/src/sync/utils/sync.ts#L121">packages/lodestar/src/sync/utils/sync.ts:121</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar/src/sync/utils/sync.ts#L121">packages/lodestar/src/sync/utils/sync.ts:121</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
