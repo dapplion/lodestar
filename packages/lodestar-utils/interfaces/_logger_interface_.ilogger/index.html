@@ -15,7 +15,7 @@
       
       
       <link rel="shortcut icon" href="../../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.3.2">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.4.0">
     
     
       
@@ -439,6 +439,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#stream" class="md-nav__link">
+    stream
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#verbose" class="md-nav__link">
     verbose
   </a>
@@ -502,21 +509,22 @@
 <li><a href="./#info">info</a></li>
 <li><a href="./#profile">profile</a></li>
 <li><a href="./#silly">silly</a></li>
+<li><a href="./#stream">stream</a></li>
 <li><a href="./#verbose">verbose</a></li>
 <li><a href="./#warn">warn</a></li>
 </ul>
 <h2 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">&para;</a></h2>
 <h3 id="level">level<a class="headerlink" href="#level" title="Permanent link">&para;</a></h3>
 <p>• <strong>level</strong>: <em><a href="../../enums/_logger_interface_.loglevel/">LogLevel</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L39">packages/lodestar-utils/src/logger/interface.ts:39</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L40">packages/lodestar-utils/src/logger/interface.ts:40</a></em></p>
 <hr />
 <h3 id="silent">silent<a class="headerlink" href="#silent" title="Permanent link">&para;</a></h3>
 <p>• <strong>silent</strong>: <em>boolean</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L40">packages/lodestar-utils/src/logger/interface.ts:40</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L41">packages/lodestar-utils/src/logger/interface.ts:41</a></em></p>
 <h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
 <h3 id="child">child<a class="headerlink" href="#child" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>child</strong>(<code>options</code>: <a href="../_logger_interface_.iloggeroptions/">ILoggerOptions</a>): <em><a href="./">ILogger</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L52">packages/lodestar-utils/src/logger/interface.ts:52</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L53">packages/lodestar-utils/src/logger/interface.ts:53</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -536,7 +544,7 @@
 <hr />
 <h3 id="debug">debug<a class="headerlink" href="#debug" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>debug</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L47">packages/lodestar-utils/src/logger/interface.ts:47</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L48">packages/lodestar-utils/src/logger/interface.ts:48</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -560,7 +568,7 @@
 <hr />
 <h3 id="error">error<a class="headerlink" href="#error" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>error</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a> | <a href="../../classes/_assert_.assertionerror/#static-error">Error</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L42">packages/lodestar-utils/src/logger/interface.ts:42</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L43">packages/lodestar-utils/src/logger/interface.ts:43</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -584,7 +592,7 @@
 <hr />
 <h3 id="important">important<a class="headerlink" href="#important" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>important</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L45">packages/lodestar-utils/src/logger/interface.ts:45</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L46">packages/lodestar-utils/src/logger/interface.ts:46</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -608,7 +616,7 @@
 <hr />
 <h3 id="info">info<a class="headerlink" href="#info" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>info</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L44">packages/lodestar-utils/src/logger/interface.ts:44</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L45">packages/lodestar-utils/src/logger/interface.ts:45</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -632,7 +640,7 @@
 <hr />
 <h3 id="profile">profile<a class="headerlink" href="#profile" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>profile</strong>(<code>message</code>: string, <code>option?</code>: object): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L49">packages/lodestar-utils/src/logger/interface.ts:49</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L50">packages/lodestar-utils/src/logger/interface.ts:50</a></em></p>
 <p><strong>Parameters:</strong></p>
 <p>▪ <strong>message</strong>: <em>string</em></p>
 <p>▪<code>Optional</code>  <strong>option</strong>: <em>object</em></p>
@@ -658,7 +666,7 @@
 <hr />
 <h3 id="silly">silly<a class="headerlink" href="#silly" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>silly</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L48">packages/lodestar-utils/src/logger/interface.ts:48</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L49">packages/lodestar-utils/src/logger/interface.ts:49</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -680,9 +688,14 @@
 </table>
 <p><strong>Returns:</strong> <em>void</em></p>
 <hr />
+<h3 id="stream">stream<a class="headerlink" href="#stream" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>stream</strong>(): <em>Writable</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L51">packages/lodestar-utils/src/logger/interface.ts:51</a></em></p>
+<p><strong>Returns:</strong> <em>Writable</em></p>
+<hr />
 <h3 id="verbose">verbose<a class="headerlink" href="#verbose" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>verbose</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L46">packages/lodestar-utils/src/logger/interface.ts:46</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L47">packages/lodestar-utils/src/logger/interface.ts:47</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -706,7 +719,7 @@
 <hr />
 <h3 id="warn">warn<a class="headerlink" href="#warn" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>warn</strong>(<code>message</code>: string, <code>context?</code>: <a href="../../modules/_logger_interface_/#context">Context</a> | <a href="../../classes/_assert_.assertionerror/#static-error">Error</a>): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/logger/interface.ts#L43">packages/lodestar-utils/src/logger/interface.ts:43</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/logger/interface.ts#L44">packages/lodestar-utils/src/logger/interface.ts:44</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -799,14 +812,14 @@
     </div>
     
       <script src="../../../../assets/javascripts/vendor.d710d30a.min.js"></script>
-      <script src="../../../../assets/javascripts/bundle.7f4f3c92.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../../assets/javascripts/bundle.b39636ac.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../../..",
           features: [],
           search: Object.assign({
-            worker: "../../../../assets/javascripts/worker/search.9b3611bd.min.js"
+            worker: "../../../../assets/javascripts/worker/search.a68abb33.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

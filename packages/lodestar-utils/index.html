@@ -15,7 +15,7 @@
       
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.3.2">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.4.0">
     
     
       
@@ -325,115 +325,8 @@
                 
                 <p><a href="./">@chainsafe/lodestar-utils</a> › <a href="globals/">Globals</a></p>
 <h1 id="chainsafelodestar-utils">@chainsafe/lodestar-utils<a class="headerlink" href="#chainsafelodestar-utils" title="Permanent link">&para;</a></h1>
-<p><img alt="lodestar logo" src="/assets/300ppi/FullMark-BLACK.png" /></p>
-<h1 id="lodestar-monorepo">Lodestar Monorepo<a class="headerlink" href="#lodestar-monorepo" title="Permanent link">&para;</a></h1>
-<p><img alt="ETH2.0_Spec_Version 0.11.1" src="https://img.shields.io/badge/ETH2.0_Spec_Version-0.11.1-2e86c1.svg" />
-<a href="https://discord.gg/aMxzVcr"><img alt="Discord" src="https://img.shields.io/discord/593655374469660673.svg?label=Discord&amp;logo=discord" /></a>
-<a href="https://codecov.io/gh/ChainSafe/lodestar"><img alt="codecov" src="https://codecov.io/gh/ChainSafe/lodestar/branch/master/graph/badge.svg" /></a>
-<a href="https://codeclimate.com/github/ChainSafe/lodestar/maintainability"><img alt="Maintainability" src="https://api.codeclimate.com/v1/badges/678099476c401e1af503/maintainability" /></a></p>
-<p>Lodestar is a Typescript implementation of the Ethereum 2.0 specification developed by ChainSafe.</p>
-<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Follow the <a href="https://chainsafe.github.io/lodestar/installation">installation guide</a> to install Lodestar.</li>
-<li>Quickly try out the whole stack by <a href="https://chainsafe.github.io/lodestar/usage">starting a local testnet</a>.</li>
-<li>View the <a href="https://chainsafe.github.io/lodestar/packages">typedoc code docs</a>.</li>
-<li>If you have questions <a href="https://github.com/ChainSafe/lodestar/issues/new">submit an issue</a> or join us on <a href="https://discord.gg/yjyvFRP">discord</a>!</li>
-</ul>
-<h2 id="index">Index<a class="headerlink" href="#index" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="#tldr">Tl;Dr</a></li>
-<li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#getting-started">Getting Started</a></li>
-<li><a href="#contributors">Contributors</a></li>
-<li><a href="#meeting-notes">Meeting Notes</a></li>
-<li><a href="#donations">Donations</a></li>
-<li><a href="#packages">Packages</a></li>
-</ul>
-<h2 id="contributors">Contributors<a class="headerlink" href="#contributors" title="Permanent link">&para;</a></h2>
-<p>Read our <a href="/CONTRIBUTING.md">contributors document</a>, <a href="https://github.com/ChainSafe/lodestar/issues/new/choose">submit an issue</a> or talk to us on our <a href="https://discord.gg/yjyvFRP">discord</a>!</p>
-<h2 id="meeting-notes">Meeting Notes<a class="headerlink" href="#meeting-notes" title="Permanent link">&para;</a></h2>
-<p>Feel free to check out our meeting notes and documents on <a href="https://hackmd.io/@wemeetagain/rJTEOdqPS/%2F%40yBpKEsxORheI8AJoIiZj1Q%2FHk_b8XfcV%2F%252F6pRB5amJRLKBGEkeOJA8Cw">HackMD</a>.</p>
-<h2 id="donations">Donations<a class="headerlink" href="#donations" title="Permanent link">&para;</a></h2>
-<p>We are a local group of Toronto open source developers. As such, all of our open source work is funded by grants. We all take the time out of our hectic lives to contribute to the Ethereum ecosystem.
-If you want to donate, you can send us ETH at the following address: <strong>lodestar.chainsafe.eth</strong></p>
-<h2 id="packages">Packages<a class="headerlink" href="#packages" title="Permanent link">&para;</a></h2>
-<p>This monorepo repository contains a suite of Ethereum 2.0 packages.</p>
-<table>
-<thead>
-<tr>
-<th>Package</th>
-<th>Version</th>
-<th>License</th>
-<th>Docs</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar">@chainsafe/lodestar</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar" /></a></td>
-<td><a href="https://www.gnu.org/licenses/lgpl-3.0"><img alt="License: LGPL v3" src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" /></a></td>
-<td><a href="https://chainsafe.github.io/lodestar/lodestar"><img alt="documentation" src="https://img.shields.io/badge/typedoc-blue" /></a></td>
-<td>Beacon chain client</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-validator">@chainsafe/lodestar-validator</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-validator"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-validator" /></a></td>
-<td><a href="https://www.gnu.org/licenses/lgpl-3.0"><img alt="License: LGPL v3" src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" /></a></td>
-<td><a href="https://chainsafe.github.io/lodestar/lodestar-validator"><img alt="documentation" src="https://img.shields.io/badge/typedoc-blue" /></a></td>
-<td>Validator client</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-cli">@chainsafe/lodestar-cli</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-cli"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-cli" /></a></td>
-<td><a href="https://www.gnu.org/licenses/lgpl-3.0"><img alt="License: LGPL v3" src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" /></a></td>
-<td><a href="https://chainsafe.github.io/lodestar/lodestar-cli"><img alt="documentation" src="https://img.shields.io/badge/typedoc-blue" /></a></td>
-<td>Command line tool for lodestar</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-beacon-state-transition">@chainsafe/lodestar-beacon-state-transition</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-beacon-state-transition"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-beacon-state-transition" /></a></td>
-<td><a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></td>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-beacon-state-transition"><img alt="documentation" src="https://img.shields.io/badge/readme-blue" /></a></td>
-<td>Eth2 beacon state transition</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-types">@chainsafe/lodestar-types</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-types"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-types" /></a></td>
-<td><a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></td>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-types"><img alt="documentation" src="https://img.shields.io/badge/readme-blue" /></a></td>
-<td>Eth2 typescript and SSZ types</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-params">@chainsafe/lodestar-params</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-params"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-params" /></a></td>
-<td><a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></td>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-params"><img alt="documentation" src="https://img.shields.io/badge/readme-blue" /></a></td>
-<td>Eth2 network parameters</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-utils">@chainsafe/lodestar-utils</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-utils"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-utils" /></a></td>
-<td><a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></td>
-<td><a href="https://chainsafe.github.io/lodestar/lodestar-utils"><img alt="documentation" src="https://img.shields.io/badge/typedoc-blue" /></a></td>
-<td>Misc utility functions used across lodestar</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-config">@chainsafe/lodestar-config</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-config"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-config" /></a></td>
-<td><a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></td>
-<td><a href="https://chainsafe.github.io/lodestar/lodestar-config"><img alt="documentation" src="https://img.shields.io/badge/typedoc-blue" /></a></td>
-<td>Eth2 types and params bundled together</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ChainSafe/lodestar/tree/master/packages/lodestar-spec-test-util">@chainsafe/lodestar-spec-test-util</a></td>
-<td><a href="https://www.npmjs.com/package/@chainsafe/lodestar-spec-test-util"><img alt="npm" src="https://img.shields.io/npm/v/@chainsafe/lodestar-spec-test-util" /></a></td>
-<td><a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" /></a></td>
-<td><a href="https://chainsafe.github.io/lodestar/lodestar-spec-test-util"><img alt="documentation" src="https://img.shields.io/badge/typedoc-blue" /></a></td>
-<td>Test harness for Eth2 spec tests</td>
-</tr>
-</tbody>
-</table>
+<p><img alt="ES Version" src="https://img.shields.io/badge/ES-2020-yellow" />
+<img alt="Node Version" src="https://img.shields.io/badge/node-12.x-green" /></p>
                 
               
               
@@ -506,14 +399,14 @@ If you want to donate, you can send us ETH at the following address: <strong>lod
     </div>
     
       <script src="../../assets/javascripts/vendor.d710d30a.min.js"></script>
-      <script src="../../assets/javascripts/bundle.7f4f3c92.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../assets/javascripts/bundle.b39636ac.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../..",
           features: [],
           search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.9b3611bd.min.js"
+            worker: "../../assets/javascripts/worker/search.a68abb33.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

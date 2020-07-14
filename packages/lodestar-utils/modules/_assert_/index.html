@@ -15,7 +15,7 @@
       
       
       <link rel="shortcut icon" href="../../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.3.2">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.4.0">
     
     
       
@@ -329,8 +329,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#functions" class="md-nav__link">
-    Functions
+  <a href="#object-literals" class="md-nav__link">
+    Object literals
   </a>
   
 </li>
@@ -341,16 +341,65 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#functions_1" class="md-nav__link">
-    Functions
+  <a href="#object-literals_1" class="md-nav__link">
+    Object literals
   </a>
   
-    <nav class="md-nav" aria-label="Functions">
+    <nav class="md-nav" aria-label="Object literals">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#assert" class="md-nav__link">
-    assert
+  <a href="#const-assert" class="md-nav__link">
+    Const assert
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assert-object" class="md-nav__link">
+    ▪ assert: object
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equal" class="md-nav__link">
+    equal
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gt" class="md-nav__link">
+    gt
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gte" class="md-nav__link">
+    gte
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lt" class="md-nav__link">
+    lt
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lte" class="md-nav__link">
+    lte
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#true" class="md-nav__link">
+    true
   </a>
   
 </li>
@@ -387,34 +436,196 @@
 <ul>
 <li><a href="../../classes/_assert_.assertionerror/">AssertionError</a></li>
 </ul>
-<h3 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h3>
+<h3 id="object-literals">Object literals<a class="headerlink" href="#object-literals" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="./#assert">assert</a></li>
+<li><a href="./#const-assert">assert</a></li>
 </ul>
-<h2 id="functions_1">Functions<a class="headerlink" href="#functions_1" title="Permanent link">&para;</a></h2>
-<h3 id="assert">assert<a class="headerlink" href="#assert" title="Permanent link">&para;</a></h3>
-<p>▸ <strong>assert</strong>(<code>condition</code>: boolean, <code>message?</code>: string): <em>void</em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-utils/src/assert.ts#L6">packages/lodestar-utils/src/assert.ts:6</a></em></p>
-<p>Assert condition is truthy, otherwise throw AssertionError</p>
+<h2 id="object-literals_1">Object literals<a class="headerlink" href="#object-literals_1" title="Permanent link">&para;</a></h2>
+<h3 id="const-assert"><code>Const</code> assert<a class="headerlink" href="#const-assert" title="Permanent link">&para;</a></h3>
+<h3 id="assert-object">▪ <strong>assert</strong>: <em>object</em><a class="headerlink" href="#assert-object" title="Permanent link">&para;</a></h3>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L1">packages/lodestar-utils/src/assert.ts:1</a></em></p>
+<h3 id="equal">equal<a class="headerlink" href="#equal" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>equal</strong>&lt;<strong>T</strong>&gt;(<code>actual</code>: T, <code>expected</code>: T, <code>message?</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L17">packages/lodestar-utils/src/assert.ts:17</a></em></p>
+<p>Assert strict equality</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">actual</span> <span class="o">===</span> <span class="nx">expected</span>
+</code></pre></div>
+
+
+<p><strong>Type parameters:</strong></p>
+<p>▪ <strong>T</strong></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Type</th>
-<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>actual</code></td>
+<td>T</td>
+</tr>
+<tr>
+<td><code>expected</code></td>
+<td>T</td>
+</tr>
+<tr>
+<td><code>message?</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<h3 id="gt">gt<a class="headerlink" href="#gt" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>gt</strong>(<code>left</code>: number, <code>right</code>: number, <code>message?</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L65">packages/lodestar-utils/src/assert.ts:65</a></em></p>
+<p>Assert greater than</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">left</span> <span class="o">&gt;</span> <span class="nx">right</span>
+</code></pre></div>
+
+
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>left</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>message?</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<h3 id="gte">gte<a class="headerlink" href="#gte" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>gte</strong>(<code>left</code>: number, <code>right</code>: number, <code>message?</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L53">packages/lodestar-utils/src/assert.ts:53</a></em></p>
+<p>Assert greater than or equal</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">left</span> <span class="o">&gt;=</span> <span class="nx">right</span>
+</code></pre></div>
+
+
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>left</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>message?</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<h3 id="lt">lt<a class="headerlink" href="#lt" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>lt</strong>(<code>left</code>: number, <code>right</code>: number, <code>message?</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L41">packages/lodestar-utils/src/assert.ts:41</a></em></p>
+<p>Assert less than</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">left</span> <span class="o">&lt;</span> <span class="nx">right</span>
+</code></pre></div>
+
+
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>left</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>message?</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<h3 id="lte">lte<a class="headerlink" href="#lte" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>lte</strong>(<code>left</code>: number, <code>right</code>: number, <code>message?</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L29">packages/lodestar-utils/src/assert.ts:29</a></em></p>
+<p>Assert less than or equal</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">left</span> <span class="o">&lt;=</span> <span class="nx">right</span>
+</code></pre></div>
+
+
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>left</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>right</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>message?</code></td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <em>void</em></p>
+<h3 id="true">true<a class="headerlink" href="#true" title="Permanent link">&para;</a></h3>
+<p>▸ <strong>true</strong>(<code>condition</code>: boolean, <code>message?</code>: string): <em>void</em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-utils/src/assert.ts#L5">packages/lodestar-utils/src/assert.ts:5</a></em></p>
+<p>Assert condition is true, otherwise throw AssertionError</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>condition</code></td>
 <td>boolean</td>
-<td>-</td>
 </tr>
 <tr>
 <td><code>message?</code></td>
 <td>string</td>
-<td></td>
 </tr>
 </tbody>
 </table>
@@ -491,14 +702,14 @@
     </div>
     
       <script src="../../../../assets/javascripts/vendor.d710d30a.min.js"></script>
-      <script src="../../../../assets/javascripts/bundle.7f4f3c92.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../../assets/javascripts/bundle.b39636ac.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../../..",
           features: [],
           search: Object.assign({
-            worker: "../../../../assets/javascripts/worker/search.9b3611bd.min.js"
+            worker: "../../../../assets/javascripts/worker/search.a68abb33.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

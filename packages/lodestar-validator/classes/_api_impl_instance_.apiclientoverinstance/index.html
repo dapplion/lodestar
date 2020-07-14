@@ -15,7 +15,7 @@
       
       
       <link rel="shortcut icon" href="../../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.3.2">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.4.0">
     
     
       
@@ -432,6 +432,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#node" class="md-nav__link">
+    node
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#url" class="md-nav__link">
     url
   </a>
@@ -543,6 +550,7 @@
 <li><a href="./#optional--_eventstype"> _eventsType</a></li>
 <li><a href="./#beacon">beacon</a></li>
 <li><a href="./#protected-config">config</a></li>
+<li><a href="./#node">node</a></li>
 <li><a href="./#url">url</a></li>
 <li><a href="./#validator">validator</a></li>
 </ul>
@@ -558,7 +566,7 @@
 <h3 id="constructor">constructor<a class="headerlink" href="#constructor" title="Permanent link">&para;</a></h3>
 <p>+ <strong>new ApiClientOverInstance</strong>(<code>opts</code>: <a href="../../interfaces/_api_impl_instance_.iapiclientoverinstanceopts/">IApiClientOverInstanceOpts</a>): <em><a href="./">ApiClientOverInstance</a></em></p>
 <p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#protected-constructor">constructor</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/impl/instance.ts#L18">packages/lodestar-validator/src/api/impl/instance.ts:18</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L22">packages/lodestar-validator/src/api/impl/instance.ts:22</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -598,51 +606,57 @@
 <p>• <strong>beacon</strong>: <em><a href="../../interfaces/_api_interface_beacon_.ibeaconapi/">IBeaconApi</a></em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#beacon">beacon</a></em></p>
 <p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#abstract-beacon">beacon</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/impl/instance.ts#L16">packages/lodestar-validator/src/api/impl/instance.ts:16</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L18">packages/lodestar-validator/src/api/impl/instance.ts:18</a></em></p>
 <hr />
 <h3 id="protected-config"><code>Protected</code> config<a class="headerlink" href="#protected-config" title="Permanent link">&para;</a></h3>
 <p>• <strong>config</strong>: <em>IBeaconConfig</em></p>
 <p><em>Inherited from <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#protected-config">config</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/abstract.ts#L15">packages/lodestar-validator/src/api/abstract.ts:15</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/abstract.ts#L17">packages/lodestar-validator/src/api/abstract.ts:17</a></em></p>
+<hr />
+<h3 id="node">node<a class="headerlink" href="#node" title="Permanent link">&para;</a></h3>
+<p>• <strong>node</strong>: <em><a href="../../interfaces/_api_interface_node_.inodeapi/">INodeApi</a></em></p>
+<p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#node">node</a></em></p>
+<p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#abstract-node">node</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L20">packages/lodestar-validator/src/api/impl/instance.ts:20</a></em></p>
 <hr />
 <h3 id="url">url<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
 <p>• <strong>url</strong>: <em>string</em> = "inmemory"</p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#url">url</a></em></p>
 <p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#abstract-url">url</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/impl/instance.ts#L14">packages/lodestar-validator/src/api/impl/instance.ts:14</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L16">packages/lodestar-validator/src/api/impl/instance.ts:16</a></em></p>
 <hr />
 <h3 id="validator">validator<a class="headerlink" href="#validator" title="Permanent link">&para;</a></h3>
 <p>• <strong>validator</strong>: <em><a href="../../interfaces/_api_interface_validators_.ivalidatorapi/">IValidatorApi</a></em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a>.<a href="../../interfaces/_api_interface_.iapiclient/#validator">validator</a></em></p>
 <p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#abstract-validator">validator</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/impl/instance.ts#L18">packages/lodestar-validator/src/api/impl/instance.ts:18</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L22">packages/lodestar-validator/src/api/impl/instance.ts:22</a></em></p>
 <h2 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h2>
 <h3 id="connect">connect<a class="headerlink" href="#connect" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>connect</strong>(): <em>Promise‹void›</em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
 <p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#connect">connect</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/impl/instance.ts#L26">packages/lodestar-validator/src/api/impl/instance.ts:26</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L31">packages/lodestar-validator/src/api/impl/instance.ts:31</a></em></p>
 <p><strong>Returns:</strong> <em>Promise‹void›</em></p>
 <hr />
 <h3 id="disconnect">disconnect<a class="headerlink" href="#disconnect" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>disconnect</strong>(): <em>Promise‹void›</em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
 <p><em>Overrides <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#disconnect">disconnect</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/impl/instance.ts#L30">packages/lodestar-validator/src/api/impl/instance.ts:30</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/impl/instance.ts#L35">packages/lodestar-validator/src/api/impl/instance.ts:35</a></em></p>
 <p><strong>Returns:</strong> <em>Promise‹void›</em></p>
 <hr />
 <h3 id="getcurrentslot">getCurrentSlot<a class="headerlink" href="#getcurrentslot" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>getCurrentSlot</strong>(): <em>Slot</em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
 <p><em>Inherited from <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#getcurrentslot">getCurrentSlot</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/abstract.ts#L64">packages/lodestar-validator/src/api/abstract.ts:64</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/abstract.ts#L68">packages/lodestar-validator/src/api/abstract.ts:68</a></em></p>
 <p><strong>Returns:</strong> <em>Slot</em></p>
 <hr />
 <h3 id="onnewepoch">onNewEpoch<a class="headerlink" href="#onnewepoch" title="Permanent link">&para;</a></h3>
 <p>▸ <strong>onNewEpoch</strong>(<code>cb</code>: <a href="../../interfaces/_api_interface_.inewepochcallback/">INewEpochCallback</a>): <em>void</em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
 <p><em>Inherited from <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#onnewepoch">onNewEpoch</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/abstract.ts#L34">packages/lodestar-validator/src/api/abstract.ts:34</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/abstract.ts#L38">packages/lodestar-validator/src/api/abstract.ts:38</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -664,7 +678,7 @@
 <p>▸ <strong>onNewSlot</strong>(<code>cb</code>: <a href="../../interfaces/_api_interface_.inewslotcallback/">INewSlotCallback</a>): <em>void</em></p>
 <p><em>Implementation of <a href="../../interfaces/_api_interface_.iapiclient/">IApiClient</a></em></p>
 <p><em>Inherited from <a href="../_api_abstract_.abstractapiclient/">AbstractApiClient</a>.<a href="../_api_abstract_.abstractapiclient/#onnewslot">onNewSlot</a></em></p>
-<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/38519236e/packages/lodestar-validator/src/api/abstract.ts#L40">packages/lodestar-validator/src/api/abstract.ts:40</a></em></p>
+<p><em>Defined in <a href="https://github.com/dapplion/lodestar/blob/3f4c0201b/packages/lodestar-validator/src/api/abstract.ts#L44">packages/lodestar-validator/src/api/abstract.ts:44</a></em></p>
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -753,14 +767,14 @@
     </div>
     
       <script src="../../../../assets/javascripts/vendor.d710d30a.min.js"></script>
-      <script src="../../../../assets/javascripts/bundle.7f4f3c92.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      <script src="../../../../assets/javascripts/bundle.b39636ac.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
       
       <script>
         app = initialize({
           base: "../../../..",
           features: [],
           search: Object.assign({
-            worker: "../../../../assets/javascripts/worker/search.9b3611bd.min.js"
+            worker: "../../../../assets/javascripts/worker/search.a68abb33.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
