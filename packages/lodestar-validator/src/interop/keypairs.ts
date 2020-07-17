@@ -10,9 +10,9 @@ interface IKeypair {
   privkey: Buffer;
 }
 
-export function interopKeypairs(validatorCount: number): IKeypair[] {
+export function interopKeypairs(validatorCount: number, offset = 0): IKeypair[] {
   return Array.from({length: validatorCount}, (_, i) => {
-    return interopKeypair(i);
+    return interopKeypair(i + offset);
   });
 }
 

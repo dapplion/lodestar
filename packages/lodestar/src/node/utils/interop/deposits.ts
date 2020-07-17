@@ -9,10 +9,11 @@ import {DomainType} from "../../../constants";
 export function interopDeposits(
   config: IBeaconConfig,
   depositDataRootList: TreeBacked<List<Root>>,
-  validatorCount: number
+  validatorCount: number,
+  offset?: number
 ): Deposit[] {
   const tree = depositDataRootList.tree();
-  return interopKeypairs(validatorCount).map(({pubkey, privkey}, i) => {
+  return interopKeypairs(validatorCount, offset).map(({pubkey, privkey}, i) => {
     // create DepositData
     const data: DepositData = {
       pubkey,

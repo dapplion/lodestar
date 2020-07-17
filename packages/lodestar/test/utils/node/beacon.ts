@@ -9,7 +9,7 @@ import {InteropEth1Notifier} from "../../../src/eth1/impl/interop";
 import {createNodeJsLibp2p} from "../../../src/network/nodejs";
 import {createPeerId} from "../../../src/network";
 import {initDevChain} from "../../../src/node/utils/state";
-import { IBeaconNodeOptions } from "../../../lib/node/options";
+import {IBeaconNodeOptions} from "../../../lib/node/options";
 
 type RecursivePartial<T> = {
   [P in keyof T]?:
@@ -18,19 +18,26 @@ type RecursivePartial<T> = {
       T[P];
 };
 
-export async function getDevBeaconNode(
-  params: Partial<IBeaconParams>,
-  options: RecursivePartial<IBeaconNodeOptions> = {},
-  validatorsCount = 8,
-  genesisTime?: number
-): Promise<BeaconNode> {
+export async function getDevBeaconNode({
+  params,
+  options = {},
+  validatorCount = 8,
+  offset,
+  genesisTime
+}: {
+  params: Partial<IBeaconParams>;
+  options?: RecursivePartial<IBeaconNodeOptions>;
+  validatorCount?: number;
+  offset?: number;
+  genesisTime?: number;
+}): Promise<BeaconNode> {
   const peerId = await createPeerId();
   const tmpDir = tmp.dirSync({unsafeCleanup: true});
   config.params = {
     ...config.params,
     ...params
   };
-  const bn = new BeaconNode(
+  const node = new BeaconNode(
     deepmerge({
       db: {
         name: tmpDir.name
@@ -58,6 +65,6 @@ export async function getDevBeaconNode(
         false
       )
     });
-  await initDevChain(bn, validatorsCount, genesisTime);
-  return bn;
+  await initDevChain({node, validatorCount, offset, genesisTime});
+  return node;
 }
