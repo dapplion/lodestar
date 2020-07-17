@@ -145,11 +145,21 @@ export class ValidatorApi implements IValidatorApi {
     if(state.slot < currentSlot) {
       processSlots(epochCtx, state, currentSlot);
     }
-    const validatorIndexes = validatorPubKeys.map((key) => epochCtx.pubkey2index.get(key));
+    const validatorIndexes = validatorPubKeys.map((key) => {
+      const validatorIndex = epochCtx.pubkey2index.get(key);
+      if (!validatorIndex) {
+        throw Error(`Validator pubkey ${Buffer.from(key).toString("hex")} not in epochCtx`);
+      }
+      return epochCtx.pubkey2index.get(key);
+    });
     return validatorIndexes.map((validatorIndex) => {
+      const validator = state.validators[validatorIndex];
+      if (!validator) {
+        throw Error(`Validator ${validatorIndex} not in state`);
+      }
       return assembleAttesterDuty(
         this.config,
-        {publicKey: state.validators[validatorIndex].pubkey, index: validatorIndex},
+        {publicKey: validator.pubkey, index: validatorIndex},
         epochCtx,
         epoch
       );
