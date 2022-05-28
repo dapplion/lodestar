@@ -6,8 +6,7 @@ import path from "node:path";
 import semver from "semver";
 import inquirer from "inquirer";
 
-// TODO: Change to 'unstable'
-const UNSTABLE_BRANCH = "dapplion/gitflow";
+const UNSTABLE_BRANCH = "unstable";
 const GIT_REPO_URL = "git@github.com:ChainSafe/lodestar.git";
 const MAIN_PACKAGE_PATH = "packages/lodestar";
 
