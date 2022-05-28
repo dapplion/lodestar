@@ -66,7 +66,6 @@ RC branch: ${rcBranchName}
 Current version: ${currentVersion}
 
 Selected commit: ${commit}
-Commit details:
 
 ${getCommitDetails(commit)}
   `);
@@ -331,8 +330,12 @@ function readMainPackageJson() {
  * @returns {string}
  */
 function getCommitDetails(commit) {
-  // f59814ab91 | 13 minutes ago
+  // commit <hash>
+  // Author: <author>
+  // Date:   <author-date>
   //
-  // Push only branch
-  return shell(`git log -n 1 ${commit} --date=relative --pretty=format:"%h | %ad %n%n%s %n%b"`);
+  // <title-line>
+  //
+  // <full-commit-message>
+  return shell(`git log -n 1 ${commit} --date=relative --pretty=medium`);
 }
