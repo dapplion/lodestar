@@ -1,39 +1,57 @@
-import {config} from "@chainsafe/lodestar-config/minimal";
-import {SinonStubbedInstance} from "sinon";
-import {IBeaconSync} from "../../../../../src/sync/interface";
-import {IApiModules} from "../../../../../src/api/impl/interface";
-import {ValidatorApi} from "../../../../../src/api/impl/validator/validator";
-import {IEth1ForBlockProduction} from "../../../../../src/eth1";
-import {testLogger} from "../../../../utils/logger";
+import {config} from "@chainsafe/lodestar-config/default";
+import {IProtoBlock} from "@chainsafe/lodestar-fork-choice";
+import sinon, {SinonStubbedInstance} from "sinon";
+import {IBeaconSync, SyncState} from "../../../../../src/sync/interface.js";
+import {ApiModules} from "../../../../../src/api/impl/types.js";
+import {getValidatorApi} from "../../../../../src/api/impl/validator/index.js";
+import {LocalClock} from "../../../../../src/chain/clock/index.js";
+import {testLogger} from "../../../../utils/logger.js";
 import chaiAsPromised from "chai-as-promised";
 import {use, expect} from "chai";
-import {ApiImplTestModules, setupApiImplTestServer} from "../index.test";
+import {ApiImplTestModules, setupApiImplTestServer} from "../index.test.js";
 
 use(chaiAsPromised);
 
 describe("api - validator - produceAttestationData", function () {
-  let eth1Stub: SinonStubbedInstance<IEth1ForBlockProduction>;
+  const logger = testLogger();
   let syncStub: SinonStubbedInstance<IBeaconSync>;
-  let modules!: IApiModules;
+  let modules: ApiModules;
   let server: ApiImplTestModules;
 
-  before(function () {
+  beforeEach(function () {
     server = setupApiImplTestServer();
     syncStub = server.syncStub;
     modules = {
       chain: server.chainStub,
       config,
       db: server.dbStub,
-      eth1: eth1Stub,
-      logger: testLogger(),
+      logger,
       network: server.networkStub,
       sync: syncStub,
+      metrics: null,
     };
   });
 
-  it("not synced", async function () {
-    syncStub.getSyncStatus.returns({syncDistance: BigInt(300), headSlot: BigInt(0)});
-    const api = new ValidatorApi({}, modules);
+  it("Should throw when node is not synced", async function () {
+    // Set the node's state to way back from current slot
+    const currentSlot = 100000;
+    const headSlot = 0;
+    server.chainStub.clock = {currentSlot} as LocalClock;
+    sinon.replaceGetter(syncStub, "state", () => SyncState.SyncingFinalized);
+    server.forkChoiceStub.getHead.returns({slot: headSlot} as IProtoBlock);
+
+    // Should not allow any call to validator API
+    const api = getValidatorApi(modules);
     await expect(api.produceAttestationData(0, 0)).to.be.rejectedWith("Node is syncing");
+  });
+
+  it("Should throw error when node is stopped", async function () {
+    const currentSlot = 100000;
+    server.chainStub.clock = {currentSlot} as LocalClock;
+    sinon.replaceGetter(syncStub, "state", () => SyncState.Stalled);
+
+    // Should not allow any call to validator API
+    const api = getValidatorApi(modules);
+    await expect(api.produceAttestationData(0, 0)).to.be.rejectedWith("Node is syncing - waiting for peers");
   });
 });

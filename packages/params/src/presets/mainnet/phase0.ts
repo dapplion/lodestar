@@ -1,9 +1,7 @@
+import {Phase0Preset} from "../../interface/phase0.js";
+
 /* eslint-disable @typescript-eslint/naming-convention */
-// Mainnet preset
-
-export const phase0Json = {
-  CONFIG_NAME: "mainnet",
-
+export const phase0: Phase0Preset = {
   // Misc
   // ---------------------------------------------------------------
   // 2**6 (= 64)
@@ -12,50 +10,19 @@ export const phase0Json = {
   TARGET_COMMITTEE_SIZE: 128,
   // 2**11 (= 2,048)
   MAX_VALIDATORS_PER_COMMITTEE: 2048,
-  // 2**2 (= 4)
-  MIN_PER_EPOCH_CHURN_LIMIT: 4,
-  // 2**16 (= 65,536)
-  CHURN_LIMIT_QUOTIENT: 65536,
   // See issue 563
   SHUFFLE_ROUND_COUNT: 90,
-  // `2**14` (= 16,384)
-  MIN_GENESIS_ACTIVE_VALIDATOR_COUNT: 16384,
-  // Jan 3, 2020
-  MIN_GENESIS_TIME: 1606824000,
   // 4
   HYSTERESIS_QUOTIENT: 4,
   // 1 (minus 0.25)
   HYSTERESIS_DOWNWARD_MULTIPLIER: 1,
   // 5 (plus 1.25)
   HYSTERESIS_UPWARD_MULTIPLIER: 5,
-  // 3
-  PROPORTIONAL_SLASHING_MULTIPLIER: 1,
 
   // Fork Choice
   // ---------------------------------------------------------------
   // 2**3 (= 8)
   SAFE_SLOTS_TO_UPDATE_JUSTIFIED: 8,
-
-  // Validator
-  // ---------------------------------------------------------------
-  // 2**11 (= 2,048)
-  ETH1_FOLLOW_DISTANCE: 2048,
-  // 2**4 (= 16)
-  TARGET_AGGREGATORS_PER_COMMITTEE: 16,
-  // 2**0 (= 1)
-  RANDOM_SUBNETS_PER_VALIDATOR: 1,
-  // 2**8 (= 256)
-  EPOCHS_PER_RANDOM_SUBNET_SUBSCRIPTION: 256,
-  // 14 (estimate from Eth1 mainnet)
-  SECONDS_PER_ETH1_BLOCK: 14,
-
-  // Deposit contract
-  // ---------------------------------------------------------------
-  // Ethereum PoW Mainnet
-  DEPOSIT_CHAIN_ID: 1,
-  DEPOSIT_NETWORK_ID: 1,
-  // **TBD**
-  DEPOSIT_CONTRACT_ADDRESS: "0x00000000219ab540356cBB839Cbe05303d7705Fa",
 
   // Gwei values
   // ---------------------------------------------------------------
@@ -63,23 +30,11 @@ export const phase0Json = {
   MIN_DEPOSIT_AMOUNT: 1000000000,
   // 2**5 * 10**9 (= 32,000,000,000) Gwei
   MAX_EFFECTIVE_BALANCE: 32000000000,
-  // 2**4 * 10**9 (= 16,000,000,000) Gwei
-  EJECTION_BALANCE: 16000000000,
   // 2**0 * 10**9 (= 1,000,000,000) Gwei
   EFFECTIVE_BALANCE_INCREMENT: 1000000000,
 
-  // Initial values
-  // ---------------------------------------------------------------
-  // Mainnet initial fork version, recommend altering for testnets
-  GENESIS_FORK_VERSION: "0x00000000",
-  BLS_WITHDRAWAL_PREFIX: "0x00",
-
   // Time parameters
   // ---------------------------------------------------------------
-  // 604800 seconds (7 days)
-  GENESIS_DELAY: 604800,
-  // 12 seconds
-  SECONDS_PER_SLOT: 12,
   // 2**0 (= 1) slots 12 seconds
   MIN_ATTESTATION_INCLUSION_DELAY: 1,
   // 2**5 (= 32) slots 6.4 minutes
@@ -92,10 +47,6 @@ export const phase0Json = {
   EPOCHS_PER_ETH1_VOTING_PERIOD: 64,
   // 2**13 (= 8,192) slots ~13 hours
   SLOTS_PER_HISTORICAL_ROOT: 8192,
-  // 2**8 (= 256) epochs ~27 hours
-  MIN_VALIDATOR_WITHDRAWABILITY_DELAY: 256,
-  // 2**8 (= 256) epochs ~27 hours
-  SHARD_COMMITTEE_PERIOD: 256,
   // 2**2 (= 4) epochs 25.6 minutes
   MIN_EPOCHS_TO_INACTIVITY_PENALTY: 4,
 
@@ -122,6 +73,7 @@ export const phase0Json = {
   INACTIVITY_PENALTY_QUOTIENT: 67108864,
   // 2**7 (= 128) (lower safety margin at Phase 0 genesis)
   MIN_SLASHING_PENALTY_QUOTIENT: 128,
+  PROPORTIONAL_SLASHING_MULTIPLIER: 1,
 
   // Max operations per block
   // ---------------------------------------------------------------
@@ -135,14 +87,4 @@ export const phase0Json = {
   MAX_DEPOSITS: 16,
   // 2**4 (= 16)
   MAX_VOLUNTARY_EXITS: 16,
-
-  // Signature domains
-  // ---------------------------------------------------------------
-  DOMAIN_BEACON_PROPOSER: "0x00000000",
-  DOMAIN_BEACON_ATTESTER: "0x01000000",
-  DOMAIN_RANDAO: "0x02000000",
-  DOMAIN_DEPOSIT: "0x03000000",
-  DOMAIN_VOLUNTARY_EXIT: "0x04000000",
-  DOMAIN_SELECTION_PROOF: "0x05000000",
-  DOMAIN_AGGREGATE_AND_PROOF: "0x06000000",
 };

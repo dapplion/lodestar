@@ -1,12 +1,11 @@
 import {EventEmitter} from "events";
 import StrictEventEmitter from "strict-event-emitter-types";
 
-import {phase0, Epoch, Slot, Version, allForks} from "@chainsafe/lodestar-types";
-import {IBlockSummary} from "@chainsafe/lodestar-fork-choice";
-import {IForkName} from "@chainsafe/lodestar-config";
-import {IBlockJob} from "./interface";
-import {AttestationError, BlockError} from "./errors";
-import {CachedBeaconState} from "@chainsafe/lodestar-beacon-state-transition";
+import {routes} from "@chainsafe/lodestar-api";
+import {phase0, Epoch, Slot, allForks} from "@chainsafe/lodestar-types";
+import {CheckpointWithHex, IProtoBlock} from "@chainsafe/lodestar-fork-choice";
+import {CachedBeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {AttestationError, BlockError} from "./errors/index.js";
 
 /**
  * Important chain events that occur during normal chain operation.
@@ -49,12 +48,6 @@ export enum ChainEvent {
    * This event is a derivative of the `checkpoint` event. Eg: in cases where the `checkpoint` state has an updated finalized checkpoint, this event is triggered.
    */
   finalized = "finalized",
-  /**
-   * This event signals that the chain has reached a new fork version.
-   *
-   * This event is guaranteed to be triggered after processing any block or checkpoint that updates the `state.fork.currentVersion` as a result of processing.
-   */
-  forkVersion = "forkVersion",
   /**
    * This event signals the start of a new slot, and that subsequent calls to `clock.currentSlot` will equal `slot`.
    *
@@ -103,30 +96,36 @@ export enum ChainEvent {
    * This event is guaranteed to be triggered after any block fed to the chain fails at any stage of processing.
    */
   errorBlock = "error:block",
+  /**
+   * A new lightclient header update is available to be broadcasted to connected light-clients
+   */
+  lightclientHeaderUpdate = "lightclient:header_update",
+  /**
+   * A new lightclient finalized header update is available to be broadcasted to connected light-clients
+   */
+  lightclientFinalizedUpdate = "lightclient:finalized_update",
 }
 
 export interface IChainEvents {
   [ChainEvent.attestation]: (attestation: phase0.Attestation) => void;
-  [ChainEvent.block]: (
-    signedBlock: allForks.SignedBeaconBlock,
-    postState: CachedBeaconState<allForks.BeaconState>,
-    job: IBlockJob
-  ) => void;
+  [ChainEvent.block]: (signedBlock: allForks.SignedBeaconBlock, postState: CachedBeaconStateAllForks) => void;
   [ChainEvent.errorAttestation]: (error: AttestationError) => void;
   [ChainEvent.errorBlock]: (error: BlockError) => void;
 
-  [ChainEvent.checkpoint]: (checkpoint: phase0.Checkpoint, state: CachedBeaconState<allForks.BeaconState>) => void;
-  [ChainEvent.justified]: (checkpoint: phase0.Checkpoint, state: CachedBeaconState<allForks.BeaconState>) => void;
-  [ChainEvent.finalized]: (checkpoint: phase0.Checkpoint, state: CachedBeaconState<allForks.BeaconState>) => void;
-  [ChainEvent.forkVersion]: (version: Version, fork: IForkName) => void;
+  [ChainEvent.checkpoint]: (checkpoint: phase0.Checkpoint, state: CachedBeaconStateAllForks) => void;
+  [ChainEvent.justified]: (checkpoint: phase0.Checkpoint, state: CachedBeaconStateAllForks) => void;
+  [ChainEvent.finalized]: (checkpoint: phase0.Checkpoint, state: CachedBeaconStateAllForks) => void;
 
   [ChainEvent.clockSlot]: (slot: Slot) => void;
   [ChainEvent.clockEpoch]: (epoch: Epoch) => void;
 
-  [ChainEvent.forkChoiceHead]: (head: IBlockSummary) => void;
-  [ChainEvent.forkChoiceReorg]: (head: IBlockSummary, oldHead: IBlockSummary, depth: number) => void;
-  [ChainEvent.forkChoiceJustified]: (checkpoint: phase0.Checkpoint) => void;
-  [ChainEvent.forkChoiceFinalized]: (checkpoint: phase0.Checkpoint) => void;
+  [ChainEvent.forkChoiceHead]: (head: IProtoBlock) => void;
+  [ChainEvent.forkChoiceReorg]: (head: IProtoBlock, oldHead: IProtoBlock, depth: number) => void;
+  [ChainEvent.forkChoiceJustified]: (checkpoint: CheckpointWithHex) => void;
+  [ChainEvent.forkChoiceFinalized]: (checkpoint: CheckpointWithHex) => void;
+
+  [ChainEvent.lightclientHeaderUpdate]: (headerUpdate: routes.events.LightclientHeaderUpdate) => void;
+  [ChainEvent.lightclientFinalizedUpdate]: (finalizedUpdate: routes.events.LightclientFinalizedUpdate) => void;
 }
 
 /**

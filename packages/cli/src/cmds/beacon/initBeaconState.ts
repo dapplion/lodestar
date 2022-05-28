@@ -1,55 +1,160 @@
-import {AbortSignal} from "abort-controller";
-
-import {TreeBacked} from "@chainsafe/ssz";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
+import {ssz} from "@chainsafe/lodestar-types";
+import {createIBeaconConfig, IBeaconConfig, IChainForkConfig} from "@chainsafe/lodestar-config";
 import {ILogger} from "@chainsafe/lodestar-utils";
-import {allForks} from "@chainsafe/lodestar-types";
+import {
+  computeEpochAtSlot,
+  getLatestBlockRoot,
+  isWithinWeakSubjectivityPeriod,
+  BeaconStateAllForks,
+} from "@chainsafe/lodestar-beacon-state-transition";
 import {
   IBeaconDb,
-  Eth1Provider,
   IBeaconNodeOptions,
   initStateFromAnchorState,
-  initStateFromDb,
   initStateFromEth1,
+  getStateTypeFromBytes,
 } from "@chainsafe/lodestar";
-import {downloadOrLoadFile} from "../../util";
-import {IBeaconArgs} from "./options";
-import {defaultNetwork, IGlobalArgs} from "../../options/globalOptions";
-import {getGenesisFileUrl} from "../../networks";
+import {Checkpoint} from "@chainsafe/lodestar-types/phase0";
+
+import {downloadOrLoadFile} from "../../util/index.js";
+import {IBeaconArgs} from "./options.js";
+import {defaultNetwork, IGlobalArgs} from "../../options/globalOptions.js";
+import {parseWSSArgs, WSSOptions} from "../../options/wssOptions.js";
+import {fetchWeakSubjectivityState, getGenesisFileUrl, getCheckpointFromArg} from "../../networks/index.js";
+
+function getCheckpointFromState(state: BeaconStateAllForks): Checkpoint {
+  return {
+    epoch: computeEpochAtSlot(state.latestBlockHeader.slot),
+    root: getLatestBlockRoot(state),
+  };
+}
+
+async function initAndVerifyWeakSubjectivityState(
+  config: IBeaconConfig,
+  db: IBeaconDb,
+  logger: ILogger,
+  store: BeaconStateAllForks,
+  wsState: BeaconStateAllForks,
+  wsCheckpoint: Checkpoint
+): Promise<{anchorState: BeaconStateAllForks; wsCheckpoint: Checkpoint}> {
+  // Check if the store's state and wsState are compatible
+  if (
+    store.genesisTime !== wsState.genesisTime ||
+    !ssz.Root.equals(store.genesisValidatorsRoot, wsState.genesisValidatorsRoot)
+  ) {
+    throw new Error(
+      "Db state and checkpoint state are not compatible, either clear the db or verify your checkpoint source"
+    );
+  }
+
+  // Pick the state which is ahead as an anchor to initialize the beacon chain
+  let anchorState = wsState;
+  let anchorCheckpoint = wsCheckpoint;
+  if (store.slot > wsState.slot) {
+    anchorState = store;
+    anchorCheckpoint = getCheckpointFromState(store);
+    logger.verbose(
+      "Db state is ahead of the provided checkpoint state, using the db state to initialize the beacon chain"
+    );
+  }
+
+  if (!isWithinWeakSubjectivityPeriod(config, anchorState, anchorCheckpoint)) {
+    throw new Error("Fetched weak subjectivity checkpoint not within weak subjectivity period.");
+  }
+
+  anchorState = await initStateFromAnchorState(config, db, logger, anchorState);
+
+  // Return the latest anchorState but still return original wsCheckpoint to validate in backfill
+  return {anchorState, wsCheckpoint};
+}
 
 /**
  * Initialize a beacon state, picking the strategy based on the `IBeaconArgs`
  *
  * State is initialized in one of three ways:
- * 1. restore from a file (possibly downloaded via URL)
+ * 1. restore from weak subjectivity state (possibly downloaded from a remote beacon node)
  * 2. restore from db
- * 3. create from eth1
+ * 3. restore from genesis state (possibly downloaded via URL)
+ * 4. create genesis state from eth1
  */
 export async function initBeaconState(
   options: IBeaconNodeOptions,
   args: IBeaconArgs & IGlobalArgs,
-  config: IBeaconConfig,
+  chainForkConfig: IChainForkConfig,
   db: IBeaconDb,
   logger: ILogger,
   signal: AbortSignal
-): Promise<TreeBacked<allForks.BeaconState>> {
-  async function initFromFile(pathOrUrl: string): Promise<TreeBacked<allForks.BeaconState>> {
-    const anchorState = config.types.phase0.BeaconState.createTreeBackedFromBytes(await downloadOrLoadFile(pathOrUrl));
-    return await initStateFromAnchorState(config, db, logger, anchorState as TreeBacked<allForks.BeaconState>);
-  }
+): Promise<{anchorState: BeaconStateAllForks; wsCheckpoint?: Checkpoint}> {
+  // fetch the latest state stored in the db
+  // this will be used in all cases, if it exists, either used during verification of a weak subjectivity state, or used directly as the anchor state
+  const lastDbState = await db.stateArchive.lastValue();
+  const wssOpts = parseWSSArgs(args);
 
-  const dbHasSomeState = (await db.stateArchive.lastKey()) != null;
-
-  if (args.weakSubjectivityStateFile) {
-    return await initFromFile(args.weakSubjectivityStateFile);
-  } else if (dbHasSomeState) {
-    return await initStateFromDb(config, db, logger);
+  if (wssOpts) {
+    return await initFromWSState(lastDbState, wssOpts, chainForkConfig, db, logger);
+  } else if (lastDbState) {
+    // start the chain from the latest stored state in the db
+    const config = createIBeaconConfig(chainForkConfig, lastDbState.genesisValidatorsRoot);
+    const anchorState = await initStateFromAnchorState(config, db, logger, lastDbState);
+    return {anchorState};
   } else {
     const genesisStateFile = args.genesisStateFile || getGenesisFileUrl(args.network || defaultNetwork);
     if (genesisStateFile && !args.forceGenesis) {
-      return await initFromFile(genesisStateFile);
+      const stateBytes = await downloadOrLoadFile(genesisStateFile);
+      let anchorState = getStateTypeFromBytes(chainForkConfig, stateBytes).deserializeToViewDU(stateBytes);
+      const config = createIBeaconConfig(chainForkConfig, anchorState.genesisValidatorsRoot);
+      anchorState = await initStateFromAnchorState(config, db, logger, anchorState);
+      return {anchorState};
     } else {
-      return await initStateFromEth1(config, db, logger, new Eth1Provider(config, options.eth1), signal);
+      const anchorState = await initStateFromEth1({config: chainForkConfig, db, logger, opts: options.eth1, signal});
+      return {anchorState};
     }
+  }
+}
+
+async function initFromWSState(
+  lastDbState: BeaconStateAllForks | null,
+  wssOpts: WSSOptions,
+  chainForkConfig: IChainForkConfig,
+  db: IBeaconDb,
+  logger: ILogger
+): Promise<{anchorState: BeaconStateAllForks; wsCheckpoint?: Checkpoint}> {
+  if (wssOpts.weakSubjectivityStateFile) {
+    // weak subjectivity sync from a provided state file:
+    // if a weak subjectivity checkpoint has been provided, it is used for additional verification
+    // otherwise, the state itself is used for verification (not bad, because the trusted state has been explicitly provided)
+    const {weakSubjectivityStateFile, weakSubjectivityCheckpoint} = wssOpts;
+
+    const stateBytes = await downloadOrLoadFile(weakSubjectivityStateFile);
+    const wsState = getStateTypeFromBytes(chainForkConfig, stateBytes).deserializeToViewDU(stateBytes);
+    const config = createIBeaconConfig(chainForkConfig, wsState.genesisValidatorsRoot);
+    const store = lastDbState ?? wsState;
+    const checkpoint = weakSubjectivityCheckpoint
+      ? getCheckpointFromArg(weakSubjectivityCheckpoint)
+      : getCheckpointFromState(wsState);
+    return initAndVerifyWeakSubjectivityState(config, db, logger, store, wsState, checkpoint);
+  } else if (wssOpts.weakSubjectivitySyncLatest) {
+    // weak subjectivity sync from a state that needs to be fetched:
+    // if a weak subjectivity checkpoint has been provided, it is used to inform which state to download and used for additional verification
+    // otherwise, the 'finalized' state is downloaded and the state itself is used for verification (all trust delegated to the remote beacon node)
+    const {weakSubjectivityServerUrl} = wssOpts;
+    try {
+      // Validate the weakSubjectivityServerUrl and only log the origin to mask the
+      // username password credentials
+      const wssUrl = new URL(weakSubjectivityServerUrl);
+      logger.info("Fetching weak subjectivity state", {
+        weakSubjectivityServerUrl: wssUrl.origin,
+      });
+    } catch (e) {
+      logger.error("Invalid", {weakSubjectivityServerUrl}, e as Error);
+      throw e;
+    }
+
+    const {wsState, wsCheckpoint} = await fetchWeakSubjectivityState(chainForkConfig, wssOpts);
+    const config = createIBeaconConfig(chainForkConfig, wsState.genesisValidatorsRoot);
+    const store = lastDbState ?? wsState;
+    return initAndVerifyWeakSubjectivityState(config, db, logger, store, wsState, wsCheckpoint);
+  } else {
+    throw Error("Invalid wss options");
   }
 }

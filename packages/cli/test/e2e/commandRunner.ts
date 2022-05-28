@@ -1,4 +1,4 @@
-import {getLodestarCli} from "../../src/cli";
+import {getLodestarCli} from "../../src/cli.js";
 
 export function getLodestarCliTestRunner() {
   return async <T = any>(arg: string | readonly string[], context?: Record<string, unknown>): Promise<T> => {
@@ -11,7 +11,7 @@ export function getLodestarCliTestRunner() {
         })
         // Method to execute when a failure occurs, rather than printing the failure message.
         .fail((msg, err) => {
-          if (err) reject(err);
+          if (err !== undefined) reject(err);
           else if (msg) reject(Error(msg));
           else reject(Error("Unknown error"));
         })

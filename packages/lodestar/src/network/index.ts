@@ -1,10 +1,8 @@
-/**
- * @module network
- */
-export * from "./events";
-export * from "./interface";
-export * from "./network";
-export * from "./nodejs";
-export * from "./reqresp";
-export * from "./util";
-export * from "./peers";
+export * from "./events.js";
+export * from "./interface.js";
+export * from "./network.js";
+export * from "./nodejs/index.js";
+export * from "./gossip/index.js";
+export * from "./reqresp/index.js";
+export * from "./util.js";
+export * from "./peers/index.js";

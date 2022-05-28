@@ -1,9 +1,8 @@
 import {sleep} from "@chainsafe/lodestar-utils";
-import {AbortController} from "abort-controller";
 import {expect} from "chai";
 
-import {JobQueue, QueueError, QueueErrorCode, QueueType} from "../../../src/util/queue";
-import {expectLodestarError, expectRejectedWithLodestarError} from "../../utils/errors";
+import {JobFnQueue, QueueError, QueueErrorCode, QueueType} from "../../../src/util/queue/index.js";
+import {expectLodestarError, expectRejectedWithLodestarError} from "../../utils/errors.js";
 
 describe("Job queue", () => {
   const maxLength = 3;
@@ -11,7 +10,7 @@ describe("Job queue", () => {
 
   it("should only allow a single job at a time to run", async () => {
     const controller = new AbortController();
-    const jobQueue = new JobQueue({maxLength, signal: controller.signal});
+    const jobQueue = new JobFnQueue({maxLength, signal: controller.signal});
 
     let activeJobs = 0;
     async function job(): Promise<void> {
@@ -30,7 +29,7 @@ describe("Job queue", () => {
 
   it("should throw after the queue is full", async () => {
     const controller = new AbortController();
-    const jobQueue = new JobQueue({maxLength, signal: controller.signal});
+    const jobQueue = new JobFnQueue({maxLength, signal: controller.signal});
 
     async function job(): Promise<void> {
       await sleep(jobDuration);
@@ -40,14 +39,17 @@ describe("Job queue", () => {
     const jobs = Promise.all(Array.from({length: maxLength}, () => jobQueue.push(job)));
 
     // the next enqueued job should go over the limit
-    await expectRejectedWithLodestarError(jobQueue.push(job), new QueueError({code: QueueErrorCode.QUEUE_MAX_LENGTH}));
+    await expectRejectedWithLodestarError(
+      wrapFn(() => jobQueue.push(job)),
+      new QueueError({code: QueueErrorCode.QUEUE_MAX_LENGTH})
+    );
 
     await jobs;
   });
 
   it("should throw after the queue is aborted", async () => {
     const controller = new AbortController();
-    const jobQueue = new JobQueue({maxLength, signal: controller.signal});
+    const jobQueue = new JobFnQueue({maxLength, signal: controller.signal});
 
     async function job(): Promise<void> {
       await sleep(jobDuration);
@@ -66,7 +68,10 @@ describe("Job queue", () => {
     }
 
     // any subsequently enqueued job should also be rejected
-    await expectRejectedWithLodestarError(jobQueue.push(job), new QueueError({code: QueueErrorCode.QUEUE_ABORTED}));
+    await expectRejectedWithLodestarError(
+      wrapFn(() => jobQueue.push(job)),
+      new QueueError({code: QueueErrorCode.QUEUE_ABORTED})
+    );
   });
 
   describe("Queue types", () => {
@@ -81,7 +86,7 @@ describe("Job queue", () => {
     for (const {type, expectedResults} of testCases) {
       it(type, async () => {
         const controller = new AbortController();
-        const jobQueue = new JobQueue({maxLength, type, signal: controller.signal});
+        const jobQueue = new JobFnQueue({maxLength, type, signal: controller.signal});
 
         const results: number[] = [];
         const jobPromises: Promise<void>[] = [];
@@ -106,3 +111,11 @@ describe("Job queue", () => {
     }
   });
 });
+
+async function wrapFn(fn: () => Promise<unknown>): Promise<unknown> {
+  try {
+    return await fn();
+  } catch (e) {
+    return Promise.reject(e);
+  }
+}

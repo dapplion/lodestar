@@ -1,16 +1,32 @@
 import {Options} from "yargs";
-import {ICliCommandOptions} from "../../util";
-import {beaconOptions, IBeaconArgs} from "../beacon/options";
-import {globalOptions, beaconNodeOptions} from "../../options";
+import {ICliCommandOptions} from "../../util/index.js";
+import {beaconOptions, IBeaconArgs} from "../beacon/options.js";
+import {beaconNodeOptions} from "../../options/index.js";
+import {IValidatorCliArgs, validatorOptions} from "../validator/options.js";
+import {KeymanagerArgs, keymanagerOptions} from "../../options/keymanagerOptions.js";
 
-interface IDevOwnArgs {
+type IDevOwnArgs = {
+  genesisEth1Hash?: string;
   genesisValidators?: number;
   startValidators?: string;
+  genesisTime?: number;
   reset?: boolean;
   server: string;
-}
+} & KeymanagerArgs &
+  Pick<IValidatorCliArgs, "importKeystoresPath" | "importKeystoresPassword">;
 
 const devOwnOptions: ICliCommandOptions<IDevOwnArgs> = {
+  ...keymanagerOptions,
+  ...{
+    importKeystoresPath: validatorOptions["importKeystoresPath"],
+    importKeystoresPassword: validatorOptions["importKeystoresPassword"],
+  },
+  genesisEth1Hash: {
+    description: "If present it will create genesis with this eth1 hash.",
+    type: "string",
+    group: "dev",
+  },
+
   genesisValidators: {
     alias: ["c"],
     description: "If present it will create genesis with interop validators and start chain.",
@@ -19,9 +35,14 @@ const devOwnOptions: ICliCommandOptions<IDevOwnArgs> = {
   },
 
   startValidators: {
-    description: "Start interop validators in given range",
-    default: "0:8",
+    description: "Start interop validators in inclusive range with notation '0:7'",
     type: "string",
+    group: "dev",
+  },
+
+  genesisTime: {
+    description: "genesis_time to initialize interop genesis state",
+    type: "number",
     group: "dev",
   },
 
@@ -47,10 +68,15 @@ const devOwnOptions: ICliCommandOptions<IDevOwnArgs> = {
  * Note: use beaconNodeOptions and globalOptions to make sure option key is correct
  */
 const externalOptionsOverrides: {[k: string]: Options} = {
-  "sync.minPeers": {
-    ...beaconNodeOptions["sync.minPeers"],
+  "sync.isSingleNode": {
+    ...beaconNodeOptions["sync.isSingleNode"],
     defaultDescription: undefined,
-    default: 0,
+    default: true,
+  },
+  "network.allowPublishToZeroPeers": {
+    ...beaconNodeOptions["network.allowPublishToZeroPeers"],
+    defaultDescription: undefined,
+    default: true,
   },
   "network.maxPeers": {
     ...beaconNodeOptions["network.maxPeers"],
@@ -71,10 +97,6 @@ const externalOptionsOverrides: {[k: string]: Options} = {
     ...beaconNodeOptions["api.rest.enabled"],
     defaultDescription: undefined,
     default: true,
-  },
-  preset: {
-    ...globalOptions.preset,
-    default: "minimal",
   },
 };
 

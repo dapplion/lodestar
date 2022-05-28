@@ -1,19 +1,19 @@
 /**
  * @module util/objects
  */
-import {hash} from "@chainsafe/ssz";
+import {digest} from "@chainsafe/as-sha256";
+import {SHUFFLE_ROUND_COUNT} from "@chainsafe/lodestar-params";
 import {ValidatorIndex, Bytes32} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
 import {assert, bytesToBigInt} from "@chainsafe/lodestar-utils";
 
 // ShuffleList shuffles a list, using the given seed for randomness. Mutates the input list.
-export function shuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: Bytes32): void {
-  innerShuffleList(config, input, seed, true);
+export function shuffleList(input: ValidatorIndex[], seed: Bytes32): void {
+  innerShuffleList(input, seed, true);
 }
 
 // UnshuffleList undoes a list shuffling using the seed of the shuffling. Mutates the input list.
-export function unshuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: Bytes32): void {
-  innerShuffleList(config, input, seed, false);
+export function unshuffleList(input: ValidatorIndex[], seed: Bytes32): void {
+  innerShuffleList(input, seed, false);
 }
 
 const _SHUFFLE_H_SEED_SIZE = 32;
@@ -46,7 +46,7 @@ def shuffle(list_size, seed):
 Heavily-optimized version of the set-shuffling algorithm proposed by Vitalik to shuffle all items in a list together.
 
 Original here:
-	https://github.com/ethereum/eth2.0-specs/pull/576#issue-250741806
+	https://github.com/ethereum/consensus-specs/pull/576
 
 Main differences, implemented by @protolambda:
     - User can supply input slice to shuffle, simple provide [0,1,2,3,4, ...] to get a list of cleanly shuffled indices.
@@ -64,13 +64,21 @@ Go: https://github.com/protolambda/eth2-shuffle
 All three implemented by @protolambda, but meant for public use, like the original spec version.
 */
 
+function setPositionUint32(value: number, buf: Buffer): void {
+  // Little endian, optimized version
+  buf[_SHUFFLE_H_PIVOT_VIEW_SIZE] = (value >> 0) & 0xff;
+  buf[_SHUFFLE_H_PIVOT_VIEW_SIZE + 1] = (value >> 8) & 0xff;
+  buf[_SHUFFLE_H_PIVOT_VIEW_SIZE + 2] = (value >> 16) & 0xff;
+  buf[_SHUFFLE_H_PIVOT_VIEW_SIZE + 3] = (value >> 24) & 0xff;
+}
+
 // Shuffles or unshuffles, depending on the `dir` (true for shuffling, false for unshuffling
-function innerShuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: Bytes32, dir: boolean): void {
+function innerShuffleList(input: ValidatorIndex[], seed: Bytes32, dir: boolean): void {
   if (input.length <= 1) {
     // nothing to (un)shuffle
     return;
   }
-  if (config.params.SHUFFLE_ROUND_COUNT == 0) {
+  if (SHUFFLE_ROUND_COUNT == 0) {
     // no shuffling
     return;
   }
@@ -85,53 +93,16 @@ function innerShuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: 
   if (!dir) {
     // Start at last round.
     // Iterating through the rounds in reverse, un-swaps everything, effectively un-shuffling the list.
-    r = config.params.SHUFFLE_ROUND_COUNT - 1;
+    r = SHUFFLE_ROUND_COUNT - 1;
   }
 
   // Seed is always the first 32 bytes of the hash input, we never have to change this part of the buffer.
-  const _seed = seed.valueOf() as Uint8Array;
+  const _seed = seed;
   Buffer.from(_seed).copy(buf, 0, 0, _SHUFFLE_H_SEED_SIZE);
-
-  function setPositionUint32(value: number): void {
-    // Little endian, optimized version
-    buf[_SHUFFLE_H_PIVOT_VIEW_SIZE] = (value >> 0) & 0xff;
-    buf[_SHUFFLE_H_PIVOT_VIEW_SIZE + 1] = (value >> 8) & 0xff;
-    buf[_SHUFFLE_H_PIVOT_VIEW_SIZE + 2] = (value >> 16) & 0xff;
-    buf[_SHUFFLE_H_PIVOT_VIEW_SIZE + 3] = (value >> 24) & 0xff;
-  }
 
   // initial values here are not used: overwritten first within the inner for loop.
   let source = seed; // just setting it to a Bytes32
-  let i = 0;
-  let j = 0;
   let byteV = 0;
-
-  function step(): void {
-    // The pair is i,j. With j being the bigger of the two, hence the "position" identifier of the pair.
-    // Every 256th bit (aligned to j).
-    if ((j & 0xff) == 0xff) {
-      // just overwrite the last part of the buffer, reuse the start (seed, round)
-      setPositionUint32(j >> 8);
-      source = hash(buf);
-    }
-
-    // Same trick with byte retrieval. Only every 8th.
-    if ((j & 0x7) == 0x7) {
-      byteV = source[(j & 0xff) >> 3];
-    }
-
-    const bitV = (byteV >> (j & 0x7)) & 0x1;
-
-    if (bitV == 1) {
-      // swap the pair items
-      const tmp = input[j];
-      input[j] = input[i];
-      input[i] = tmp;
-    }
-
-    i = i + 1;
-    j = j - 1;
-  }
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -140,7 +111,7 @@ function innerShuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: 
     buf[_SHUFFLE_H_SEED_SIZE] = r;
     // Seed is already in place, now just hash the correct part of the buffer, and take a uint64 from it,
     //  and modulo it to get a pivot within range.
-    const h = hash(buf.slice(0, _SHUFFLE_H_PIVOT_VIEW_SIZE));
+    const h = digest(buf.slice(0, _SHUFFLE_H_PIVOT_VIEW_SIZE));
     const pivot = Number(bytesToBigInt(h.slice(0, 8)) % BigInt(listSize)) >>> 0;
 
     // Split up the for-loop in two:
@@ -162,14 +133,35 @@ function innerShuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: 
     //   which will be used later to select a bit from the resulting hash.
     // We start from the pivot position, and work back to the mirror position (of the part left to the pivot).
     // This makes us process each pear exactly once (instead of unnecessarily twice, like in the spec)
-    setPositionUint32(pivot >> 8); // already using first pivot byte below.
-    source = hash(buf);
+    setPositionUint32(pivot >> 8, buf); // already using first pivot byte below.
+    source = digest(buf);
     byteV = source[(pivot & 0xff) >> 3];
-    i = 0;
-    j = pivot;
 
-    while (i < mirror) {
-      step();
+    for (let i = 0, j; i < mirror; i++) {
+      j = pivot - i;
+      // -- step() fn start
+      // The pair is i,j. With j being the bigger of the two, hence the "position" identifier of the pair.
+      // Every 256th bit (aligned to j).
+      if ((j & 0xff) == 0xff) {
+        // just overwrite the last part of the buffer, reuse the start (seed, round)
+        setPositionUint32(j >> 8, buf);
+        source = digest(buf);
+      }
+
+      // Same trick with byte retrieval. Only every 8th.
+      if ((j & 0x7) == 0x7) {
+        byteV = source[(j & 0xff) >> 3];
+      }
+
+      const bitV = (byteV >> (j & 0x7)) & 0x1;
+
+      if (bitV == 1) {
+        // swap the pair items
+        const tmp = input[j];
+        input[j] = input[i];
+        input[i] = tmp;
+      }
+      // -- step() fn end
     }
 
     // Now repeat, but for the part after the pivot.
@@ -178,20 +170,41 @@ function innerShuffleList(config: IBeaconConfig, input: ValidatorIndex[], seed: 
     // Again, seed and round input is in place, just update the position.
     // We start at the end, and work back to the mirror point.
     // This makes us process each pear exactly once (instead of unnecessarily twice, like in the spec)
-    setPositionUint32(end >> 8);
-    source = hash(buf);
+    setPositionUint32(end >> 8, buf);
+    source = digest(buf);
     byteV = source[(end & 0xff) >> 3];
-    i = pivot + 1;
-    j = end;
-    while (i < mirror) {
-      step();
+    for (let i = pivot + 1, j; i < mirror; i++) {
+      j = end - i + pivot + 1;
+      // -- step() fn start
+      // The pair is i,j. With j being the bigger of the two, hence the "position" identifier of the pair.
+      // Every 256th bit (aligned to j).
+      if ((j & 0xff) == 0xff) {
+        // just overwrite the last part of the buffer, reuse the start (seed, round)
+        setPositionUint32(j >> 8, buf);
+        source = digest(buf);
+      }
+
+      // Same trick with byte retrieval. Only every 8th.
+      if ((j & 0x7) == 0x7) {
+        byteV = source[(j & 0xff) >> 3];
+      }
+
+      const bitV = (byteV >> (j & 0x7)) & 0x1;
+
+      if (bitV == 1) {
+        // swap the pair items
+        const tmp = input[j];
+        input[j] = input[i];
+        input[i] = tmp;
+      }
+      // -- step() fn end
     }
 
     // go forwards?
     if (dir) {
       // -> shuffle
       r += 1;
-      if (r == config.params.SHUFFLE_ROUND_COUNT) {
+      if (r == SHUFFLE_ROUND_COUNT) {
         break;
       }
     } else {

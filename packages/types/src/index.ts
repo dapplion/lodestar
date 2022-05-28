@@ -1,24 +1,4 @@
-// Export IPhase0SSZTypes interface & constants
-export * from "./phase0/ssz";
-// Export namespaced phase0 types
-export * as phase0 from "./phase0";
-
-// Export IAltairSSZTypes interface & constants
-export * from "./altair/ssz";
-// Export namespaced phase0 types
-export * as altair from "./altair";
-
-// Export IPhase1SSZTypes interface & constants
-export * from "./phase1/ssz";
-// Export namespaced phase0 types
-export * as phase1 from "./phase1";
-
-// Export union types
-export * as allForks from "./allForks";
-// Export IAllForksSSZTypes
-export {IAllForksSSZTypes} from "./allForks";
-
-// Export non-namespaced primitive types
-export * from "./primitive/types";
-// Export IBeaconSSZTypes interface and constructor
-export * from "./IBeaconSSZTypes";
+export * from "./types.js";
+export * as ssz from "./sszTypes.js";
+// String type
+export {StringType} from "./utils/StringType.js";

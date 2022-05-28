@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {parseBeaconParamsArgs} from "../../../src/options/paramsOptions";
-import {IBeaconParamsUnparsed} from "../../../src/config/types";
+import {parseBeaconParamsArgs} from "../../../src/options/paramsOptions.js";
+import {IBeaconParamsUnparsed} from "../../../src/config/types.js";
 
 describe("options / paramsOptions", () => {
-  it("Should parse BeaconNodeArgs", () => {
+  it("Should parse BeaconParams", () => {
     // Cast to match the expected fully defined type
     const beaconParamsArgs = {
       "params.GENESIS_FORK_VERSION": "0x00000001",

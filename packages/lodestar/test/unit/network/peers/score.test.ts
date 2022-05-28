@@ -1,8 +1,7 @@
 import {expect} from "chai";
 import PeerId from "peer-id";
-import {phase0} from "@chainsafe/lodestar-types";
-import {PeerAction, ScoreState, PeerRpcScoreStore} from "../../../../src/network/peers/score";
-import {IPeerMetadataStore} from "../../../../src/network/peers";
+import sinon from "sinon";
+import {PeerAction, ScoreState, PeerRpcScoreStore, updateGossipsubScores} from "../../../../src/network/peers/score.js";
 
 describe("simple block provider score tracking", function () {
   const peer = PeerId.createFromB58String("Qma9T5YraSnpRDZqRR4krcSJabThc8nwZuJV3LercPHufi");
@@ -10,14 +9,9 @@ describe("simple block provider score tracking", function () {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   function mockStore() {
-    const store: IPeerMetadataStore = {
-      encoding: new PeerMap<any>(),
-      metadata: new PeerMap<any>(),
-      rpcScore: new PeerMap<number>(),
-      rpcScoreLastUpdate: new PeerMap<number>(),
-      status: new PeerMap<phase0.Status>(),
-    };
-    return {store, scoreStore: new PeerRpcScoreStore(store)};
+    const scoreStore = new PeerRpcScoreStore();
+    const peerScores = scoreStore["scores"];
+    return {scoreStore, peerScores};
   }
 
   it("Should return default score, without any previous action", function () {
@@ -34,7 +28,7 @@ describe("simple block provider score tracking", function () {
   ];
 
   for (const [peerAction, times] of timesToBan)
-    it(`Should ban peer after ${times} ${peerAction}`, () => {
+    it(`Should ban peer after ${times} ${peerAction}`, async () => {
       const {scoreStore} = mockStore();
       for (let i = 0; i < times; i++) scoreStore.applyAction(peer, peerAction);
       expect(scoreStore.getScoreState(peer)).to.be.equal(ScoreState.Banned);
@@ -49,14 +43,17 @@ describe("simple block provider score tracking", function () {
   ];
   for (const [minScore, timeToDecay] of decayTimes)
     it(`Should decay MIN_SCORE to ${minScore} after ${timeToDecay} ms`, () => {
-      const {store, scoreStore} = mockStore();
-      store.rpcScore.set(peer, MIN_SCORE);
-      store.rpcScoreLastUpdate.set(peer, Date.now() - timeToDecay * factorForJsBadMath);
-      scoreStore.update(peer);
+      const {scoreStore, peerScores} = mockStore();
+      const peerScore = peerScores.get(peer.toB58String());
+      if (peerScore) {
+        peerScore["lastUpdate"] = Date.now() - timeToDecay * factorForJsBadMath;
+        peerScore["lodestarScore"] = MIN_SCORE;
+      }
+      scoreStore.update();
       expect(scoreStore.getScore(peer)).to.be.greaterThan(minScore);
     });
 
-  it("should not go belove min score", function () {
+  it("should not go below min score", function () {
     const {scoreStore} = mockStore();
     scoreStore.applyAction(peer, PeerAction.Fatal);
     scoreStore.applyAction(peer, PeerAction.Fatal);
@@ -64,12 +61,30 @@ describe("simple block provider score tracking", function () {
   });
 });
 
-class PeerMap<T> {
-  map = new Map<string, T>();
-  get(peer: PeerId): T | undefined {
-    return this.map.get(peer.toB58String());
-  }
-  set(peer: PeerId, value: T): void {
-    this.map.set(peer.toB58String(), value);
-  }
-}
+describe("updateGossipsubScores", function () {
+  const sandbox = sinon.createSandbox();
+  const peerRpcScoresStub = sandbox.createStubInstance(PeerRpcScoreStore);
+
+  this.afterEach(() => {
+    sandbox.restore();
+  });
+
+  it("should update gossipsub peer scores", () => {
+    updateGossipsubScores(
+      peerRpcScoresStub,
+      new Map([
+        ["a", 10],
+        ["b", -10],
+        ["c", -20],
+        ["d", -5],
+      ]),
+      2
+    );
+    expect(peerRpcScoresStub.updateGossipsubScore.calledWith("a", 10, false)).to.be.true;
+    // should ignore b d since they are 2 biggest negative scores
+    expect(peerRpcScoresStub.updateGossipsubScore.calledWith("b", -10, true)).to.be.true;
+    expect(peerRpcScoresStub.updateGossipsubScore.calledWith("d", -5, true)).to.be.true;
+    // should not ignore c as it's lowest negative scores
+    expect(peerRpcScoresStub.updateGossipsubScore.calledWith("c", -20, false)).to.be.true;
+  });
+});

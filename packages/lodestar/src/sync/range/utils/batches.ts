@@ -1,5 +1,5 @@
 import {Epoch} from "@chainsafe/lodestar-types";
-import {Batch, BatchOpts, BatchStatus} from "../batch";
+import {Batch, BatchOpts, BatchStatus} from "../batch.js";
 
 /**
  * Validates that the status and ordering of batches is valid
@@ -75,7 +75,7 @@ export function toBeProcessedStartEpoch(batches: Batch[], startEpoch: Epoch, opt
  * Compute the startEpoch of the next batch to be downloaded
  */
 export function toBeDownloadedStartEpoch(batches: Batch[], startEpoch: Epoch, opts: BatchOpts): Epoch {
-  const lastBatch: undefined | Batch = batches[batches.length - 1];
+  const lastBatch = batches[batches.length - 1] as undefined | Batch;
   return lastBatch ? lastBatch.startEpoch + opts.epochsPerBatch : startEpoch;
 }
 

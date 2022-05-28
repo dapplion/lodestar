@@ -1,30 +1,40 @@
-import {isValidVoluntaryExit} from "@chainsafe/lodestar-beacon-state-transition";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {phase0} from "@chainsafe/lodestar-types";
+import {phase0, allForks} from "@chainsafe/lodestar-beacon-state-transition";
 import {IBeaconChain} from "..";
-import {VoluntaryExitError, VoluntaryExitErrorCode} from "../errors/voluntaryExitError";
-import {IBeaconDb} from "../../db";
+import {VoluntaryExitError, VoluntaryExitErrorCode, GossipAction} from "../errors/index.js";
 
 export async function validateGossipVoluntaryExit(
-  config: IBeaconConfig,
   chain: IBeaconChain,
-  db: IBeaconDb,
   voluntaryExit: phase0.SignedVoluntaryExit
 ): Promise<void> {
-  if (await db.voluntaryExit.has(voluntaryExit.message.validatorIndex)) {
-    throw new VoluntaryExitError({
-      code: VoluntaryExitErrorCode.EXIT_ALREADY_EXISTS,
+  // [IGNORE] The voluntary exit is the first valid voluntary exit received for the validator with index
+  // signed_voluntary_exit.message.validator_index.
+  if (chain.opPool.hasSeenVoluntaryExit(voluntaryExit.message.validatorIndex)) {
+    throw new VoluntaryExitError(GossipAction.IGNORE, {
+      code: VoluntaryExitErrorCode.ALREADY_EXISTS,
     });
   }
 
-  const state = await chain.regen.getCheckpointState({
-    root: chain.forkChoice.getHeadRoot(),
-    epoch: voluntaryExit.message.epoch,
-  });
+  // What state should the voluntaryExit validate against?
+  //
+  // The only condtion that is time sensitive and may require a non-head state is
+  // -> Validator is active && validator has not initiated exit
+  // The voluntaryExit.epoch must be in the past but the validator's status may change in recent epochs.
+  // We dial the head state to the current epoch to get the current status of the validator. This is
+  // relevant on periods of many skipped slots.
+  const state = await chain.getHeadStateAtCurrentEpoch();
 
-  if (!isValidVoluntaryExit(config, state, voluntaryExit)) {
-    throw new VoluntaryExitError({
-      code: VoluntaryExitErrorCode.INVALID_EXIT,
+  // [REJECT] All of the conditions within process_voluntary_exit pass validation.
+  // verifySignature = false, verified in batch below
+  if (!allForks.isValidVoluntaryExit(state, voluntaryExit, false)) {
+    throw new VoluntaryExitError(GossipAction.REJECT, {
+      code: VoluntaryExitErrorCode.INVALID,
+    });
+  }
+
+  const signatureSet = allForks.getVoluntaryExitSignatureSet(state, voluntaryExit);
+  if (!(await chain.bls.verifySignatureSets([signatureSet], {batchable: true}))) {
+    throw new VoluntaryExitError(GossipAction.REJECT, {
+      code: VoluntaryExitErrorCode.INVALID_SIGNATURE,
     });
   }
 }

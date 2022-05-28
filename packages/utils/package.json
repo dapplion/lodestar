@@ -11,40 +11,41 @@
   "bugs": {
     "url": "https://github.com/ChainSafe/lodestar/issues"
   },
-  "version": "0.18.0",
-  "main": "lib/index.js",
+  "version": "0.37.0",
+  "type": "module",
+  "exports": "./lib/index.js",
   "files": [
     "lib/**/*.d.ts",
     "lib/**/*.js",
-    "lib/**/*.js.map"
+    "lib/**/*.js.map",
+    "*.d.ts",
+    "*.js"
   ],
   "scripts": {
     "clean": "rm -rf lib && rm -f *.tsbuildinfo",
-    "build": "concurrently \"yarn build:lib\" \"yarn build:types\"",
+    "build": "tsc -p tsconfig.build.json",
     "build:typedocs": "typedoc --exclude src/index.ts --out typedocs src",
-    "build:lib": "babel src -x .ts -d lib --source-maps",
     "build:lib:watch": "yarn run build:lib --watch",
     "build:release": "yarn clean && yarn build && yarn build:typedocs",
-    "build:types": "tsc -p tsconfig.build.json",
     "build:types:watch": "yarn run build:types --watch",
+    "check-build": "node -e \"(async function() { await import('./lib/index.js') })()\"",
     "check-types": "tsc",
     "lint": "eslint --color --ext .ts src/ test/",
     "lint:fix": "yarn run lint --fix",
-    "prepublishOnly": "yarn build",
     "pretest": "yarn run check-types",
-    "test:unit": "mocha 'test/**/*.test.ts'"
+    "test:unit": "mocha 'test/**/*.test.ts'",
+    "check-readme": "typescript-docs-verifier"
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@chainsafe/bls": "5.1.0",
-    "@chainsafe/ssz": "^0.8.0",
-    "abort-controller": "^3.0.0",
-    "any-signal": "2.1.1",
+    "@chainsafe/as-sha256": "^0.3.1",
+    "any-signal": "2.1.2",
     "bigint-buffer": "^1.1.5",
-    "chalk": "^2.4.2",
-    "event-iterator": "^2.0.0",
+    "case": "^1.6.3",
+    "chalk": "^4.1.2",
     "js-yaml": "^3.13.1",
     "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5",
     "winston-transport": "^4.3.0"
   },
   "devDependencies": {
@@ -54,7 +55,7 @@
   },
   "keywords": [
     "ethereum",
-    "eth2",
+    "eth-consensus",
     "beacon",
     "blockchain"
   ]

@@ -2,12 +2,12 @@
  * @module eth1
  */
 
-import {AbortSignal} from "abort-controller";
-import {IBatchDepositEvents, IEth1Provider, IEth1StreamParams} from "./interface";
-import {groupDepositEventsByBlock} from "./utils/groupDepositEventsByBlock";
-import {optimizeNextBlockDiffForGenesis} from "./utils/optimizeNextBlockDiffForGenesis";
+import {Eth1Block, IBatchDepositEvents, IEth1Provider, IEth1StreamParams} from "./interface.js";
+import {groupDepositEventsByBlock} from "./utils/groupDepositEventsByBlock.js";
+import {optimizeNextBlockDiffForGenesis} from "./utils/optimizeNextBlockDiffForGenesis.js";
 import {sleep} from "@chainsafe/lodestar-utils";
 import {phase0} from "@chainsafe/lodestar-types";
+import {parseEth1Block} from "./provider/eth1Provider.js";
 
 /**
  * Phase 1 of genesis building.
@@ -47,16 +47,20 @@ export async function* getDepositsAndBlockStreamForGenesis(
   provider: IEth1Provider,
   params: IEth1StreamParams,
   signal?: AbortSignal
-): AsyncGenerator<[phase0.DepositEvent[], phase0.Eth1Block]> {
+): AsyncGenerator<[phase0.DepositEvent[], Eth1Block]> {
   fromBlock = Math.max(fromBlock, provider.deployBlock);
   fromBlock = Math.min(fromBlock, await getRemoteFollowBlock(provider, params));
   let toBlock = fromBlock; // First, fetch only the first block
 
   while (true) {
-    const [logs, block] = await Promise.all([
+    const [logs, blockRaw] = await Promise.all([
       provider.getDepositEvents(fromBlock, toBlock),
       provider.getBlockByNumber(toBlock),
     ]);
+
+    if (!blockRaw) throw Error(`No block found for number ${toBlock}`);
+    const block = parseEth1Block(blockRaw);
+
     yield [logs, block];
 
     const remoteFollowBlock = await getRemoteFollowBlock(provider, params);

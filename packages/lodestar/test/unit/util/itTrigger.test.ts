@@ -1,7 +1,7 @@
 import chai, {expect} from "chai";
 import chaiAsPromised from "chai-as-promised";
 import all from "it-all";
-import {ItTrigger} from "../../../src/util/itTrigger";
+import {ItTrigger} from "../../../src/util/itTrigger.js";
 
 chai.use(chaiAsPromised);
 
@@ -47,5 +47,22 @@ describe("util / itTrigger", () => {
     }, 5);
 
     await expect(all(itTrigger)).to.be.rejectedWith(testError);
+  });
+
+  it("ItTrigger as a single thread processor", async () => {
+    const processor = new ItTrigger();
+
+    for (let i = 0; i <= 4; i++) {
+      setTimeout(() => {
+        processor.trigger();
+      }, i * 5);
+    }
+
+    let counter = 0;
+    for await (const _ of processor) {
+      if (counter++ >= 3) {
+        break;
+      }
+    }
   });
 });

@@ -1,92 +1,80 @@
+import {digest} from "@chainsafe/as-sha256";
 import {compress, uncompress} from "snappyjs";
-import {hash} from "@chainsafe/ssz";
-import {GOSSIP_MSGID_LENGTH, MESSAGE_DOMAIN_INVALID_SNAPPY, MESSAGE_DOMAIN_VALID_SNAPPY} from "./constants";
-import {GossipEncoding, IGossipMessage} from "./interface";
+import {intToBytes} from "@chainsafe/lodestar-utils";
+import {ForkName} from "@chainsafe/lodestar-params";
+import {MESSAGE_DOMAIN_VALID_SNAPPY} from "./constants.js";
+import {GossipTopicCache} from "./topic.js";
+import {RPC} from "libp2p-gossipsub/src/message/rpc";
+import {GossipsubMessage} from "libp2p-gossipsub/src/types";
 
-export function getTopicEncoding(topic: string): GossipEncoding {
-  if (topic.endsWith(GossipEncoding.ssz)) {
-    return GossipEncoding.ssz;
-  }
-
-  if (topic.endsWith(GossipEncoding.ssz_snappy)) {
-    return GossipEncoding.ssz_snappy;
-  }
-
-  throw `Unknown gossip encoding "${topic.split("/").pop()}"`;
-}
-
-export function decodeMessageData(encoding: GossipEncoding, data: Uint8Array): Uint8Array {
-  switch (encoding) {
-    case GossipEncoding.ssz_snappy:
-      return uncompress(data);
-
-    case GossipEncoding.ssz:
-      return data;
-
-    default:
-      throw new Error(`Unsupported encoding ${encoding}`);
-  }
-}
-
-export function encodeMessageData(encoding: GossipEncoding, data: Uint8Array): Uint8Array {
-  switch (encoding) {
-    case GossipEncoding.ssz_snappy:
-      return compress(data);
-
-    case GossipEncoding.ssz:
-      return data;
-
-    default:
-      throw new Error(`Unsupported encoding ${encoding}`);
-  }
-}
-
-export function getMessageDecoder(encoding: GossipEncoding): (message: IGossipMessage) => Uint8Array {
-  switch (encoding) {
-    case GossipEncoding.ssz_snappy:
-      return (message) => {
-        if (message.uncompressed) {
-          return message.uncompressed;
-        } else {
-          return uncompress(message.data);
-        }
-      };
-
-    case GossipEncoding.ssz:
-      return (message) => message.data;
-
-    default:
-      throw new Error(`unsupported encoding ${encoding}`);
+/**
+ * The function used to generate a gossipsub message id
+ * We use the first 8 bytes of SHA256(data) for content addressing
+ */
+export function fastMsgIdFn(rpcMsg: RPC.IMessage): string {
+  if (rpcMsg.data) {
+    return Buffer.from(digest(rpcMsg.data)).slice(0, 8).toString("hex");
+  } else {
+    return "0000000000000000";
   }
 }
 
 /**
- * Computing the message id requires uncompressing data, if applicable
- * Return both the computed message id and uncompressed data
+ * Only valid msgId. Messages that fail to snappy_decompress() are not tracked
  */
-export function computeMsgId(topic: string, data: Uint8Array): {msgId: Uint8Array; uncompressed?: Uint8Array} {
-  const encoding = getTopicEncoding(topic);
+export function msgIdFn(gossipTopicCache: GossipTopicCache, msg: GossipsubMessage): Uint8Array {
+  const topic = gossipTopicCache.getTopic(msg.topic);
 
-  let dataToHash: Uint8Array;
-  let uncompressed: Uint8Array | undefined;
-  switch (encoding) {
-    case GossipEncoding.ssz_snappy:
-      try {
-        uncompressed = uncompress(data);
-        dataToHash = Buffer.concat([MESSAGE_DOMAIN_VALID_SNAPPY, uncompressed]);
-      } catch (e) {
-        dataToHash = Buffer.concat([MESSAGE_DOMAIN_INVALID_SNAPPY, data]);
-      }
+  let vec: Uint8Array[];
+
+  switch (topic.fork) {
+    // message id for phase0.
+    // ```
+    // SHA256(MESSAGE_DOMAIN_VALID_SNAPPY + snappy_decompress(message.data))[:20]
+    // ```
+    case ForkName.phase0:
+      vec = [MESSAGE_DOMAIN_VALID_SNAPPY, msg.data];
       break;
 
-    default:
-      uncompressed = data;
-      dataToHash = data;
+    // message id for altair.
+    // ```
+    // SHA256(
+    //   MESSAGE_DOMAIN_VALID_SNAPPY +
+    //   uint_to_bytes(uint64(len(message.topic))) +
+    //   message.topic +
+    //   snappy_decompress(message.data)
+    // )[:20]
+    // ```
+    // https://github.com/ethereum/eth2.0-specs/blob/v1.1.0-alpha.7/specs/altair/p2p-interface.md#topics-and-messages
+    case ForkName.altair:
+    case ForkName.bellatrix: {
+      vec = [MESSAGE_DOMAIN_VALID_SNAPPY, intToBytes(msg.topic.length, 8), Buffer.from(msg.topic), msg.data];
       break;
+    }
   }
 
-  return {
-    msgId: hash(dataToHash).slice(0, GOSSIP_MSGID_LENGTH),
-    uncompressed,
-  };
+  return digest(Buffer.concat(vec)).slice(0, 20);
+}
+
+export class DataTransformSnappy {
+  constructor(private readonly gossipTopicCache: GossipTopicCache) {}
+
+  /**
+   * Takes the data published by peers on a topic and transforms the data.
+   * Should be the reverse of outboundTransform(). Example:
+   * - `inboundTransform()`: decompress snappy payload
+   * - `outboundTransform()`: compress snappy payload
+   */
+  inboundTransform(topicStr: string, data: Uint8Array): Uint8Array {
+    // No need to parse topic, everything is snappy compressed
+    return uncompress(data);
+  }
+  /**
+   * Takes the data to be published (a topic and associated data) transforms the data. The
+   * transformed data will then be used to create a `RawGossipsubMessage` to be sent to peers.
+   */
+  outboundTransform(topicStr: string, data: Uint8Array): Uint8Array {
+    // No need to parse topic, everything is snappy compressed
+    return compress(data);
+  }
 }

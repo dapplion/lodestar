@@ -1,11 +1,12 @@
-import {AbortController} from "abort-controller";
 import all from "it-all";
 import pipe from "it-pipe";
 import {LodestarError, sleep as _sleep} from "@chainsafe/lodestar-utils";
-import {timeoutOptions} from "../../../../../src/constants";
-import {responseTimeoutsHandler} from "../../../../../src/network/reqresp/request/responseTimeoutsHandler";
-import {RequestErrorCode, RequestInternalError} from "../../../../../src/network/reqresp/request/errors";
-import {expectRejectedWithLodestarError} from "../../../../utils/errors";
+import {timeoutOptions} from "../../../../../src/constants/index.js";
+import {responseTimeoutsHandler} from "../../../../../src/network/reqresp/request/responseTimeoutsHandler.js";
+import {RequestErrorCode, RequestInternalError} from "../../../../../src/network/reqresp/request/errors.js";
+import {expectRejectedWithLodestarError} from "../../../../utils/errors.js";
+
+/* eslint-disable require-yield */
 
 describe("network / reqresp / request / responseTimeoutsHandler", () => {
   let controller: AbortController;
@@ -70,7 +71,6 @@ describe("network / reqresp / request / responseTimeoutsHandler", () => {
           await sleep(20);
         }
       },
-      // eslint-disable-next-line require-yield
       responseDecoder: async function* (source) {
         for await (const _ of source) {
           // Never yield a response_chunk
@@ -78,7 +78,30 @@ describe("network / reqresp / request / responseTimeoutsHandler", () => {
       },
       error: new RequestInternalError({code: RequestErrorCode.RESP_TIMEOUT}),
     },
-    // TODO: Test a `sleep(100000)`
+    {
+      // Upstream "abortable-iterator" never throws with an infinite sleep.
+      id: "Infinite sleep on first byte",
+      timeouts: {TTFB_TIMEOUT: 1, RESP_TIMEOUT: 1},
+      source: async function* () {
+        await sleep(100000);
+      },
+      responseDecoder: async function* (source) {
+        yield* source;
+      },
+      error: new RequestInternalError({code: RequestErrorCode.TTFB_TIMEOUT}),
+    },
+    {
+      id: "Infinite sleep on second chunk",
+      timeouts: {TTFB_TIMEOUT: 1, RESP_TIMEOUT: 1},
+      source: async function* () {
+        yield Buffer.from([0]);
+        await sleep(100000);
+      },
+      responseDecoder: async function* (source) {
+        yield* source;
+      },
+      error: new RequestInternalError({code: RequestErrorCode.RESP_TIMEOUT}),
+    },
   ];
   /* eslint-enable @typescript-eslint/naming-convention */
 

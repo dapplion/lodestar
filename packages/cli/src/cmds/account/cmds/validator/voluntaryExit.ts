@@ -1,14 +1,15 @@
-import {ICliCommand, initBLS, YargsError} from "../../../../util";
-import {IGlobalArgs} from "../../../../options";
-import {Validator} from "@chainsafe/lodestar-validator";
-import {ValidatorDirManager} from "../../../../validatorDir";
-import {getAccountPaths} from "../../paths";
-import {getBeaconConfigFromArgs} from "../../../../config";
-import {errorLogger} from "../../../../util/logger";
-import {IValidatorCliArgs, validatorOptions} from "../../../validator/options";
+import {SignerType, SlashingProtection, Validator} from "@chainsafe/lodestar-validator";
+import {readdirSync} from "node:fs";
+import {LevelDbController} from "@chainsafe/lodestar-db";
 import inquirer from "inquirer";
-import {readdirSync} from "fs";
-import {getSlashingProtection} from "./slashingProtection/utils";
+import {ICliCommand} from "../../../../util/index.js";
+import {IGlobalArgs} from "../../../../options/index.js";
+import {ValidatorDirManager} from "../../../../validatorDir/index.js";
+import {getAccountPaths} from "../../paths.js";
+import {getBeaconConfigFromArgs} from "../../../../config/index.js";
+import {errorLogger} from "../../../../util/logger.js";
+import {IValidatorCliArgs, validatorOptions} from "../../../validator/options.js";
+import {getValidatorPaths} from "../../../validator/paths.js";
 
 /* eslint-disable no-console */
 
@@ -48,8 +49,6 @@ like to choose for the voluntary exit.",
   },
 
   handler: async (args) => {
-    await initBLS();
-
     const force = args.force;
     let publicKey = args.publicKey;
     const accountPaths = getAccountPaths(args);
@@ -77,8 +76,8 @@ like to choose for the voluntary exit.",
 
 WARNING: THIS CANNOT BE UNDONE.
 
-ONCE YOU VOLUNTARILY EXIT, YOU WILL NOT BE ABLE TO WITHDRAW 
-YOUR DEPOSIT UNTIL PHASE 2 IS LAUNCHED WHICH MAY NOT 
+ONCE YOU VOLUNTARILY EXIT, YOU WILL NOT BE ABLE TO WITHDRAW
+YOUR DEPOSIT UNTIL PHASE 2 IS LAUNCHED WHICH MAY NOT
 BE UNTIL AT LEAST TWO YEARS AFTER THE PHASE 0 MAINNET LAUNCH.
 
 `,
@@ -91,30 +90,36 @@ BE UNTIL AT LEAST TWO YEARS AFTER THE PHASE 0 MAINNET LAUNCH.
     console.log(`Initiating voluntary exit for validator ${publicKey}`);
 
     let secretKey;
-
     try {
       secretKey = await validatorDirManager.decryptValidator(publicKey, {force});
-    } catch (error) {
-      throw new YargsError(error);
+    } catch (e) {
+      if ((e as Error).message.indexOf("EEXIST") !== -1) {
+        console.log(`Decrypting keystore failed with error ${e}. use --force to override`);
+      }
+      throw e;
     }
-    if (!secretKey) throw new YargsError("No validator keystores found");
+
     console.log(`Decrypted keystore for validator ${publicKey}`);
 
+    const validatorPaths = getValidatorPaths(args);
+    const dbPath = validatorPaths.validatorsDbDir;
     const config = getBeaconConfigFromArgs(args);
-
-    const validatorClient = new Validator({
-      slashingProtection: getSlashingProtection(args),
+    const logger = errorLogger();
+    const dbOps = {
       config,
+      controller: new LevelDbController({name: dbPath}, {logger}),
+    };
+    const slashingProtection = new SlashingProtection(dbOps);
+
+    const validatorClient = await Validator.initializeFromBeaconNode({
+      slashingProtection,
+      dbOps,
       api: args.server,
-      secretKeys: [secretKey],
+      signers: [{type: SignerType.Local, secretKey}],
       logger: errorLogger(),
       graffiti: args.graffiti,
     });
 
-    try {
-      await validatorClient.voluntaryExit(publicKey, args.exitEpoch);
-    } catch (error) {
-      throw new Error(error);
-    }
+    await validatorClient.voluntaryExit(publicKey, args.exitEpoch);
   },
 };

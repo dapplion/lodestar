@@ -1,14 +1,17 @@
 import {expect} from "chai";
 import {LodestarError, mapValues} from "@chainsafe/lodestar-utils";
-import {Json} from "@chainsafe/ssz";
 
-export function expectThrowsLodestarError(fn: () => void, expectedErr: LodestarError<any>): void {
+export function expectThrowsLodestarError(fn: () => void, expectedErr: LodestarError<any> | string): void {
   try {
     const value = fn();
     const json = JSON.stringify(value, null, 2);
     throw Error(`Expected fn to throw but returned value: \n\n\t${json}`);
   } catch (e) {
-    expectLodestarError(e, expectedErr);
+    if (typeof expectedErr === "string") {
+      expectLodestarErrorCode(e as LodestarError<any>, expectedErr);
+    } else {
+      expectLodestarError(e as LodestarError<any>, expectedErr);
+    }
   }
 }
 
@@ -22,9 +25,9 @@ export async function expectRejectedWithLodestarError(
     throw Error(`Expected promise to reject but returned value: \n\n\t${json}`);
   } catch (e) {
     if (typeof expectedErr === "string") {
-      expectLodestarErrorCode(e, expectedErr);
+      expectLodestarErrorCode(e as LodestarError<any>, expectedErr);
     } else {
-      expectLodestarError(e, expectedErr);
+      expectLodestarError(e as LodestarError<any>, expectedErr);
     }
   }
 }
@@ -45,9 +48,9 @@ export function expectLodestarError<T extends {code: string}>(err1: LodestarErro
   expect(errMeta1).to.deep.equal(errMeta2, "Wrong LodestarError metadata");
 }
 
-export function getErrorMetadata<T extends {code: string}>(err: LodestarError<T> | Error | Json): Json {
+export function getErrorMetadata<T extends {code: string}>(err: LodestarError<T> | Error | unknown): unknown {
   if (err instanceof LodestarError) {
-    return mapValues(err.getMetadata(), (value) => getErrorMetadata(value));
+    return mapValues(err.getMetadata(), (value) => getErrorMetadata(value as any));
   } else if (err instanceof Error) {
     return err.message;
   } else {

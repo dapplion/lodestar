@@ -2,6 +2,9 @@ name: Tests
 
 on: [pull_request, push]
 
+env:
+  GOERLI_RPC_DEFAULT_URL: https://goerli.infura.io/v3/84842078b09946638c03157f83405213
+
 jobs:
   tests-main:
     name: Tests
@@ -9,9 +12,12 @@ jobs:
     steps:
       # <common-build> - Uses YAML anchors in the future
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+      - uses: actions/setup-node@v2
         with:
-          node-version: "12.14.1"
+          node-version: "lts/gallium"
+      - name: Node.js version
+        id: node
+        run: echo "::set-output name=v8CppApiVersion::$(node --print "process.versions.modules")"
       - name: Restore dependencies
         uses: actions/cache@master
         id: cache-deps
@@ -19,36 +25,46 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}-ignore-optional
+          key: ${{ runner.os }}-${{ steps.node.outputs.v8CppApiVersion }}-${{ hashFiles('**/yarn.lock', '**/package.json') }}
       - name: Install & build
         if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile --ignore-optional
+        run: yarn install --frozen-lockfile --ignore-optional && yarn build
       - name: Build
-        run: node_modules/.bin/lerna run build
+        run: yarn build
         if: steps.cache-deps.outputs.cache-hit == 'true'
       # </common-build>
-      - name: Lint
-        run: yarn lint
+
+      # Cache validator slashing protection data tests
+      - name: Restore spec tests cache
+        uses: actions/cache@master
+        with:
+          path: packages/validator/spec-tests
+          key: spec-test-data-${{ hashFiles('packages/validator/test/spec/params.ts') }}
+
+      # Misc sanity checks
+      - name: Lint Grafana dashboards
+        run: node scripts/validate-grafana-dashboard.mjs ./dashboards
+      - name: Test root binary exists
+        run: ./lodestar --version
+      - name: Reject yarn.lock changes
+        run: .github/workflows/scripts/reject_yarn_lock_changes.sh
+        # Run only on forks
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+
       - name: Check Types
         run: yarn run check-types
+      # TODO: uncomment after https://github.com/bbc/typescript-docs-verifier/issues/17 is resolved
+      # - name: README check
+      #   run: yarn run check-readme
+      - name: Lint
+        run: yarn lint
+      - name: Check Build
+        run: yarn check-build
       - name: Unit tests
         run: yarn test:unit
       - name: Upload coverage data
         run: yarn coverage
       - name: E2e tests
         run: yarn test:e2e
-
-  docker:
-    name: Build docker image
-    runs-on: ubuntu-latest
-    needs: [tests-main]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v2
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - run: docker build --tag chainsafe/lodestar:latest .
-      - run: docker push chainsafe/lodestar:latest
+        env:
+          GOERLI_RPC_URL: ${{ secrets.GOERLI_RPC_URL!=0 && secrets.GOERLI_RPC_URL || env.GOERLI_RPC_DEFAULT_URL }}

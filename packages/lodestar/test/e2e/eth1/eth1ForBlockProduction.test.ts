@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import "mocha";
 import {expect} from "chai";
-import {promisify} from "es6-promisify";
-// @ts-ignore
+import {promisify} from "node:util";
 import leveldown from "leveldown";
-import {AbortController} from "abort-controller";
 import {sleep} from "@chainsafe/lodestar-utils";
 import {LevelDbController} from "@chainsafe/lodestar-db";
 
-import {Eth1ForBlockProduction, Eth1Provider} from "../../../src/eth1";
-import {IEth1Options} from "../../../src/eth1/options";
-import {getTestnetConfig, testnet} from "../../utils/testnet";
-import {testLogger} from "../../utils/logger";
-import {BeaconDb} from "../../../src/db";
-import {generateState} from "../../utils/state";
-import {fromHexString, List, toHexString} from "@chainsafe/ssz";
-import {Root} from "@chainsafe/lodestar-types";
-import {createCachedBeaconState} from "@chainsafe/lodestar-beacon-state-transition";
+import {Eth1ForBlockProduction} from "../../../src/eth1/index.js";
+import {Eth1Options} from "../../../src/eth1/options.js";
+import {getTestnetConfig, medallaTestnetConfig} from "../../utils/testnet.js";
+import {testLogger} from "../../utils/logger.js";
+import {BeaconDb} from "../../../src/db/index.js";
+import {generateState} from "../../utils/state.js";
+import {fromHexString, toHexString} from "@chainsafe/ssz";
+import {ssz} from "@chainsafe/lodestar-types";
+import {Eth1Provider} from "../../../src/eth1/provider/eth1Provider.js";
+import {getGoerliRpcUrl} from "../../testParams.js";
+import {createCachedBeaconStateTest} from "../../utils/cachedBeaconState.js";
 
 const dbLocation = "./.__testdb";
 
@@ -31,16 +31,10 @@ const pyrmontDepositsDataRoot = [
 describe("eth1 / Eth1Provider", function () {
   this.timeout("2 min");
 
-  const eth1Options: IEth1Options = {
-    enabled: true,
-    providerUrl: testnet.providerUrl,
-    depositContractDeployBlock: testnet.depositBlock,
-  };
   const controller = new AbortController();
 
   const config = getTestnetConfig();
   const logger = testLogger();
-  const eth1Provider = new Eth1Provider(config, eth1Options);
 
   let db: BeaconDb;
   let dbController: LevelDbController;
@@ -48,7 +42,7 @@ describe("eth1 / Eth1Provider", function () {
 
   before(async () => {
     // Nuke DB to make sure it's empty
-    await promisify<void, string>(leveldown.destroy)(dbLocation);
+    await promisify<string>(leveldown.destroy)(dbLocation);
 
     dbController = new LevelDbController({name: dbLocation}, {logger});
     db = new BeaconDb({
@@ -63,17 +57,26 @@ describe("eth1 / Eth1Provider", function () {
     clearInterval(interval);
     controller.abort();
     await db.stop();
-    await promisify<void, string>(leveldown.destroy)(dbLocation);
+    await promisify<string>(leveldown.destroy)(dbLocation);
   });
 
   it("Should fetch real Pyrmont eth1 data for block proposing", async function () {
-    const eth1ForBlockProduction = new Eth1ForBlockProduction({
+    const eth1Options: Eth1Options = {
+      enabled: true,
+      providerUrls: [getGoerliRpcUrl()],
+      depositContractDeployBlock: medallaTestnetConfig.depositBlock,
+      unsafeAllowDepositDataOverwrite: false,
+    };
+    const eth1Provider = new Eth1Provider(config, eth1Options, controller.signal);
+
+    const eth1ForBlockProduction = new Eth1ForBlockProduction(eth1Options, {
       config,
       db,
-      eth1Provider,
       logger,
-      opts: eth1Options,
       signal: controller.signal,
+      eth1Provider,
+      clockEpoch: 0,
+      isMergeTransitionComplete: false,
     });
 
     // Resolves when Eth1ForBlockProduction has fetched both blocks and deposits
@@ -94,40 +97,39 @@ describe("eth1 / Eth1Provider", function () {
     if (eth1Datas.length === 0) throw Error("No eth1Datas");
     const {key: maxTimestamp, value: latestEth1Data} = eth1Datas[eth1Datas.length - 1];
 
-    const {SECONDS_PER_ETH1_BLOCK, ETH1_FOLLOW_DISTANCE} = config.params;
+    const {SECONDS_PER_ETH1_BLOCK, ETH1_FOLLOW_DISTANCE} = config;
     // block.timestamp + SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE <= period_start && ...
     const periodStart = maxTimestamp + SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE;
 
     // Compute correct deposit root tree
-    const depositRootTree = config.types.phase0.DepositDataRootList.createTreeBackedFromStruct(
-      pyrmontDepositsDataRoot.map((root) => fromHexString(root)) as List<Root>
+    const depositRootTree = ssz.phase0.DepositDataRootList.toViewDU(
+      pyrmontDepositsDataRoot.map((root) => fromHexString(root))
     );
 
-    const state = createCachedBeaconState(
-      config,
-      generateState(
-        {
-          // Set genesis time and slot so latestEth1Data is considered
-          slot: 0,
-          genesisTime: periodStart,
-          // No deposits processed yet
-          // eth1_deposit_index represents the next deposit index to be added
-          eth1DepositIndex: 0,
-          // Set eth1Data with deposit length to return them
-          eth1Data: {
-            depositCount: deposits.length,
-            depositRoot: depositRootTree.hashTreeRoot(),
-            blockHash: Buffer.alloc(32),
-          },
+    const tbState = generateState(
+      {
+        // Set genesis time and slot so latestEth1Data is considered
+        slot: 0,
+        genesisTime: periodStart,
+        // No deposits processed yet
+        // eth1_deposit_index represents the next deposit index to be added
+        eth1DepositIndex: 0,
+        // Set eth1Data with deposit length to return them
+        eth1Data: {
+          depositCount: deposits.length,
+          depositRoot: depositRootTree.hashTreeRoot(),
+          blockHash: Buffer.alloc(32),
         },
-        config
-      )
+      },
+      config
     );
+
+    const state = createCachedBeaconStateTest(tbState, config);
 
     const result = await eth1ForBlockProduction.getEth1DataAndDeposits(state);
     expect(result.eth1Data).to.deep.equal(latestEth1Data, "Wrong eth1Data for block production");
     expect(
-      result.deposits.map((deposit) => toHexString(config.types.phase0.DepositData.hashTreeRoot(deposit.data)))
+      result.deposits.map((deposit) => toHexString(ssz.phase0.DepositData.hashTreeRoot(deposit.data)))
     ).to.deep.equal(pyrmontDepositsDataRoot, "Wrong deposits for for block production");
   });
 });

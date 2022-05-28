@@ -1,10 +1,9 @@
 import {InterchangeFormatVersion} from "@chainsafe/lodestar-validator";
-import {Json} from "@chainsafe/ssz";
-import {ICliCommand, writeFile} from "../../../../../util";
-import {IGlobalArgs} from "../../../../../options";
-import {IAccountValidatorArgs} from "../options";
-import {ISlashingProtectionArgs} from "./options";
-import {getGenesisValidatorsRoot, getSlashingProtection} from "./utils";
+import {ICliCommand, writeFile} from "../../../../../util/index.js";
+import {IGlobalArgs} from "../../../../../options/index.js";
+import {IAccountValidatorArgs} from "../options.js";
+import {ISlashingProtectionArgs} from "./options.js";
+import {getGenesisValidatorsRoot, getSlashingProtection} from "./utils.js";
 
 /* eslint-disable no-console */
 
@@ -19,7 +18,7 @@ export const exportCmd: ICliCommand<IExportArgs, ISlashingProtectionArgs & IAcco
 
   examples: [
     {
-      command: "account validator slashing-protection export --network pyrmont --file interchange.json",
+      command: "account validator slashing-protection export --network prater --file interchange.json",
       description: "Export an interchange JSON file for all validators in the slashing protection DB",
     },
   ],
@@ -41,7 +40,7 @@ export const exportCmd: ICliCommand<IExportArgs, ISlashingProtectionArgs & IAcco
     const pubkeys = await slashingProtection.listPubkeys();
 
     const interchange = await slashingProtection.exportInterchange(genesisValidatorsRoot, pubkeys, formatVersion);
-    writeFile(args.file, (interchange as unknown) as Json);
+    writeFile(args.file, interchange);
 
     console.log("Export completed successfully");
   },

@@ -1,16 +1,16 @@
 import {expect} from "chai";
-import {config} from "@chainsafe/lodestar-config/minimal";
-import {List, TreeBacked} from "@chainsafe/ssz";
-import {allForks, phase0} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {generateState} from "../../../utils/state";
-import {filterBy} from "../../../utils/db";
+import {config} from "@chainsafe/lodestar-config/default";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
+import {BeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {generateState} from "../../../utils/state.js";
+import {filterBy} from "../../../utils/db.js";
 import {
   getEth1VotesToConsider,
   pickEth1Vote,
   votingPeriodStartTime,
   Eth1DataGetter,
-} from "../../../../src/eth1/utils/eth1Vote";
+} from "../../../../src/eth1/utils/eth1Vote.js";
 
 describe("eth1 / util / eth1Vote", function () {
   function generateEth1Vote(i: number): phase0.Eth1Data {
@@ -82,10 +82,10 @@ describe("eth1 / util / eth1Vote", function () {
 
     for (const testCase of testCases) {
       const {id, eth1DataVotesInState, votesToConsider, expectedEth1Vote} = testCase();
-      it(`get eth1 vote: ${id}`, async function () {
-        const state = generateState({slot: 5, eth1DataVotes: eth1DataVotesInState as List<phase0.Eth1Data>});
-        const eth1Vote = pickEth1Vote(config, state, votesToConsider);
-        expect(config.types.phase0.Eth1Data.equals(eth1Vote, expectedEth1Vote)).to.be.true;
+      it(id, async function () {
+        const state = generateState({slot: 5, eth1DataVotes: eth1DataVotesInState});
+        const eth1Vote = pickEth1Vote(state, votesToConsider);
+        expect(ssz.phase0.Eth1Data.toJson(eth1Vote)).to.deep.equal(ssz.phase0.Eth1Data.toJson(expectedEth1Vote));
       });
     }
   });
@@ -94,7 +94,7 @@ describe("eth1 / util / eth1Vote", function () {
     // Function array to scope votes in each test case defintion
     const testCases: (() => {
       id: string;
-      state: TreeBacked<allForks.BeaconState>;
+      state: BeaconStateAllForks;
       eth1Datas: IEth1DataWithTimestamp[];
       expectedVotesToConsider: phase0.Eth1Data[];
     })[] = [
@@ -132,7 +132,10 @@ describe("eth1 / util / eth1Vote", function () {
           filterBy(eth1Datas, timestampRange, (eth1Data) => eth1Data.timestamp);
 
         const votesToConsider = await getEth1VotesToConsider(config, state, eth1DataGetter);
-        expect(votesToConsider).to.deep.equal(expectedVotesToConsider);
+
+        expect(votesToConsider.map((eth1Data) => ssz.phase0.Eth1Data.toJson(eth1Data))).to.deep.equal(
+          expectedVotesToConsider.map((eth1Data) => ssz.phase0.Eth1Data.toJson(eth1Data))
+        );
       });
     }
   });
@@ -161,8 +164,8 @@ function getEth1DataBlock(eth1DataBlock: Partial<IEth1DataWithTimestamp>): IEth1
  * @param config
  * @param state
  */
-function getTimestampInRange(config: IBeaconConfig, state: TreeBacked<allForks.BeaconState>): number {
-  const {SECONDS_PER_ETH1_BLOCK, ETH1_FOLLOW_DISTANCE} = config.params;
+function getTimestampInRange(config: IChainForkConfig, state: BeaconStateAllForks): number {
+  const {SECONDS_PER_ETH1_BLOCK, ETH1_FOLLOW_DISTANCE} = config;
   const periodStart = votingPeriodStartTime(config, state);
   return periodStart - SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE;
 }

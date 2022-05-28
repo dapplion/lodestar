@@ -1,42 +1,43 @@
 import deepmerge from "deepmerge";
 import tmp from "tmp";
-import {createEnr} from "@chainsafe/lodestar-cli/src/config";
-import {params as minimalParams} from "@chainsafe/lodestar-params/minimal";
-import {createIBeaconConfig} from "@chainsafe/lodestar-config";
-import {IBeaconParams} from "@chainsafe/lodestar-params";
+import PeerId from "peer-id";
+import {createEnr} from "../../../../cli/src/config/enr.js";
+import {config as minimalConfig} from "@chainsafe/lodestar-config/default";
+import {createIBeaconConfig, createIChainForkConfig, IChainConfig} from "@chainsafe/lodestar-config";
 import {ILogger, RecursivePartial} from "@chainsafe/lodestar-utils";
 import {LevelDbController} from "@chainsafe/lodestar-db";
-import {BeaconNode} from "../../../src/node";
-import {createNodeJsLibp2p} from "../../../src/network/nodejs";
-import {createPeerId} from "../../../src/network";
-import {defaultNetworkOptions} from "../../../src/network/options";
-import {initDevState} from "../../../src/node/utils/state";
-import {IBeaconNodeOptions} from "../../../src/node/options";
-import {defaultOptions} from "../../../src/node/options";
-import {BeaconDb} from "../../../src/db";
-import {testLogger} from "../logger";
-import PeerId from "peer-id";
+import {phase0} from "@chainsafe/lodestar-types";
+import {BeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {BeaconNode} from "../../../src/node/index.js";
+import {createNodeJsLibp2p} from "../../../src/network/nodejs/index.js";
+import {createPeerId} from "../../../src/network/index.js";
+import {defaultNetworkOptions} from "../../../src/network/options.js";
+import {initDevState} from "../../../src/node/utils/state.js";
+import {IBeaconNodeOptions} from "../../../src/node/options.js";
+import {defaultOptions} from "../../../src/node/options.js";
+import {BeaconDb} from "../../../src/db/index.js";
+import {testLogger} from "../logger.js";
+import {InteropStateOpts} from "../../../src/node/utils/interop/state.js";
+import {isPlainObject} from "@chainsafe/lodestar-utils";
 
-export async function getDevBeaconNode({
-  params,
-  options = {},
-  validatorCount = 8,
-  genesisTime,
-  logger,
-  peerId,
-  peerStoreDir,
-}: {
-  params: Partial<IBeaconParams>;
-  options?: RecursivePartial<IBeaconNodeOptions>;
-  validatorCount?: number;
-  genesisTime?: number;
-  logger?: ILogger;
-  peerId?: PeerId;
-  peerStoreDir?: string;
-}): Promise<BeaconNode> {
+export async function getDevBeaconNode(
+  opts: {
+    params: Partial<IChainConfig>;
+    options?: RecursivePartial<IBeaconNodeOptions>;
+    validatorCount?: number;
+    logger?: ILogger;
+    peerId?: PeerId;
+    peerStoreDir?: string;
+    anchorState?: BeaconStateAllForks;
+    wsCheckpoint?: phase0.Checkpoint;
+  } & InteropStateOpts
+): Promise<BeaconNode> {
+  const {params, validatorCount = 8, peerStoreDir} = opts;
+  let {options = {}, logger, peerId} = opts;
+
   if (!peerId) peerId = await createPeerId();
   const tmpDir = tmp.dirSync({unsafeCleanup: true});
-  const config = createIBeaconConfig({...minimalParams, ...params});
+  const config = createIChainForkConfig({...minimalConfig, ...params});
   logger = logger ?? testLogger();
 
   const db = new BeaconDb({config, controller: new LevelDbController({name: tmpDir.name}, {logger})});
@@ -59,26 +60,42 @@ export async function getDevBeaconNode({
   );
 
   options = deepmerge(
+    // This deepmerge should NOT merge the array with the defaults but overwrite them
     defaultOptions,
     deepmerge(
+      // This deepmerge should merge all the array elements of the api options with the
+      // dev defaults that we wish, especially for the api options
       {
         db: {name: tmpDir.name},
-        sync: {minPeers: 1},
         eth1: {enabled: false},
+        api: {rest: {api: ["beacon", "config", "events", "node", "validator"], port: 19596}},
         metrics: {enabled: false},
-        network: {disablePeerDiscovery: true},
+        network: {discv5: null},
       } as Partial<IBeaconNodeOptions>,
       options
-    )
+    ),
+    {
+      arrayMerge: overwriteTargetArrayIfItems,
+      isMergeableObject: isPlainObject,
+    }
   );
 
-  const anchorState = await initDevState(config, db, validatorCount, genesisTime);
+  const state = opts.anchorState || (await initDevState(config, db, validatorCount, opts));
+  const beaconConfig = createIBeaconConfig(config, state.genesisValidatorsRoot);
   return await BeaconNode.init({
     opts: options as IBeaconNodeOptions,
-    config,
+    config: beaconConfig,
     db,
     logger,
     libp2p,
-    anchorState,
+    anchorState: state,
+    wsCheckpoint: opts.wsCheckpoint,
   });
+}
+
+function overwriteTargetArrayIfItems(target: unknown[], source: unknown[]): unknown[] {
+  if (source.length === 0) {
+    return target;
+  }
+  return source;
 }

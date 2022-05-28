@@ -1,17 +1,16 @@
 import {expect} from "chai";
-import fs from "fs";
+import fs from "node:fs";
 import yaml from "js-yaml";
 import {toHexString} from "@chainsafe/ssz";
-import {getTestdirPath} from "../../utils";
-import {getBeaconParams} from "../../../src/config";
+import {getTestdirPath} from "../../utils.js";
+import {getBeaconParams} from "../../../src/config/index.js";
 
 describe("config / beaconParams", () => {
   const GENESIS_FORK_VERSION_MAINNET = "0x00000000";
-  const GENESIS_FORK_VERSION_PYRMONT = "0x00002009";
+  const GENESIS_FORK_VERSION_PRATER = "0x00001020";
   const GENESIS_FORK_VERSION_FILE = "0x00009902";
   const GENESIS_FORK_VERSION_CLI = "0x00009903";
-  const presetName = "mainnet";
-  const networkName = "pyrmont";
+  const networkName = "prater";
   const paramsFilepath = getTestdirPath("./test-config.yaml");
 
   const testCases: {
@@ -21,30 +20,25 @@ describe("config / beaconParams", () => {
     GENESIS_FORK_VERSION: string;
   }[] = [
     {
-      id: "Params from preset > returns preset",
+      id: "Params defaults > returns mainnet",
       kwargs: {
-        preset: presetName,
-        paramsFile: "./no/file",
         additionalParamsCli: {},
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
       GENESIS_FORK_VERSION: GENESIS_FORK_VERSION_MAINNET,
     },
     {
-      id: "Params from preset & network > returns network",
+      id: "Params from network > returns network",
       kwargs: {
-        preset: presetName,
         network: networkName,
-        paramsFile: "./no/file",
         additionalParamsCli: {},
       },
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      GENESIS_FORK_VERSION: GENESIS_FORK_VERSION_PYRMONT,
+      GENESIS_FORK_VERSION: GENESIS_FORK_VERSION_PRATER,
     },
     {
-      id: "Params from preset & network & file > returns file",
+      id: "Params from network & file > returns file",
       kwargs: {
-        preset: presetName,
         network: networkName,
         paramsFile: paramsFilepath,
         additionalParamsCli: {},
@@ -53,9 +47,8 @@ describe("config / beaconParams", () => {
       GENESIS_FORK_VERSION: GENESIS_FORK_VERSION_FILE,
     },
     {
-      id: "Params from preset & network & file & CLI > returns CLI",
+      id: "Params from network & file & CLI > returns CLI",
       kwargs: {
-        preset: presetName,
         network: networkName,
         paramsFile: paramsFilepath,
         // eslint-disable-next-line @typescript-eslint/naming-convention

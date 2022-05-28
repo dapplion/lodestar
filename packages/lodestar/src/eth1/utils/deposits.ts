@@ -1,77 +1,67 @@
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {Root, phase0, allForks} from "@chainsafe/lodestar-types";
-import {TreeBacked, List, toHexString} from "@chainsafe/ssz";
+import {MAX_DEPOSITS} from "@chainsafe/lodestar-params";
+import {BeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
+import {toGindex, Tree} from "@chainsafe/persistent-merkle-tree";
+import {toHexString} from "@chainsafe/ssz";
 import {IFilterOptions} from "@chainsafe/lodestar-db";
-import {getTreeAtIndex} from "../../util/tree";
+import {Eth1Error, Eth1ErrorCode} from "../errors.js";
+import {DepositTree} from "../../db/repositories/depositDataRoot.js";
 
 export type DepositGetter<T> = (indexRange: IFilterOptions<number>, eth1Data: phase0.Eth1Data) => Promise<T[]>;
 
 export async function getDeposits<T>(
-  config: IBeaconConfig,
   // eth1_deposit_index represents the next deposit index to be added
-  state: allForks.BeaconState,
+  state: BeaconStateAllForks,
   eth1Data: phase0.Eth1Data,
   depositsGetter: DepositGetter<T>
 ): Promise<T[]> {
   const depositIndex = state.eth1DepositIndex;
   const depositCount = eth1Data.depositCount;
 
-  if (depositIndex > depositCount) throw new ErrorDepositIndexTooHigh(depositIndex, depositCount);
+  if (depositIndex > depositCount) {
+    throw new Eth1Error({code: Eth1ErrorCode.DEPOSIT_INDEX_TOO_HIGH, depositIndex, depositCount});
+  }
 
   // Spec v0.12.2
   // assert len(body.deposits) == min(MAX_DEPOSITS, state.eth1_data.deposit_count - state.eth1_deposit_index)
-  const depositsLen = Math.min(config.params.MAX_DEPOSITS, depositCount - depositIndex);
+  const depositsLen = Math.min(MAX_DEPOSITS, depositCount - depositIndex);
 
   const indexRange = {gte: depositIndex, lt: depositIndex + depositsLen};
   const deposits = await depositsGetter(indexRange, eth1Data);
 
-  if (deposits.length < depositsLen) throw new ErrorNotEnoughDeposits(deposits.length, depositsLen);
-  if (deposits.length > depositsLen) throw new ErrorTooManyDeposits(deposits.length, depositsLen);
+  if (deposits.length < depositsLen) {
+    throw new Eth1Error({code: Eth1ErrorCode.NOT_ENOUGH_DEPOSITS, len: deposits.length, expectedLen: depositsLen});
+  } else if (deposits.length > depositsLen) {
+    throw new Eth1Error({code: Eth1ErrorCode.TOO_MANY_DEPOSITS, len: deposits.length, expectedLen: depositsLen});
+  }
 
   return deposits;
 }
 
 export function getDepositsWithProofs(
-  config: IBeaconConfig,
   depositEvents: phase0.DepositEvent[],
-  depositRootTree: TreeBacked<List<Root>>,
+  depositRootTree: DepositTree,
   eth1Data: phase0.Eth1Data
 ): phase0.Deposit[] {
   // Get tree at this particular depositCount to compute correct proofs
-  const treeAtDepositCount = getTreeAtIndex(depositRootTree, eth1Data.depositCount - 1);
+  const viewAtDepositCount = depositRootTree.sliceTo(eth1Data.depositCount - 1);
 
-  const depositRoot = treeAtDepositCount.hashTreeRoot();
+  const depositRoot = viewAtDepositCount.hashTreeRoot();
 
-  if (!config.types.Root.equals(depositRoot, eth1Data.depositRoot)) {
-    throw new ErrorWrongDepositRoot(toHexString(depositRoot), toHexString(eth1Data.depositRoot));
+  if (!ssz.Root.equals(depositRoot, eth1Data.depositRoot)) {
+    throw new Eth1Error({
+      code: Eth1ErrorCode.WRONG_DEPOSIT_ROOT,
+      root: toHexString(depositRoot),
+      expectedRoot: toHexString(eth1Data.depositRoot),
+    });
   }
+
+  // Already commited for .hashTreeRoot()
+  const treeAtDepositCount = new Tree(viewAtDepositCount.node);
+  const depositTreeDepth = viewAtDepositCount.type.depth;
 
   return depositEvents.map((log) => ({
-    proof: treeAtDepositCount.tree.getSingleProof(treeAtDepositCount.type.getPropertyGindex(log.index)),
+    proof: treeAtDepositCount.getSingleProof(toGindex(depositTreeDepth, BigInt(log.index))),
     data: log.depositData,
   }));
-}
-
-export class ErrorDepositIndexTooHigh extends Error {
-  constructor(depositIndex: number, depositCount: number) {
-    super(`Deposit index too high: depositIndex=${depositIndex} depositCount=${depositCount}`);
-  }
-}
-
-export class ErrorNotEnoughDeposits extends Error {
-  constructor(len: number, expectedLen: number) {
-    super(`Not enough deposits in DB: got ${len}, expected ${expectedLen}`);
-  }
-}
-
-export class ErrorTooManyDeposits extends Error {
-  constructor(len: number, expectedLen: number) {
-    super(`Too many deposits returned by DB: got ${len}, expected ${expectedLen}`);
-  }
-}
-
-export class ErrorWrongDepositRoot extends Error {
-  constructor(root: string, expectedRoot: string) {
-    super(`Deposit root tree does not match current eth1Data ${root} != ${expectedRoot}`);
-  }
 }

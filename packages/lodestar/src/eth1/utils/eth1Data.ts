@@ -1,20 +1,23 @@
 import {Root, phase0} from "@chainsafe/lodestar-types";
-import {List, TreeBacked} from "@chainsafe/ssz";
-import {getTreeAtIndex} from "../../util/tree";
-import {binarySearchLte} from "../../util/binarySearch";
+import {binarySearchLte} from "../../util/binarySearch.js";
+import {Eth1Error, Eth1ErrorCode} from "../errors.js";
+import {DepositTree} from "../../db/repositories/depositDataRoot.js";
+import {Eth1Block} from "../interface.js";
+
+type BlockNumber = number;
 
 /**
  * Appends partial eth1 data (depositRoot, depositCount) in a sequence of blocks
  * eth1 data deposit is inferred from sparse eth1 data obtained from the deposit logs
  */
 export async function getEth1DataForBlocks(
-  blocks: phase0.Eth1Block[],
+  blocks: Eth1Block[],
   depositDescendingStream: AsyncIterable<phase0.DepositEvent>,
-  depositRootTree: TreeBacked<List<Root>>,
-  lastProcessedDepositBlockNumber: number | null
-): Promise<(phase0.Eth1Data & phase0.Eth1Block)[]> {
+  depositRootTree: DepositTree,
+  lastProcessedDepositBlockNumber: BlockNumber | null
+): Promise<(phase0.Eth1Data & Eth1Block)[]> {
   // Exclude blocks for which there is no valid eth1 data deposit
-  if (lastProcessedDepositBlockNumber) {
+  if (lastProcessedDepositBlockNumber !== null) {
     blocks = blocks.filter((block) => block.blockNumber <= lastProcessedDepositBlockNumber);
   }
 
@@ -28,19 +31,21 @@ export async function getEth1DataForBlocks(
   const toBlock = blocks[blocks.length - 1].blockNumber;
   const depositsByBlockNumber = await getDepositsByBlockNumber(fromBlock, toBlock, depositDescendingStream);
   if (depositsByBlockNumber.length === 0) {
-    throw new ErrorNoDepositsForBlockRange(fromBlock, toBlock);
+    throw new Eth1Error({code: Eth1ErrorCode.NO_DEPOSITS_FOR_BLOCK_RANGE, fromBlock, toBlock});
   }
 
   // Precompute a map of depositCount => depositRoot (from depositRootTree)
   const depositCounts = depositsByBlockNumber.map((event) => event.index + 1);
   const depositRootByDepositCount = getDepositRootByDepositCount(depositCounts, depositRootTree);
 
-  const eth1Datas: (phase0.Eth1Data & phase0.Eth1Block)[] = [];
+  const eth1Datas: (phase0.Eth1Data & Eth1Block)[] = [];
   for (const block of blocks) {
     const deposit = binarySearchLte(depositsByBlockNumber, block.blockNumber, (event) => event.blockNumber);
     const depositCount = deposit.index + 1;
     const depositRoot = depositRootByDepositCount.get(depositCount);
-    if (depositRoot === undefined) throw new ErrorNoDepositRoot(depositCount);
+    if (depositRoot === undefined) {
+      throw new Eth1Error({code: Eth1ErrorCode.NO_DEPOSIT_ROOT, depositCount});
+    }
     eth1Datas.push({...block, depositCount, depositRoot});
   }
   return eth1Datas;
@@ -53,11 +58,11 @@ export async function getEth1DataForBlocks(
  * @returns array ascending by blockNumber
  */
 export async function getDepositsByBlockNumber(
-  fromBlock: number,
-  toBlock: number,
+  fromBlock: BlockNumber,
+  toBlock: BlockNumber,
   depositEventDescendingStream: AsyncIterable<phase0.DepositEvent>
 ): Promise<phase0.DepositEvent[]> {
-  const depositCountMap = new Map<number, phase0.DepositEvent>();
+  const depositCountMap = new Map<BlockNumber, phase0.DepositEvent>();
   // Take blocks until the block under the range lower bound (included)
   for await (const deposit of depositEventDescendingStream) {
     if (deposit.blockNumber <= toBlock && !depositCountMap.has(deposit.blockNumber)) {
@@ -74,10 +79,7 @@ export async function getDepositsByBlockNumber(
 /**
  * Precompute a map of depositCount => depositRoot from a depositRootTree filled beforehand
  */
-export function getDepositRootByDepositCount(
-  depositCounts: number[],
-  depositRootTree: TreeBacked<List<Root>>
-): Map<number, Root> {
+export function getDepositRootByDepositCount(depositCounts: number[], depositRootTree: DepositTree): Map<number, Root> {
   // Unique + sort numerically in descending order
   depositCounts = [...new Set(depositCounts)].sort((a, b) => b - a);
 
@@ -85,41 +87,14 @@ export function getDepositRootByDepositCount(
     const maxIndex = depositCounts[0] - 1;
     const treeLength = depositRootTree.length - 1;
     if (maxIndex > treeLength) {
-      throw new ErrorNotEnoughDepositRoots(maxIndex, treeLength);
+      throw new Eth1Error({code: Eth1ErrorCode.NOT_ENOUGH_DEPOSIT_ROOTS, index: maxIndex, treeLength});
     }
   }
 
-  return depositCounts.reduce((map: Map<number, Root>, depositCount) => {
-    depositRootTree = getTreeAtIndex(depositRootTree, depositCount - 1);
-    map.set(depositCount, depositRootTree.hashTreeRoot());
-    return map;
-  }, new Map());
-}
-
-export class ErrorNoDepositsForBlockRange extends Error {
-  fromBlock: number;
-  toBlock: number;
-  constructor(fromBlock: number, toBlock: number) {
-    super(`No deposits found for block range [${fromBlock}, ${toBlock}]`);
-    this.fromBlock = fromBlock;
-    this.toBlock = toBlock;
+  const depositRootByDepositCount = new Map<number, Root>();
+  for (const depositCount of depositCounts) {
+    depositRootTree = depositRootTree.sliceTo(depositCount - 1);
+    depositRootByDepositCount.set(depositCount, depositRootTree.hashTreeRoot());
   }
-}
-
-export class ErrorNoDepositRoot extends Error {
-  depositCount: number;
-  constructor(depositCount: number) {
-    super(`No depositRoot for depositCount ${depositCount}`);
-    this.depositCount = depositCount;
-  }
-}
-
-export class ErrorNotEnoughDepositRoots extends Error {
-  index: number;
-  treeLength: number;
-  constructor(index: number, treeLength: number) {
-    super(`Not enough deposit roots for index ${index}, current length ${treeLength}`);
-    this.index = index;
-    this.treeLength = treeLength;
-  }
+  return depositRootByDepositCount;
 }

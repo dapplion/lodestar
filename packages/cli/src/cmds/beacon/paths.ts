@@ -1,15 +1,17 @@
-import path from "path";
-import {IGlobalArgs} from "../../options";
-import {getGlobalPaths, IGlobalPaths} from "../../paths/global";
+import path from "node:path";
+import {IGlobalArgs} from "../../options/index.js";
+import {getGlobalPaths, IGlobalPaths} from "../../paths/global.js";
 
 export interface IBeaconPaths {
   beaconDir: string;
   peerStoreDir: string;
   dbDir: string;
-  configFile: string;
+  persistInvalidSszObjectsDir: string;
+  configFile?: string;
   peerIdFile: string;
   enrFile: string;
   logFile?: string;
+  bootnodesFile?: string;
 }
 
 /**
@@ -34,21 +36,25 @@ export function getBeaconPaths(
   const rootDir = globalPaths.rootDir;
   const beaconDir = rootDir;
   const dbDir = args.dbDir || path.join(beaconDir, "chain-db");
+  const persistInvalidSszObjectsDir = args.persistInvalidSszObjectsDir || path.join(beaconDir, "invalidSszObjects");
   const peerStoreDir = args.peerStoreDir || path.join(beaconDir, "peerstore");
-  const configFile = args.configFile || path.join(beaconDir, "beacon.config.json");
+  const configFile = args.configFile;
   const peerIdFile = args.peerIdFile || path.join(beaconDir, "peer-id.json");
   const enrFile = args.enrFile || path.join(beaconDir, "enr");
   const logFile = args.logFile;
+  const bootnodesFile = args.bootnodesFile;
 
   return {
     ...globalPaths,
     beaconDir,
     dbDir,
+    persistInvalidSszObjectsDir,
     configFile,
     peerStoreDir,
     peerIdFile,
     enrFile,
     logFile,
+    bootnodesFile,
   };
 }
 

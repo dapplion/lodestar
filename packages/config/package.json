@@ -1,6 +1,6 @@
 {
   "name": "@chainsafe/lodestar-config",
-  "version": "0.18.0",
+  "version": "0.37.0",
   "description": "Chain configuration required for lodestar",
   "author": "ChainSafe Systems",
   "license": "Apache-2.0",
@@ -8,29 +8,52 @@
     "url": "https://github.com/ChainSafe/lodestar/issues"
   },
   "homepage": "https://github.com/ChainSafe/lodestar#readme",
-  "main": "lib/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js"
+    },
+    "./default": {
+      "import": "./lib/default.js"
+    },
+    "./networks": {
+      "import": "./lib/networks.js"
+    },
+    "./presets": {
+      "import": "./lib/presets.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*",
+        "lib/*",
+        "lib/*/index"
+      ]
+    }
+  },
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*.js",
     "lib/**/*.js.map",
     "lib/**/*.d.ts",
-    "mainnet.*",
-    "minimal.*"
+    "*.d.ts",
+    "*.js"
   ],
   "scripts": {
     "clean": "rm -rf lib && rm -f *.tsbuildinfo",
-    "build": "concurrently \"yarn build:lib\" \"yarn build:types\"",
+    "build": "tsc -p tsconfig.build.json",
     "build:release": "yarn run clean && yarn run build && yarn run build:typedocs",
-    "build:types": "tsc -p tsconfig.build.json",
     "build:types:watch": "yarn run build:types --watch",
-    "build:lib": "babel src -x .ts -d lib --source-maps",
     "build:lib:watch": "yarn run build:lib --watch",
     "build:typedocs": "typedoc --exclude src/index.ts --out typedocs src",
+    "check-build": "node -e \"(async function() { await import('./lib/index.js') })()\"",
     "check-types": "tsc",
     "lint": "eslint --color --ext .ts src/",
     "lint:fix": "yarn run lint --fix",
-    "prepublishOnly": "yarn build",
-    "pretest": "yarn run check-types"
+    "pretest": "yarn run check-types",
+    "test:unit": "nyc --cache-dir .nyc_output/.cache -e .ts mocha 'test/unit/**/*.test.ts'",
+    "check-readme": "typescript-docs-verifier"
   },
   "repository": {
     "type": "git",
@@ -38,12 +61,13 @@
   },
   "keywords": [
     "ethereum",
-    "eth2",
+    "eth-consensus",
     "beacon",
     "blockchain"
   ],
   "dependencies": {
-    "@chainsafe/lodestar-params": "^0.18.0",
-    "@chainsafe/lodestar-types": "^0.18.0"
+    "@chainsafe/lodestar-params": "^0.37.0",
+    "@chainsafe/lodestar-types": "^0.37.0",
+    "@chainsafe/ssz": "^0.9.1"
   }
 }

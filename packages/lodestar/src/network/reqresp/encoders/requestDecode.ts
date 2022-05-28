@@ -1,9 +1,7 @@
 import BufferList from "bl";
-import {phase0} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {Method, Methods, ReqRespEncoding} from "../../../constants";
-import {BufferedSource} from "../utils/bufferedSource";
-import {readEncodedPayload} from "../encodingStrategies";
+import {getRequestSzzTypeByMethod, Protocol, RequestBody} from "../types.js";
+import {BufferedSource} from "../utils/index.js";
+import {readEncodedPayload} from "../encodingStrategies/index.js";
 
 /**
  * Consumes a stream source to read a `<request>`
@@ -12,12 +10,10 @@ import {readEncodedPayload} from "../encodingStrategies";
  * ```
  */
 export function requestDecode(
-  config: IBeaconConfig,
-  method: Method,
-  encoding: ReqRespEncoding
-): (source: AsyncIterable<Buffer | BufferList>) => Promise<phase0.RequestBody> {
-  return async function (source) {
-    const type = Methods[method].requestSSZType(config);
+  protocol: Pick<Protocol, "method" | "encoding">
+): (source: AsyncIterable<Buffer | BufferList>) => Promise<RequestBody> {
+  return async function requestDecodeSink(source) {
+    const type = getRequestSzzTypeByMethod(protocol.method);
     if (!type) {
       // method has no body
       return null;
@@ -25,6 +21,6 @@ export function requestDecode(
 
     // Request has a single payload, so return immediately
     const bufferedSource = new BufferedSource(source as AsyncGenerator<Buffer>);
-    return await readEncodedPayload<phase0.RequestBody>(bufferedSource, encoding, type);
+    return await readEncodedPayload(bufferedSource, protocol.encoding, type);
   };
 }

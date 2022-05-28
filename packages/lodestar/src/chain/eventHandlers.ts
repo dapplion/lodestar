@@ -1,17 +1,15 @@
-import {AbortSignal} from "abort-controller";
-import {readonlyValues, toHexString} from "@chainsafe/ssz";
-import {allForks, phase0, Slot, Version} from "@chainsafe/lodestar-types";
+import {toHexString} from "@chainsafe/ssz";
+import {allForks, Epoch, phase0, Slot, Version} from "@chainsafe/lodestar-types";
 import {ILogger} from "@chainsafe/lodestar-utils";
-import {IBlockSummary} from "@chainsafe/lodestar-fork-choice";
-import {CachedBeaconState} from "@chainsafe/lodestar-beacon-state-transition";
-
-import {AttestationError, AttestationErrorCode, BlockError, BlockErrorCode} from "./errors";
-import {IBlockJob} from "./interface";
-import {ChainEvent, ChainEventEmitter, IChainEvents} from "./emitter";
-import {BeaconChain} from "./chain";
+import {CheckpointWithHex, IProtoBlock} from "@chainsafe/lodestar-fork-choice";
+import {CachedBeaconStateAllForks, computeStartSlotAtEpoch} from "@chainsafe/lodestar-beacon-state-transition";
+import {AttestationError, BlockError, BlockErrorCode} from "./errors/index.js";
+import {ChainEvent, IChainEvents} from "./emitter.js";
+import {BeaconChain} from "./chain.js";
+import {REPROCESS_MIN_TIME_TO_NEXT_SLOT_SEC} from "./reprocess.js";
+import {toCheckpointHex} from "./stateCache/index.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ListenerType<T> = [T] extends [(...args: infer U) => any] ? U : [T] extends [void] ? [] : [T];
 type AnyCallback = () => Promise<void>;
 
 /**
@@ -22,18 +20,12 @@ type AnyCallback = () => Promise<void>;
 function wrapHandler<
   Event extends keyof IChainEvents = keyof IChainEvents,
   Callback extends IChainEvents[Event] = IChainEvents[Event]
->(
-  event: Event,
-  emitter: ChainEventEmitter,
-  logger: ILogger,
-  handler: (...args: Parameters<Callback>) => Promise<void> | void
-) {
+>(event: Event, logger: ILogger, handler: (...args: Parameters<Callback>) => Promise<void> | void) {
   return async (...args: Parameters<Callback>): Promise<void> => {
     try {
       await handler(...args);
-      emitter.emit(event, ...((args as unknown) as ListenerType<Callback>));
     } catch (e) {
-      logger.error("Error handling event", {event}, e);
+      logger.error("Error handling event", {event}, e as Error);
     }
   };
 }
@@ -41,14 +33,6 @@ function wrapHandler<
 /**
  * Attach ChainEventEmitter event handlers
  * Listen on `signal` to remove event handlers
- *
- * Events are handled in the following way:
- * Because the chain relies on event handlers to perform side effects (eg: cache/db updates),
- * We require the chain's event handlers to run and complete in full before external event handlers are allowed to run.
- *
- * This is accomplished by maintaining a separate `chain.internalEmitter` and `chain.emitter`.
- * Chain submodules emit events on the `internalEmitter`, where chain event handlers are listening.
- * Once a chain event emitter is completed, the same event, with the same args, is emitted on `chain.emitter`, for consumption by external parties.
  */
 export function handleChainEvents(this: BeaconChain, signal: AbortSignal): void {
   const handlersObj: {
@@ -66,8 +50,11 @@ export function handleChainEvents(this: BeaconChain, signal: AbortSignal): void 
     [ChainEvent.forkChoiceHead]: onForkChoiceHead,
     [ChainEvent.forkChoiceJustified]: onForkChoiceJustified,
     [ChainEvent.forkChoiceReorg]: onForkChoiceReorg,
-    [ChainEvent.forkVersion]: onForkVersion,
     [ChainEvent.justified]: onJustified,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    [ChainEvent.lightclientHeaderUpdate]: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    [ChainEvent.lightclientFinalizedUpdate]: () => {},
   };
 
   const emitter = this.emitter;
@@ -76,9 +63,9 @@ export function handleChainEvents(this: BeaconChain, signal: AbortSignal): void 
 
   for (const [eventStr, handler] of Object.entries(handlersObj)) {
     const event = eventStr as ChainEvent;
-    const wrappedHandler = wrapHandler(event, emitter, logger, handler.bind(this) as AnyCallback) as AnyCallback;
-    this.internalEmitter.on(event, wrappedHandler);
-    onAbort.push(() => this.internalEmitter.off(event, wrappedHandler));
+    const wrappedHandler = wrapHandler(event, logger, handler.bind(this) as AnyCallback) as AnyCallback;
+    emitter.on(event, wrappedHandler);
+    onAbort.push(() => emitter.off(event, wrappedHandler));
   }
 
   signal.addEventListener(
@@ -92,57 +79,34 @@ export function handleChainEvents(this: BeaconChain, signal: AbortSignal): void 
 
 export async function onClockSlot(this: BeaconChain, slot: Slot): Promise<void> {
   this.logger.verbose("Clock slot", {slot});
+
+  // CRITICAL UPDATE
   this.forkChoice.updateTime(slot);
 
-  await Promise.all(
-    // Attestations can only affect the fork choice of subsequent slots.
-    // Process the attestations in `slot - 1`, rather than `slot`
-    this.pendingAttestations.getBySlot(slot - 1).map((job) => {
-      this.pendingAttestations.remove(job);
-      return this.attestationProcessor.processAttestationJob(job);
-    })
-  );
+  this.metrics?.clockSlot.set(slot);
 
-  await Promise.all(
-    this.pendingBlocks.getBySlot(slot).map(async ({root, slot}) => {
-      const pendingBlock = await this.db.pendingBlock.get(root, slot);
-      if (pendingBlock) {
-        this.pendingBlocks.remove(pendingBlock);
-        await this.db.pendingBlock.delete(root, slot);
-        return this.blockProcessor.processBlockJob({
-          signedBlock: pendingBlock,
-          reprocess: false,
-          prefinalized: false,
-          validSignatures: false,
-          validProposerSignature: false,
-        });
-      }
-    })
-  );
-
-  this.logger.debug("Block pools: ", {
-    pendingBlocks: this.pendingBlocks.getTotalPendingBlocks(),
-    currentSlot: this.clock.currentSlot,
-  });
+  this.attestationPool.prune(slot);
+  this.aggregatedAttestationPool.prune(slot);
+  this.syncCommitteeMessagePool.prune(slot);
+  this.seenSyncCommitteeMessages.prune(slot);
+  this.reprocessController.onSlot(slot);
 }
 
-export function onClockEpoch(): void {
-  //
+export function onClockEpoch(this: BeaconChain, currentEpoch: Epoch): void {
+  this.seenAttesters.prune(currentEpoch);
+  this.seenAggregators.prune(currentEpoch);
+  this.seenAggregatedAttestations.prune(currentEpoch);
+  this.beaconProposerCache.prune(currentEpoch);
 }
 
 export function onForkVersion(this: BeaconChain, version: Version): void {
-  this.logger.verbose("New fork version", this.config.types.Version.toJson(version));
+  this.logger.verbose("New fork version", toHexString(version));
 }
 
-export function onCheckpoint(
-  this: BeaconChain,
-  cp: phase0.Checkpoint,
-  state: CachedBeaconState<allForks.BeaconState>
-): void {
-  this.logger.verbose("Checkpoint processed", this.config.types.phase0.Checkpoint.toJson(cp));
-  this.checkpointStateCache.add(cp, state);
+export function onCheckpoint(this: BeaconChain, cp: phase0.Checkpoint, state: CachedBeaconStateAllForks): void {
+  this.logger.verbose("Checkpoint processed", toCheckpointHex(cp));
 
-  this.metrics?.currentValidators.set({status: "active"}, state.currentShuffling.activeIndices.length);
+  this.metrics?.currentValidators.set({status: "active"}, state.epochCtx.currentShuffling.activeIndices.length);
   const parentBlockSummary = this.forkChoice.getBlock(state.latestBlockHeader.parentRoot);
 
   if (parentBlockSummary) {
@@ -150,115 +114,96 @@ export function onCheckpoint(
     const justifiedEpoch = justifiedCheckpoint.epoch;
     const preJustifiedEpoch = parentBlockSummary.justifiedEpoch;
     if (justifiedEpoch > preJustifiedEpoch) {
-      this.internalEmitter.emit(ChainEvent.justified, justifiedCheckpoint, state);
+      this.emitter.emit(ChainEvent.justified, justifiedCheckpoint, state);
     }
     const finalizedCheckpoint = state.finalizedCheckpoint;
     const finalizedEpoch = finalizedCheckpoint.epoch;
     const preFinalizedEpoch = parentBlockSummary.finalizedEpoch;
     if (finalizedEpoch > preFinalizedEpoch) {
-      this.internalEmitter.emit(ChainEvent.finalized, finalizedCheckpoint, state);
+      this.emitter.emit(ChainEvent.finalized, finalizedCheckpoint, state);
     }
   }
 }
 
-export function onJustified(
-  this: BeaconChain,
-  cp: phase0.Checkpoint,
-  state: CachedBeaconState<allForks.BeaconState>
-): void {
-  this.logger.verbose("Checkpoint justified", this.config.types.phase0.Checkpoint.toJson(cp));
+export function onJustified(this: BeaconChain, cp: phase0.Checkpoint, state: CachedBeaconStateAllForks): void {
+  this.logger.verbose("Checkpoint justified", toCheckpointHex(cp));
   this.metrics?.previousJustifiedEpoch.set(state.previousJustifiedCheckpoint.epoch);
   this.metrics?.currentJustifiedEpoch.set(cp.epoch);
 }
 
-export function onFinalized(this: BeaconChain, cp: phase0.Checkpoint): void {
-  this.logger.verbose("Checkpoint finalized", this.config.types.phase0.Checkpoint.toJson(cp));
+export async function onFinalized(this: BeaconChain, cp: phase0.Checkpoint): Promise<void> {
+  this.logger.verbose("Checkpoint finalized", toCheckpointHex(cp));
   this.metrics?.finalizedEpoch.set(cp.epoch);
 }
 
-export function onForkChoiceJustified(this: BeaconChain, cp: phase0.Checkpoint): void {
-  this.logger.verbose("Fork choice justified", this.config.types.phase0.Checkpoint.toJson(cp));
+export function onForkChoiceJustified(this: BeaconChain, cp: CheckpointWithHex): void {
+  this.logger.verbose("Fork choice justified", {epoch: cp.epoch, root: cp.rootHex});
 }
 
-export function onForkChoiceFinalized(this: BeaconChain, cp: phase0.Checkpoint): void {
-  this.logger.verbose("Fork choice finalized", this.config.types.phase0.Checkpoint.toJson(cp));
+export async function onForkChoiceFinalized(this: BeaconChain, cp: CheckpointWithHex): Promise<void> {
+  this.logger.verbose("Fork choice finalized", {epoch: cp.epoch, root: cp.rootHex});
+  this.seenBlockProposers.prune(computeStartSlotAtEpoch(cp.epoch));
+
+  // TODO: Improve using regen here
+  const headState = this.stateCache.get(this.forkChoice.getHead().stateRoot);
+  if (headState) {
+    this.opPool.pruneAll(headState);
+  }
 }
 
-export function onForkChoiceHead(this: BeaconChain, head: IBlockSummary): void {
+export function onForkChoiceHead(this: BeaconChain, head: IProtoBlock): void {
+  const delaySec = this.clock.secFromSlot(head.slot);
   this.logger.verbose("New chain head", {
     headSlot: head.slot,
-    headRoot: toHexString(head.blockRoot),
+    headRoot: head.blockRoot,
+    delaySec,
   });
-  this.metrics?.headSlot.set(head.slot);
+  this.syncContributionAndProofPool.prune(head.slot);
+  this.seenContributionAndProof.prune(head.slot);
+
+  if (this.metrics) {
+    this.metrics.headSlot.set(head.slot);
+    // Only track "recent" blocks. Otherwise sync can distort this metrics heavily.
+    // We want to track recent blocks coming from gossip, unknown block sync, and API.
+    if (delaySec < 64 * this.config.SECONDS_PER_SLOT) {
+      this.metrics.elapsedTimeTillBecomeHead.observe(delaySec);
+    }
+  }
 }
 
-export function onForkChoiceReorg(this: BeaconChain, head: IBlockSummary, oldHead: IBlockSummary, depth: number): void {
-  this.logger.verbose("Chain reorg", {depth});
+export function onForkChoiceReorg(this: BeaconChain, head: IProtoBlock, oldHead: IProtoBlock, depth: number): void {
+  this.logger.verbose("Chain reorg", {
+    depth,
+    previousHead: oldHead.blockRoot,
+    previousHeadParent: oldHead.parentRoot,
+    previousSlot: oldHead.slot,
+    newHead: head.blockRoot,
+    newHeadParent: head.parentRoot,
+    newSlot: head.slot,
+  });
 }
 
-export function onAttestation(this: BeaconChain, attestation: phase0.Attestation): void {
-  this.logger.debug("Attestation processed", {
-    slot: attestation.data.slot,
-    index: attestation.data.index,
-    targetRoot: toHexString(attestation.data.target.root),
-    aggregationBits: this.config.types.phase0.CommitteeBits.toJson(attestation.aggregationBits),
-  });
+export function onAttestation(this: BeaconChain, _: phase0.Attestation): void {
+  // don't want to log the processed attestations here as there are so many attestations and it takes too much disc space,
+  // users may want to keep more log files instead of unnecessary processed attestations log
+  // see https://github.com/ChainSafe/lodestar/pull/4032
 }
 
 export async function onBlock(
   this: BeaconChain,
   block: allForks.SignedBeaconBlock,
-  postState: CachedBeaconState<allForks.BeaconState>,
-  job: IBlockJob
+  _postState: CachedBeaconStateAllForks
 ): Promise<void> {
-  const blockRoot = this.config.getTypes(block.message.slot).BeaconBlock.hashTreeRoot(block.message);
+  const blockRoot = toHexString(this.config.getForkTypes(block.message.slot).BeaconBlock.hashTreeRoot(block.message));
+  const advancedSlot = this.clock.slotWithFutureTolerance(REPROCESS_MIN_TIME_TO_NEXT_SLOT_SEC);
+
+  this.reprocessController.onBlockImported({slot: block.message.slot, root: blockRoot}, advancedSlot);
+
   this.logger.verbose("Block processed", {
     slot: block.message.slot,
-    root: toHexString(blockRoot),
+    root: blockRoot,
+    delaySec: this.clock.secFromSlot(block.message.slot),
   });
-
-  this.stateCache.add(postState);
-  if (!job.reprocess) {
-    await this.db.block.add(block);
-  }
-
-  if (!job.prefinalized) {
-    // Only process attestations in response to an non-prefinalized block
-    await Promise.all([
-      // process the attestations in the block
-      ...Array.from(readonlyValues(block.message.body.attestations), (attestation) => {
-        return this.attestationProcessor.processAttestationJob({
-          attestation,
-          // attestation signatures from blocks have already been verified
-          validSignature: true,
-        });
-      }),
-      // process pending attestations which needed the block
-      ...this.pendingAttestations.getByBlock(blockRoot).map((job) => {
-        this.pendingAttestations.remove(job);
-        return this.attestationProcessor.processAttestationJob(job);
-      }),
-    ]);
-  }
-
-  await this.db.processBlockOperations(block);
-
-  await Promise.all(
-    this.pendingBlocks.getByParent(blockRoot).map(async ({root, slot}) => {
-      const pendingBlock = await this.db.pendingBlock.get(root, slot);
-      if (pendingBlock) {
-        this.pendingBlocks.remove(pendingBlock);
-        await this.db.pendingBlock.delete(root, slot);
-        return this.blockProcessor.processBlockJob({
-          signedBlock: pendingBlock,
-          reprocess: false,
-          prefinalized: false,
-          validSignatures: false,
-          validProposerSignature: false,
-        });
-      }
-    })
-  );
 }
 
 export async function onErrorAttestation(this: BeaconChain, err: AttestationError): Promise<void> {
@@ -268,32 +213,6 @@ export async function onErrorAttestation(this: BeaconChain, err: AttestationErro
   }
 
   this.logger.debug("Attestation error", {}, err);
-  const attestationRoot = this.config.types.phase0.Attestation.hashTreeRoot(err.job.attestation);
-
-  switch (err.type.code) {
-    case AttestationErrorCode.FUTURE_SLOT:
-      this.logger.debug("Add attestation to pool", {
-        reason: err.type.code,
-        attestationRoot: toHexString(attestationRoot),
-      });
-      this.pendingAttestations.putBySlot(err.type.attestationSlot, err.job);
-      break;
-
-    case AttestationErrorCode.UNKNOWN_TARGET_ROOT:
-      this.logger.debug("Add attestation to pool", {
-        reason: err.type.code,
-        attestationRoot: toHexString(attestationRoot),
-      });
-      this.pendingAttestations.putByBlock(err.type.root, err.job);
-      break;
-
-    case AttestationErrorCode.UNKNOWN_BEACON_BLOCK_ROOT:
-      this.pendingAttestations.putByBlock(err.type.beaconBlockRoot, err.job);
-      break;
-
-    default:
-      await this.db.attestation.remove(err.job.attestation);
-  }
 }
 
 export async function onErrorBlock(this: BeaconChain, err: BlockError): Promise<void> {
@@ -302,40 +221,47 @@ export async function onErrorBlock(this: BeaconChain, err: BlockError): Promise<
     return;
   }
 
-  this.logger.error("Block error", {slot: err.job.signedBlock.message.slot}, err);
-  const blockRoot = this.config
-    .getTypes(err.job.signedBlock.message.slot)
-    .BeaconBlock.hashTreeRoot(err.job.signedBlock.message);
+  // err type data may contain CachedBeaconState which is too much to log
+  const slimError = new Error();
+  slimError.message = err.message;
+  slimError.stack = err.stack;
+  this.logger.error("Block error", {slot: err.signedBlock.message.slot, errCode: err.type.code}, err);
 
-  switch (err.type.code) {
-    case BlockErrorCode.FUTURE_SLOT:
-      this.logger.debug("Add block to pool", {
-        reason: err.type.code,
-        blockRoot: toHexString(blockRoot),
-      });
-      this.pendingBlocks.addBySlot(err.job.signedBlock);
-      await this.db.pendingBlock.add(err.job.signedBlock);
-      break;
-
-    case BlockErrorCode.PARENT_UNKNOWN:
-      this.logger.debug("Add block to pool", {
-        reason: err.type.code,
-        blockRoot: toHexString(blockRoot),
-      });
-      // add to pendingBlocks first which is not await
-      // this is to process a block range
-      this.pendingBlocks.addByParent(err.job.signedBlock);
-      await this.db.pendingBlock.add(err.job.signedBlock);
-      break;
-
-    case BlockErrorCode.INCORRECT_PROPOSER:
-    case BlockErrorCode.REPEAT_PROPOSAL:
-    case BlockErrorCode.STATE_ROOT_MISMATCH:
-    case BlockErrorCode.PER_BLOCK_PROCESSING_ERROR:
-    case BlockErrorCode.BLOCK_IS_NOT_LATER_THAN_PARENT:
-    case BlockErrorCode.UNKNOWN_PROPOSER:
-      await this.db.badBlock.put(blockRoot);
-      this.logger.warn("Found bad block", {blockRoot: toHexString(blockRoot)}, err);
-      break;
+  if (err.type.code === BlockErrorCode.INVALID_SIGNATURE) {
+    const {signedBlock} = err;
+    const blockSlot = signedBlock.message.slot;
+    const {state} = err.type;
+    const blockPath = this.persistInvalidSszObject(
+      "signedBlock",
+      this.config.getForkTypes(blockSlot).SignedBeaconBlock.serialize(signedBlock),
+      `${blockSlot}_invalid_signature`
+    );
+    const statePath = this.persistInvalidSszObject("state", state.serialize(), `${state.slot}_invalid_signature`);
+    this.logger.debug("Invalid signature block and state were written to disc", {blockPath, statePath});
+  } else if (err.type.code === BlockErrorCode.INVALID_STATE_ROOT) {
+    const {signedBlock} = err;
+    const blockSlot = signedBlock.message.slot;
+    const {preState, postState} = err.type;
+    const invalidRoot = toHexString(postState.hashTreeRoot());
+    const blockPath = this.persistInvalidSszObject(
+      "signedBlock",
+      this.config.getForkTypes(blockSlot).SignedBeaconBlock.serialize(signedBlock),
+      `${blockSlot}_invalid_state_root_${invalidRoot}`
+    );
+    const preStatePath = this.persistInvalidSszObject(
+      "state",
+      preState.serialize(),
+      `${blockSlot}_invalid_state_root_preState_${invalidRoot}`
+    );
+    const postStatePath = this.persistInvalidSszObject(
+      "state",
+      postState.serialize(),
+      `${blockSlot}_invalid_state_root_postState_${invalidRoot}`
+    );
+    this.logger.debug("Invalid state root block and states were written to disc", {
+      blockPath,
+      preStatePath,
+      postStatePath,
+    });
   }
 }

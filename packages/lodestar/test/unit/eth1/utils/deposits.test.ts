@@ -1,20 +1,15 @@
 import chai, {expect} from "chai";
 import chaiAsPromised from "chai-as-promised";
-import {Root, phase0} from "@chainsafe/lodestar-types";
-import {List, TreeBacked} from "@chainsafe/ssz";
-import {config} from "@chainsafe/lodestar-config/mainnet";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
+import {MAX_DEPOSITS} from "@chainsafe/lodestar-params";
 import {verifyMerkleBranch} from "@chainsafe/lodestar-utils";
-import {filterBy} from "../../../utils/db";
-import {getTreeAtIndex} from "../../../../src/util/tree";
-import {generateDepositData, generateDepositEvent} from "../../../utils/deposit";
-import {generateState} from "../../../utils/state";
-import {
-  getDeposits,
-  getDepositsWithProofs,
-  DepositGetter,
-  ErrorDepositIndexTooHigh,
-  ErrorNotEnoughDeposits,
-} from "../../../../src/eth1/utils/deposits";
+import {filterBy} from "../../../utils/db.js";
+import {Eth1ErrorCode} from "../../../../src/eth1/errors.js";
+import {generateDepositData, generateDepositEvent} from "../../../utils/deposit.js";
+import {generateState} from "../../../utils/state.js";
+import {expectRejectedWithLodestarError} from "../../../utils/errors.js";
+import {getDeposits, getDepositsWithProofs, DepositGetter} from "../../../../src/eth1/utils/deposits.js";
+import {DepositTree} from "../../../../src/db/repositories/depositDataRoot.js";
 
 chai.use(chaiAsPromised);
 
@@ -26,10 +21,9 @@ describe("eth1 / util / deposits", function () {
       eth1DepositIndex: number;
       depositIndexes: number[];
       expectedReturnedIndexes?: number[];
-      error?: unknown;
+      error?: Eth1ErrorCode;
     }
 
-    const {MAX_DEPOSITS} = config.params;
     const testCases: ITestCase[] = [
       {
         id: "Return first deposit",
@@ -64,14 +58,14 @@ describe("eth1 / util / deposits", function () {
         depositCount: 0,
         eth1DepositIndex: 1,
         depositIndexes: [],
-        error: ErrorDepositIndexTooHigh,
+        error: Eth1ErrorCode.DEPOSIT_INDEX_TOO_HIGH,
       },
       {
         id: "Should throw if DB returns less deposits than expected",
         depositCount: 1,
         eth1DepositIndex: 0,
         depositIndexes: [],
-        error: ErrorNotEnoughDeposits,
+        error: Eth1ErrorCode.NOT_ENOUGH_DEPOSITS,
       },
       {
         id: "Empty case",
@@ -91,13 +85,13 @@ describe("eth1 / util / deposits", function () {
         const depositsGetter: DepositGetter<phase0.DepositEvent> = async (indexRange) =>
           filterBy(deposits, indexRange, (deposit) => deposit.index);
 
-        const resultPromise = getDeposits(config, state, eth1Data, depositsGetter);
+        const resultPromise = getDeposits(state, eth1Data, depositsGetter);
 
         if (expectedReturnedIndexes) {
           const result = await resultPromise;
           expect(result.map((deposit) => deposit.index)).to.deep.equal(expectedReturnedIndexes);
         } else if (error) {
-          await expect(resultPromise).to.be.rejectedWith(error as Error);
+          await expectRejectedWithLodestarError(resultPromise, error);
         } else {
           throw Error("Test case must have 'result' or 'error'");
         }
@@ -107,12 +101,12 @@ describe("eth1 / util / deposits", function () {
 
   describe("getDepositsWithProofs", () => {
     it("return empty array if no pending deposits", function () {
-      const initialValues = [Buffer.alloc(32)] as List<Root>;
-      const depositRootTree = config.types.phase0.DepositDataRootList.createTreeBackedFromStruct(initialValues);
+      const initialValues = [Buffer.alloc(32)];
+      const depositRootTree = ssz.phase0.DepositDataRootList.toViewDU(initialValues);
       const depositCount = 0;
       const eth1Data = generateEth1Data(depositCount, depositRootTree);
 
-      const deposits = getDepositsWithProofs(config, [], depositRootTree, eth1Data);
+      const deposits = getDepositsWithProofs([], depositRootTree, eth1Data);
       expect(deposits).to.be.deep.equal([]);
     });
 
@@ -126,14 +120,14 @@ describe("eth1 / util / deposits", function () {
         })
       );
 
-      const depositRootTree = config.types.phase0.DepositDataRootList.defaultTreeBacked();
+      const depositRootTree = ssz.phase0.DepositDataRootList.defaultViewDU();
       for (const depositEvent of depositEvents) {
-        depositRootTree.push(config.types.phase0.DepositData.hashTreeRoot(depositEvent.depositData));
+        depositRootTree.push(ssz.phase0.DepositData.hashTreeRoot(depositEvent.depositData));
       }
       const depositCount = depositEvents.length;
       const eth1Data = generateEth1Data(depositCount, depositRootTree);
 
-      const deposits = getDepositsWithProofs(config, depositEvents, depositRootTree, eth1Data);
+      const deposits = getDepositsWithProofs(depositEvents, depositRootTree, eth1Data);
 
       // Should not return all deposits
       expect(deposits.length).to.be.equal(2);
@@ -142,11 +136,11 @@ describe("eth1 / util / deposits", function () {
       for (const [index, deposit] of deposits.entries()) {
         expect(
           verifyMerkleBranch(
-            config.types.phase0.DepositData.hashTreeRoot(deposit.data),
-            Array.from(deposit.proof).map((p) => p.valueOf() as Uint8Array),
+            ssz.phase0.DepositData.hashTreeRoot(deposit.data),
+            Array.from(deposit.proof).map((p) => p),
             33,
             index,
-            eth1Data.depositRoot.valueOf() as Uint8Array
+            eth1Data.depositRoot
           ),
           `Wrong merkle proof on deposit ${index}`
         ).to.be.true;
@@ -155,10 +149,10 @@ describe("eth1 / util / deposits", function () {
   });
 });
 
-function generateEth1Data(depositCount: number, depositRootTree?: TreeBacked<List<Root>>): phase0.Eth1Data {
+function generateEth1Data(depositCount: number, depositRootTree?: DepositTree): phase0.Eth1Data {
   return {
     blockHash: Buffer.alloc(32),
-    depositRoot: depositRootTree ? getTreeAtIndex(depositRootTree, depositCount - 1).hashTreeRoot() : Buffer.alloc(32),
+    depositRoot: depositRootTree ? depositRootTree.sliceTo(depositCount - 1).hashTreeRoot() : Buffer.alloc(32),
     depositCount,
   };
 }

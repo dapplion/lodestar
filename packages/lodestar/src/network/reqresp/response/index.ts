@@ -1,22 +1,30 @@
 import PeerId from "peer-id";
 import pipe from "it-pipe";
+import {ILogger, TimeoutError, withTimeout} from "@chainsafe/lodestar-utils";
 import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {Context, ILogger} from "@chainsafe/lodestar-utils";
-import {phase0} from "@chainsafe/lodestar-types";
-import {Method, ReqRespEncoding, RpcResponseStatus} from "../../../constants";
-import {onChunk} from "../utils/onChunk";
-import {ILibP2pStream} from "../interface";
-import {requestDecode} from "../encoders/requestDecode";
-import {responseEncodeError, responseEncodeSuccess} from "../encoders/responseEncode";
-import {ResponseError} from "./errors";
+import {REQUEST_TIMEOUT, RespStatus} from "../../../constants/index.js";
+import {prettyPrintPeerId} from "../../util.js";
+import {PeersData} from "../../peers/peersData.js";
+import {Protocol, RequestBody, OutgoingResponseBody} from "../types.js";
+import {renderRequestBody} from "../utils/index.js";
+import {Libp2pStream} from "../interface.js";
+import {requestDecode} from "../encoders/requestDecode.js";
+import {responseEncodeError, responseEncodeSuccess} from "../encoders/responseEncode.js";
+import {ResponseError} from "./errors.js";
 
 export {ResponseError};
 
 export type PerformRequestHandler = (
-  method: Method,
-  requestBody: phase0.RequestBody,
+  protocol: Protocol,
+  requestBody: RequestBody,
   peerId: PeerId
-) => AsyncIterable<phase0.ResponseBody>;
+) => AsyncIterable<OutgoingResponseBody>;
+
+type HandleRequestModules = {
+  config: IBeaconConfig;
+  logger: ILogger;
+  peersData: PeersData;
+};
 
 /**
  * Handles a ReqResp request from a peer. Throws on error. Logs each step of the response lifecycle.
@@ -29,37 +37,47 @@ export type PerformRequestHandler = (
  * 4b. On error, encode and write an error `<response_chunk>` and stop
  */
 export async function handleRequest(
-  {config, logger}: {config: IBeaconConfig; logger: ILogger},
+  {config, logger, peersData: peersData}: HandleRequestModules,
   performRequestHandler: PerformRequestHandler,
-  stream: ILibP2pStream,
+  stream: Libp2pStream,
   peerId: PeerId,
-  method: Method,
-  encoding: ReqRespEncoding,
+  protocol: Protocol,
+  signal?: AbortSignal,
   requestId = 0
 ): Promise<void> {
-  const logCtx = {method, encoding, peer: peerId.toB58String(), requestId};
+  const client = peersData.getPeerKind(peerId.toB58String());
+  const logCtx = {method: protocol.method, client, peer: prettyPrintPeerId(peerId), requestId};
 
   let responseError: Error | null = null;
   await pipe(
     // Yields success chunks and error chunks in the same generator
     // This syntax allows to recycle stream.sink to send success and error chunks without returning
     // in case request whose body is a List fails at chunk_i > 0, without breaking out of the for..await..of
-    (async function* () {
+    (async function* requestHandlerSource() {
       try {
-        const requestBody = await pipe(stream.source, requestDecode(config, method, encoding)).catch((e: unknown) => {
-          throw new ResponseError(RpcResponseStatus.INVALID_REQUEST, (e as Error).message);
+        const requestBody = await withTimeout(
+          () => pipe(stream.source, requestDecode(protocol)),
+          REQUEST_TIMEOUT,
+          signal
+        ).catch((e: unknown) => {
+          if (e instanceof TimeoutError) {
+            throw e; // Let outter catch {} re-type the error as SERVER_ERROR
+          } else {
+            throw new ResponseError(RespStatus.INVALID_REQUEST, (e as Error).message);
+          }
         });
 
-        logger.debug("Resp received request", {...logCtx, requestBody} as Context);
+        logger.debug("Resp received request", {...logCtx, body: renderRequestBody(protocol.method, requestBody)});
 
         yield* pipe(
-          performRequestHandler(method, requestBody, peerId),
+          performRequestHandler(protocol, requestBody, peerId),
           // NOTE: Do not log the resp chunk contents, logs get extremely cluttered
-          onChunk(() => logger.debug("Resp sending chunk", logCtx)),
-          responseEncodeSuccess(config, method, encoding)
+          // Note: Not logging on each chunk since after 1 year it hasn't add any value when debugging
+          // onChunk(() => logger.debug("Resp sending chunk", logCtx)),
+          responseEncodeSuccess(config, protocol)
         );
       } catch (e) {
-        const status = e instanceof ResponseError ? e.status : RpcResponseStatus.SERVER_ERROR;
+        const status = e instanceof ResponseError ? e.status : RespStatus.SERVER_ERROR;
         yield* responseEncodeError(status, (e as Error).message);
 
         // Should not throw an error here or libp2p-mplex throws with 'AbortError: stream reset'
@@ -81,7 +99,7 @@ export async function handleRequest(
   // It has only happened when doing a request too fast upon immediate connection on inbound peer
   // investigate a potential race condition there
 
-  if (responseError) {
+  if (responseError !== null) {
     logger.verbose("Resp error", logCtx, responseError);
     throw responseError;
   } else {

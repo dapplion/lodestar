@@ -1,14 +1,6 @@
 import {SinonStubbedInstance} from "sinon";
+import {IBeaconChain} from "../../../src/chain/index.js";
 
-import {IForkChoice} from "@chainsafe/lodestar-fork-choice";
-import {IBeaconChain, ChainEventEmitter} from "../../../src/chain";
+export type StubbedChain = IBeaconChain & SinonStubbedInstance<IBeaconChain>;
 
-interface IStubbedChain extends IBeaconChain {
-  forkChoice: SinonStubbedInstance<IForkChoice>;
-  emitter: SinonStubbedInstance<ChainEventEmitter>;
-}
-
-export type StubbedChain = IStubbedChain & SinonStubbedInstance<IBeaconChain>;
-
-export * from "./chain";
-export * from "./beaconDb";
+export * from "./beaconDb.js";

@@ -1,35 +1,32 @@
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {allForks, phase0} from "@chainsafe/lodestar-types";
-import {interopDeposits} from "./interop/deposits";
-import {getInteropState} from "./interop/state";
-import {mkdirSync, writeFileSync} from "fs";
-import {dirname} from "path";
-import {IBeaconDb} from "../../db";
-import {TreeBacked} from "@chainsafe/ssz";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
+import {BeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
+import {interopDeposits} from "./interop/deposits.js";
+import {getInteropState, InteropStateOpts} from "./interop/state.js";
+import {IBeaconDb} from "../../db/index.js";
+import {GENESIS_SLOT} from "../../constants/index.js";
 
 export async function initDevState(
-  config: IBeaconConfig,
+  config: IChainForkConfig,
   db: IBeaconDb,
   validatorCount: number,
-  genesisTime?: number
-): Promise<TreeBacked<allForks.BeaconState>> {
-  const deposits = interopDeposits(config, config.types.phase0.DepositDataRootList.defaultTreeBacked(), validatorCount);
-  await storeDeposits(config, db, deposits);
+  interopStateOpts: InteropStateOpts
+): Promise<BeaconStateAllForks> {
+  const deposits = interopDeposits(config, ssz.phase0.DepositDataRootList.defaultViewDU(), validatorCount);
+  await storeDeposits(db, deposits);
   const state = getInteropState(
     config,
-    await db.depositDataRoot.getTreeBacked(validatorCount - 1),
-    genesisTime || Math.floor(Date.now() / 1000),
-    deposits
+    interopStateOpts,
+    deposits,
+    await db.depositDataRoot.getDepositRootTreeAtIndex(validatorCount - 1)
   );
+  const block = config.getForkTypes(GENESIS_SLOT).SignedBeaconBlock.defaultValue();
+  block.message.stateRoot = state.hashTreeRoot();
+  await db.blockArchive.add(block);
   return state;
 }
 
-export function storeSSZState(config: IBeaconConfig, state: TreeBacked<allForks.BeaconState>, path: string): void {
-  mkdirSync(dirname(path), {recursive: true});
-  writeFileSync(path, config.getTypes(state.slot).BeaconState.serialize(state));
-}
-
-async function storeDeposits(config: IBeaconConfig, db: IBeaconDb, deposits: phase0.Deposit[]): Promise<void> {
+async function storeDeposits(db: IBeaconDb, deposits: phase0.Deposit[]): Promise<void> {
   for (let i = 0; i < deposits.length; i++) {
     await Promise.all([
       db.depositEvent.put(i, {
@@ -37,7 +34,7 @@ async function storeDeposits(config: IBeaconConfig, db: IBeaconDb, deposits: pha
         index: i,
         depositData: deposits[i].data,
       }),
-      db.depositDataRoot.put(i, config.types.phase0.DepositData.hashTreeRoot(deposits[i].data)),
+      db.depositDataRoot.put(i, ssz.phase0.DepositData.hashTreeRoot(deposits[i].data)),
     ]);
   }
 }

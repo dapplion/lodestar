@@ -1,23 +1,24 @@
-import {createIBeaconConfig, IBeaconConfig} from "@chainsafe/lodestar-config";
-import {createIBeaconParams, BeaconParams, IBeaconParams} from "@chainsafe/lodestar-params";
-import {params as mainnetParams} from "@chainsafe/lodestar-params/mainnet";
-import {params as minimalParams} from "@chainsafe/lodestar-params/minimal";
-import {writeFile, readFileIfExists} from "../util";
-import {getNetworkBeaconParams, NetworkName} from "../networks";
-import {getGlobalPaths, IGlobalPaths} from "../paths/global";
-import {IBeaconParamsUnparsed} from "./types";
-import {parseBeaconParamsArgs} from "../options";
+import {
+  IChainConfig,
+  createIChainForkConfig,
+  createIChainConfig,
+  IChainForkConfig,
+  chainConfigFromJson,
+} from "@chainsafe/lodestar-config";
+import {readFile} from "../util/index.js";
+import {getNetworkBeaconParams, NetworkName} from "../networks/index.js";
+import {getGlobalPaths, IGlobalPaths} from "../paths/global.js";
+import {IBeaconParamsUnparsed} from "./types.js";
+import {parseBeaconParamsArgs, parseTerminalPowArgs, ITerminalPowArgs} from "../options/index.js";
 
 type IBeaconParamsCliArgs = {
-  preset: string;
   network?: NetworkName;
   paramsFile: string;
 } & Partial<IGlobalPaths>;
 
 interface IBeaconParamsArgs {
-  preset: string;
   network?: NetworkName;
-  paramsFile: string;
+  paramsFile?: string;
   additionalParamsCli: IBeaconParamsUnparsed;
 }
 
@@ -25,20 +26,22 @@ interface IBeaconParamsArgs {
  * Convenience method to parse yargs CLI args and call getBeaconParams
  * @see getBeaconConfig
  */
-export function getBeaconConfigFromArgs(args: IBeaconParamsCliArgs): IBeaconConfig {
-  return createIBeaconConfig(getBeaconParamsFromArgs(args));
+export function getBeaconConfigFromArgs(args: IBeaconParamsCliArgs): IChainForkConfig {
+  return createIChainForkConfig(getBeaconParamsFromArgs(args));
 }
 
 /**
  * Convenience method to parse yargs CLI args and call getBeaconParams
  * @see getBeaconParams
  */
-export function getBeaconParamsFromArgs(args: IBeaconParamsCliArgs): IBeaconParams {
+export function getBeaconParamsFromArgs(args: IBeaconParamsCliArgs): IChainConfig {
   return getBeaconParams({
-    preset: args.preset,
     network: args.network,
     paramsFile: getGlobalPaths(args).paramsFile,
-    additionalParamsCli: parseBeaconParamsArgs(args as Record<string, string | number>),
+    additionalParamsCli: {
+      ...parseBeaconParamsArgs(args as Record<string, string | number>),
+      ...parseTerminalPowArgs(args as ITerminalPowArgs),
+    },
   });
 }
 
@@ -46,54 +49,37 @@ export function getBeaconParamsFromArgs(args: IBeaconParamsCliArgs): IBeaconPara
  * Initializes IBeaconConfig with params
  * @see getBeaconParams
  */
-export function getBeaconConfig(args: IBeaconParamsArgs): IBeaconConfig {
-  return createIBeaconConfig(getBeaconParams(args));
+export function getBeaconConfig(args: IBeaconParamsArgs): IChainForkConfig {
+  return createIChainForkConfig(getBeaconParams(args));
 }
 
 /**
  * Computes merged IBeaconParams type from (in order)
- * - preset
  * - Network params (diff)
  * - existing params file
  * - CLI flags
  */
-export function getBeaconParams({preset, network, paramsFile, additionalParamsCli}: IBeaconParamsArgs): IBeaconParams {
-  const presetBeaconParams = getPresetBeaconParams(preset);
-  const additionalParams = mergeBeaconParams(
-    // Default network params
-    network ? getNetworkBeaconParams(network) : {},
-    // Existing user custom params from file
-    readBeaconParamsIfExists(paramsFile),
-    // Params from CLI flags
-    additionalParamsCli || {}
-  );
-  return {...presetBeaconParams, ...createIBeaconParams(additionalParams)};
+export function getBeaconParams({network, paramsFile, additionalParamsCli}: IBeaconParamsArgs): IChainConfig {
+  // Default network params
+  const networkParams: Partial<IChainConfig> = network ? getNetworkBeaconParams(network) : {};
+  // Existing user custom params from file
+  const fileParams: Partial<IChainConfig> = paramsFile
+    ? parsePartialIChainConfigJson(readBeaconParams(paramsFile))
+    : {};
+  // Params from CLI flags
+  const cliParams: Partial<IChainConfig> = parsePartialIChainConfigJson(additionalParamsCli);
+
+  return createIChainConfig({
+    ...networkParams,
+    ...fileParams,
+    ...cliParams,
+  });
 }
 
-function getPresetBeaconParams(preset: string): IBeaconParams {
-  switch (preset) {
-    case "mainnet":
-      return mainnetParams;
-    case "minimal":
-      return minimalParams;
-    default:
-      throw Error(`Unsupported spec: ${preset}`);
-  }
+function readBeaconParams(filepath: string): IBeaconParamsUnparsed {
+  return readFile(filepath) ?? {};
 }
 
-export function writeBeaconParams(filepath: string, params: IBeaconParams): void {
-  writeFile(filepath, BeaconParams.toJson(params));
-}
-
-function readBeaconParamsIfExists(filepath: string): IBeaconParamsUnparsed {
-  return readFileIfExists(filepath) || {};
-}
-
-/**
- * Typesafe wrapper to merge partial IBeaconNodeOptions objects
- */
-function mergeBeaconParams(...itemsArr: IBeaconParamsUnparsed[]): IBeaconParamsUnparsed {
-  return itemsArr.reduce((mergedItems, item) => {
-    return {...mergedItems, ...item};
-  }, itemsArr[0]);
+export function parsePartialIChainConfigJson(input: Record<string, unknown>): Partial<IChainConfig> {
+  return chainConfigFromJson(input);
 }

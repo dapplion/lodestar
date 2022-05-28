@@ -1,19 +1,31 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any */
 import {expect} from "chai";
-import {readdirSync, readFileSync} from "fs";
-import {basename, join, parse} from "path";
-import {Type, CompositeType} from "@chainsafe/ssz";
+import fs from "node:fs";
+import {basename, join, parse} from "node:path";
+import {uncompress} from "snappyjs";
+import {loadYaml} from "@chainsafe/lodestar-utils";
 
-import {isDirectory, loadYamlFile} from "./util";
+/* eslint-disable
+  @typescript-eslint/no-unsafe-assignment,
+  @typescript-eslint/no-unsafe-member-access,
+  @typescript-eslint/no-unsafe-return,
+  @typescript-eslint/no-explicit-any,
+  func-names */
 
 export enum InputType {
   SSZ = "ssz",
+  SSZ_SNAPPY = "ssz_snappy",
   YAML = "yaml",
 }
 
 export type ExpandedInputType = {
   type: InputType;
   treeBacked: boolean;
+};
+
+type SszTypeGeneric = {
+  typeName: string;
+  deserialize: (bytes: Uint8Array) => unknown;
+  deserializeToViewDU?: (bytes: Uint8Array) => unknown;
 };
 
 export function toExpandedInputType(inputType: InputType | ExpandedInputType): ExpandedInputType {
@@ -26,14 +38,25 @@ export function toExpandedInputType(inputType: InputType | ExpandedInputType): E
   };
 }
 
-export interface ISpecTestOptions<TestCase, Result> {
+export interface ISpecTestOptions<TestCase extends {meta?: any}, Result> {
   /**
    * If directory contains both ssz or yaml file version,
-   * you can choose which one to use. Default is ssz.
+   * you can choose which one to use. Default is ssz snappy.
    */
   inputTypes?: {[K in keyof NonNullable<TestCase>]?: InputType | ExpandedInputType};
 
-  sszTypes?: {[K in keyof NonNullable<TestCase>]?: Type<any>};
+  sszTypes?: Record<string, SszTypeGeneric>;
+
+  /**
+   * Some tests need to access the test case in order to generate ssz types for each input file.
+   */
+  getSszTypes?: (meta: TestCase["meta"]) => Record<string, SszTypeGeneric>;
+
+  /**
+   * loadInputFiles sometimes not create TestCase due to abnormal input file names.
+   * Use this to map to real test case.
+   */
+  mapToTestCase?: (t: Record<string, any>) => TestCase;
 
   /**
    * Optionally
@@ -56,10 +79,6 @@ export interface ISpecTestOptions<TestCase, Result> {
   timeout?: number;
 }
 
-export interface ITestCaseMeta {
-  directoryName: string;
-}
-
 const defaultOptions: ISpecTestOptions<any, any> = {
   inputTypes: {},
   inputProcessing: {},
@@ -71,7 +90,7 @@ const defaultOptions: ISpecTestOptions<any, any> = {
   timeout: 10 * 60 * 1000,
 };
 
-export function describeDirectorySpecTest<TestCase, Result>(
+export function describeDirectorySpecTest<TestCase extends {meta?: any}, Result>(
   name: string,
   testCaseDirectoryPath: string,
   testFunction: (testCase: TestCase, directoryName: string) => Result,
@@ -82,11 +101,12 @@ export function describeDirectorySpecTest<TestCase, Result>(
     throw new Error(`${testCaseDirectoryPath} is not directory`);
   }
   describe(name, function () {
-    if (options.timeout) {
+    if (options.timeout !== undefined) {
       this.timeout(options.timeout || "10 min");
     }
 
-    const testCases = readdirSync(testCaseDirectoryPath)
+    const testCases = fs
+      .readdirSync(testCaseDirectoryPath)
       .map((name) => join(testCaseDirectoryPath, name))
       .filter(isDirectory);
 
@@ -96,7 +116,11 @@ export function describeDirectorySpecTest<TestCase, Result>(
   });
 }
 
-function generateTestCase<TestCase, Result>(
+export function loadYamlFile(path: string): Record<string, unknown> {
+  return loadYaml(fs.readFileSync(path, "utf8"));
+}
+
+function generateTestCase<TestCase extends {meta?: any}, Result>(
   testCaseDirectoryPath: string,
   index: number,
   testFunction: (...args: any) => Result,
@@ -104,7 +128,14 @@ function generateTestCase<TestCase, Result>(
 ): void {
   const name = basename(testCaseDirectoryPath);
   it(name, function () {
-    const testCase = loadInputFiles(testCaseDirectoryPath, options);
+    // some tests require to load meta.yaml first in order to know respective ssz types.
+    const metaFilePath = join(testCaseDirectoryPath, "meta.yaml");
+    let meta: TestCase["meta"] = undefined;
+    if (fs.existsSync(metaFilePath)) {
+      meta = loadYaml(fs.readFileSync(metaFilePath, "utf8"));
+    }
+    let testCase = loadInputFiles(testCaseDirectoryPath, options, meta);
+    if (options.mapToTestCase) testCase = options.mapToTestCase(testCase);
     if (options.shouldSkip && options.shouldSkip(testCase, name, index)) {
       this.skip();
       return;
@@ -125,9 +156,13 @@ function generateTestCase<TestCase, Result>(
   });
 }
 
-function loadInputFiles<TestCase, Result>(directory: string, options: ISpecTestOptions<TestCase, Result>): TestCase {
+function loadInputFiles<TestCase extends {meta?: any}, Result>(
+  directory: string,
+  options: ISpecTestOptions<TestCase, Result>,
+  meta?: TestCase["meta"]
+): TestCase {
   const testCase: any = {};
-  readdirSync(directory)
+  fs.readdirSync(directory)
     .map((name) => join(directory, name))
     .filter((file) => {
       if (isDirectory(file)) {
@@ -135,43 +170,86 @@ function loadInputFiles<TestCase, Result>(directory: string, options: ISpecTestO
       }
       if (!options.inputTypes) throw Error("inputTypes is not defined");
       const name = parse(file).name as keyof NonNullable<TestCase>;
-      const inputType = toExpandedInputType(options.inputTypes[name] ?? InputType.SSZ);
+      const inputType = toExpandedInputType(options.inputTypes[name] ?? InputType.SSZ_SNAPPY);
       // set options.inputTypes[name] with expanded input type
       options.inputTypes[name] = inputType;
       const extension = inputType.type as string;
       return file.endsWith(extension);
     })
     .forEach((file) => {
-      const inputName = basename(file).replace(".ssz", "").replace(".yaml", "");
-      testCase[inputName] = deserializeTestCase(file, inputName, options);
-      if (file.endsWith(InputType.SSZ)) {
-        testCase[`${inputName}_raw`] = readFileSync(file);
+      const inputName = basename(file).replace(".ssz_snappy", "").replace(".ssz", "").replace(".yaml", "");
+      const inputType = getInputType(file);
+      testCase[inputName] = deserializeInputFile(file, inputName, inputType, options, meta);
+      switch (inputType) {
+        case InputType.SSZ:
+          testCase[`${inputName}_raw`] = fs.readFileSync(file);
+          break;
+        case InputType.SSZ_SNAPPY:
+          testCase[`${inputName}_raw`] = uncompress(fs.readFileSync(file));
+          break;
       }
       if (!options.inputProcessing) throw Error("inputProcessing is not defined");
-      if (options.inputProcessing[inputName]) {
+      if (options.inputProcessing[inputName] !== undefined) {
         testCase[inputName] = options.inputProcessing[inputName](testCase[inputName]);
       }
     });
   return testCase as TestCase;
 }
 
-function deserializeTestCase<TestCase, Result>(
+function getInputType(filename: string): InputType {
+  if (filename.endsWith(InputType.YAML)) {
+    return InputType.YAML;
+  } else if (filename.endsWith(InputType.SSZ_SNAPPY)) {
+    return InputType.SSZ_SNAPPY;
+  } else if (filename.endsWith(InputType.SSZ)) {
+    return InputType.SSZ;
+  }
+  throw new Error(`Could not get InputType from ${filename}`);
+}
+
+function deserializeInputFile<TestCase extends {meta?: any}, Result>(
   file: string,
   inputName: string,
-  options: ISpecTestOptions<TestCase, Result>
+  inputType: InputType,
+  options: ISpecTestOptions<TestCase, Result>,
+  meta?: TestCase["meta"]
 ): any {
-  if (file.endsWith(InputType.SSZ)) {
-    if (!options.sszTypes) throw Error("sszTypes is not defined");
-    const data = readFileSync(file);
-    if ((options.inputTypes![inputName as keyof TestCase]! as ExpandedInputType).treeBacked) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      return (options.sszTypes[inputName as keyof NonNullable<TestCase>] as CompositeType<
-        any
-      >).createTreeBackedFromBytes(data);
-    } else {
-      return options.sszTypes[inputName as keyof NonNullable<TestCase>]?.deserialize(data);
+  if (inputType === InputType.YAML) {
+    return loadYaml(fs.readFileSync(file, "utf8"));
+  } else if (inputType === InputType.SSZ || inputType === InputType.SSZ_SNAPPY) {
+    const sszTypes = options.getSszTypes ? options.getSszTypes(meta) : options.sszTypes;
+    if (!sszTypes) throw Error("sszTypes is not defined");
+    let data = fs.readFileSync(file);
+    if (inputType === InputType.SSZ_SNAPPY) {
+      data = uncompress(data);
     }
-  } else {
-    return loadYamlFile(file);
+
+    let sszType: SszTypeGeneric | undefined;
+    for (const key of Object.keys(sszTypes)) {
+      // most tests configure with exact match
+      // fork_choice tests configure with regex
+      if ((key.startsWith("^") && inputName.match(key)) || inputName === key) {
+        sszType = sszTypes[key];
+        break;
+      }
+    }
+
+    if (!sszType) {
+      throw Error("Cannot find ssz type for inputName " + inputName);
+    }
+
+    // TODO: Refactor this to be typesafe
+    if (sszType.typeName === "BeaconState") {
+      if (!sszType.deserializeToViewDU) {
+        throw Error("BeaconState type has no deserializeToViewDU method");
+      }
+      return sszType.deserializeToViewDU(data);
+    } else {
+      return sszType.deserialize(data);
+    }
   }
+}
+
+function isDirectory(path: string): boolean {
+  return fs.lstatSync(path).isDirectory();
 }

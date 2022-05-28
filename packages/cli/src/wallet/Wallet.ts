@@ -1,4 +1,4 @@
-import {mapValues, values} from "lodash";
+import mapValues from "lodash/mapValues.js";
 import bls from "@chainsafe/bls";
 import {Keystore, IKeystore} from "@chainsafe/bls-keystore";
 import {
@@ -7,7 +7,7 @@ import {
   eth2ValidatorPaths,
   deriveKeyFromMnemonic,
 } from "@chainsafe/bls-keygen";
-import {randomPassword} from "../util";
+import {randomPassword} from "../util/index.js";
 
 /**
  * @chainsafe/bls-keystore@1.0.0-beta8 requires a pubKey argument
@@ -32,8 +32,8 @@ export class Wallet extends Keystore {
   constructor(keystore: Partial<IWalletKeystoreJson>) {
     super(keystore as IKeystore);
     this.name = keystore.name;
-    this.nextaccount = keystore.nextaccount || 0;
-    this.version = keystore.version || 1;
+    this.nextaccount = keystore.nextaccount ?? 0;
+    this.version = keystore.version ?? 1;
     this.type = keystore.type || "hierarchical deterministic";
   }
 
@@ -105,7 +105,7 @@ export class Wallet extends Keystore {
     // Update nextaccount last in case Keystore generation throws
     this.nextaccount += 1;
 
-    const resolved = await Promise.all(values(keystores));
+    const resolved = await Promise.all(Object.values(keystores));
     return {
       withdrawal: resolved[0],
       signing: resolved[1],

@@ -1,11 +1,19 @@
-export interface IEth1Options {
+export type Eth1Options = {
   enabled: boolean;
-  providerUrl: string;
-  depositContractDeployBlock: number;
-}
+  disableEth1DepositDataTracker?: boolean;
+  providerUrls: string[];
+  /**
+   * jwtSecretHex is the jwt secret if the eth1 modules should ping the jwt auth
+   * protected engine endpoints.
+   */
+  jwtSecretHex?: string;
+  depositContractDeployBlock?: number;
+  unsafeAllowDepositDataOverwrite: boolean;
+};
 
-export const defaultEth1Options: IEth1Options = {
+export const defaultEth1Options: Eth1Options = {
   enabled: true,
-  providerUrl: "http://localhost:8545",
+  providerUrls: ["http://localhost:8545"],
   depositContractDeployBlock: 0,
+  unsafeAllowDepositDataOverwrite: false,
 };

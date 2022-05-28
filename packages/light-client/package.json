@@ -1,8 +1,7 @@
 {
   "name": "@chainsafe/lodestar-light-client",
-  "private": true,
-  "description": "A Typescript implementation of the eth2 light client",
-  "license": "LGPL-3.0",
+  "description": "A Typescript implementation of the Ethereum Consensus light client",
+  "license": "Apache-2.0",
   "author": "ChainSafe Systems",
   "homepage": "https://github.com/ChainSafe/lodestar#readme",
   "repository": {
@@ -12,41 +11,47 @@
   "bugs": {
     "url": "https://github.com/ChainSafe/lodestar/issues"
   },
-  "version": "0.18.0",
-  "main": "lib/index.js",
+  "version": "0.37.0",
+  "type": "module",
+  "exports": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
     "lib/**/*.d.ts",
     "lib/**/*.js",
-    "lib/**/*.js.map"
+    "lib/**/*.js.map",
+    "*.d.ts",
+    "*.js"
   ],
   "scripts": {
     "clean": "rm -rf lib && rm -f *.tsbuildinfo",
-    "build": "concurrently \"yarn build:lib\" \"yarn build:types\"",
+    "build": "tsc -p tsconfig.build.json",
     "build:typedocs": "typedoc --exclude src/index.ts --out typedocs src",
-    "build:lib": "babel src -x .ts -d lib --source-maps",
     "build:release": "yarn clean && yarn run build && yarn run build:typedocs",
-    "build:types": "tsc -p tsconfig.build.json",
+    "check-build": "node -e \"(async function() { await import('./lib/index.js') })()\"",
     "check-types": "tsc",
     "coverage": "codecov -F lodestar-light-client",
     "lint": "eslint --color --ext .ts src/ test/",
     "lint:fix": "yarn run lint --fix",
     "pretest": "yarn run check-types",
     "test": "yarn test:unit && yarn test:e2e",
-    "test:unit": "nyc --cache-dir .nyc_output/.cache -e .ts mocha 'test/unit/**/*.test.ts'",
-    "test:e2e": "mocha 'test/e2e/**/*.test.ts'"
+    "test:unit": "LODESTAR_PRESET=minimal nyc --cache-dir .nyc_output/.cache -e .ts mocha 'test/unit/**/*.test.ts'",
+    "check-readme": "typescript-docs-verifier"
   },
   "dependencies": {
-    "@chainsafe/bls": "^5.1.1",
-    "@chainsafe/lodestar-beacon-state-transition": "^0.18.0",
-    "@chainsafe/lodestar-config": "^0.18.0",
-    "@chainsafe/lodestar-params": "^0.18.0",
-    "@chainsafe/lodestar-types": "^0.18.0",
-    "@chainsafe/lodestar-utils": "^0.18.0",
-    "@chainsafe/ssz": "^0.8.0"
+    "@chainsafe/bls": "7.1.1",
+    "@chainsafe/lodestar-api": "^0.37.0",
+    "@chainsafe/lodestar-config": "^0.37.0",
+    "@chainsafe/lodestar-params": "^0.37.0",
+    "@chainsafe/lodestar-types": "^0.37.0",
+    "@chainsafe/lodestar-utils": "^0.37.0",
+    "@chainsafe/persistent-merkle-tree": "^0.4.1",
+    "@chainsafe/ssz": "^0.9.1",
+    "cross-fetch": "^3.1.4",
+    "mitt": "^3.0.0"
   },
   "keywords": [
     "ethereum",
-    "eth2",
+    "eth-consensus",
     "beacon",
     "light-client",
     "blockchain"

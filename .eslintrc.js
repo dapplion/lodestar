@@ -13,8 +13,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 10,
     project: "./tsconfig.json",
+    sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "eslint-plugin-import", "eslint-plugin-node", "no-only-tests", "prettier"],
+  plugins: ["@typescript-eslint", "eslint-plugin-import", "@chainsafe/eslint-plugin-node", "no-only-tests", "prettier"],
   extends: [
     "eslint:recommended",
     "plugin:import/errors",
@@ -40,8 +41,6 @@ module.exports = {
       //classes and types must be in PascalCase
       {selector: ["typeLike", "enum"], format: ["PascalCase"]},
       {selector: "enumMember", format: null},
-      //interface must start with I
-      {selector: "interface", format: ["PascalCase"], prefix: ["I"]},
       //ignore rule for quoted stuff
       {
         selector: [
@@ -78,9 +77,10 @@ module.exports = {
       "error",
       {
         varsIgnorePattern: "^_",
+        argsIgnorePattern: "^_",
       },
     ],
-    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/ban-ts-comment": "error",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/semi": "error",
     "@typescript-eslint/type-annotation-spacing": "error",
@@ -90,6 +90,15 @@ module.exports = {
     "@typescript-eslint/no-unsafe-call": "error",
     "@typescript-eslint/no-unsafe-member-access": "error",
     "@typescript-eslint/no-unsafe-return": "error",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/strict-boolean-expressions": [
+      "error",
+      {
+        allowNullableBoolean: true,
+        allowNullableString: true,
+        allowAny: true,
+      },
+    ],
     "import/no-extraneous-dependencies": [
       "error",
       {
@@ -101,7 +110,8 @@ module.exports = {
     "func-call-spacing": "off",
     //if --fix is run it messes imports like /lib/presets/minimal & /lib/presets/mainnet
     "import/no-duplicates": "off",
-    "node/no-deprecated-api": "error",
+    "import/no-relative-packages": "error",
+    "@chainsafe/node/no-deprecated-api": "error",
     "new-parens": "error",
     "no-caller": "error",
     "no-bitwise": "off",
@@ -115,9 +125,54 @@ module.exports = {
     "prefer-const": "error",
     quotes: ["error", "double"],
     semi: "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: ["../lib/*", "@chainsafe/*/lib/*"],
+        paths: [
+          {name: "child_process", message: "Please use node:child_process instead."},
+          {name: "crypto", message: "Please use node:crypto instead."},
+          {name: "fs", message: "Please use node:fs instead."},
+          {name: "http", message: "Please use node:http instead."},
+          {name: "net", message: "Please use node:net instead."},
+          {name: "os", message: "Please use node:os instead."},
+          {name: "path", message: "Please use node:path instead."},
+          {name: "stream", message: "Please use node:stream instead."},
+          {name: "util", message: "Please use node:util instead."},
+          {name: "url", message: "Please use node:url instead."},
+        ],
+      },
+    ],
+    // Force to add names to all functions to ease CPU profiling
+    "func-names": ["error", "always"],
 
     // Prevents accidentally pushing a commit with .only in Mocha tests
     "no-only-tests/no-only-tests": "error",
+
+    // TEMP Disabled while eslint-plugin-import support ESM (Typescript does support it) https://github.com/import-js/eslint-plugin-import/issues/2170
+    "import/no-unresolved": "off",
+
+    "@chainsafe/node/file-extension-in-import": [
+      "error",
+      "always",
+      {
+        "esm": true
+      }
+    ],
+  },
+  settings: {
+    "import/core-modules": [
+      "node:child_process",
+      "node:crypto",
+      "node:fs",
+      "node:http",
+      "node:net",
+      "node:os",
+      "node:path",
+      "node:stream",
+      "node:util",
+      "node:url",
+    ],
   },
   overrides: [
     {
@@ -125,6 +180,7 @@ module.exports = {
       rules: {
         "import/no-extraneous-dependencies": "off",
         "@typescript-eslint/no-explicit-any": "off",
+        "func-names": "off",
       },
     },
     {

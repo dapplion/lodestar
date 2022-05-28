@@ -1,95 +1,184 @@
+import tmp, {DirResult, FileResult} from "tmp";
+import fs from "node:fs";
+import path from "node:path";
 import {LevelDbController} from "@chainsafe/lodestar-db";
-import {ILogger, LogLevel, interopSecretKey} from "@chainsafe/lodestar-utils";
-import {IEventsApi} from "@chainsafe/lodestar-validator/lib/api/interface/events";
+import {interopSecretKey} from "@chainsafe/lodestar-beacon-state-transition";
 import {
-  ApiClientOverInstance,
-  ApiClientOverRest,
-  IApiClient,
   SlashingProtection,
   Validator,
+  Signer,
+  SignerType,
+  ISlashingProtection,
+  SignerLocal,
 } from "@chainsafe/lodestar-validator";
-import tmp from "tmp";
-import {BeaconApi} from "../../../src/api/impl/beacon";
-import {EventsApi} from "../../../src/api/impl/events";
-import {NodeApi} from "../../../src/api/impl/node/node";
-import {ValidatorApi} from "../../../src/api/impl/validator";
-import {Eth1ForBlockProductionDisabled} from "../../../src/eth1";
-import {BeaconNode} from "../../../src/node";
-import {ConfigApi} from "../../../src/api/impl/config";
-import {testLogger} from "../logger";
+import {BeaconNode} from "../../../src/node/index.js";
+import {testLogger, TestLoggerOpts} from "../logger.js";
+import type {SecretKey} from "@chainsafe/bls/types";
+import {getLocalSecretKeys} from "../../../../cli/src/cmds/validator/keys.js";
+import {IValidatorCliArgs} from "../../../../cli/src/cmds/validator/options.js";
+import {IGlobalArgs} from "../../../../cli/src/options/index.js";
+import {KEY_IMPORTED_PREFIX} from "@chainsafe/lodestar-keymanager-server";
 
-export function getDevValidators({
+export async function getAndInitValidatorsWithKeystore({
   node,
-  count = 8,
-  validatorClientCount = 1,
+  keystoreContent,
+  keystorePubKey,
   useRestApi,
-  logger,
+  testLoggerOpts,
 }: {
   node: BeaconNode;
-  count: number;
-  validatorClientCount: number;
+  keystoreContent: string;
+  keystorePubKey: string;
   useRestApi?: boolean;
-  logger?: ILogger;
-}): Validator[] {
-  const vcs: Validator[] = [];
-  for (let i = 0; i < count; i++) {
-    vcs.push(
-      getDevValidator({
-        node,
-        startIndex: i * validatorClientCount,
-        count: validatorClientCount,
-        useRestApi,
+  testLoggerOpts?: TestLoggerOpts;
+}): Promise<{
+  validator: Validator;
+  secretKeys: SecretKey[];
+  keystoreContent: string;
+  signers: SignerLocal[];
+  slashingProtection: ISlashingProtection;
+  tempDirs: {
+    keystoreDir: DirResult;
+    passwordFile: FileResult;
+  };
+}> {
+  const keystoreDir = tmp.dirSync({unsafeCleanup: true});
+  const keystoreFile = path.join(`${keystoreDir.name}`, `${KEY_IMPORTED_PREFIX}_${keystorePubKey}.json`);
+
+  fs.writeFileSync(keystoreFile, keystoreContent, {encoding: "utf8", flag: "wx"});
+
+  const passwordFile = tmp.fileSync();
+  fs.writeFileSync(passwordFile.name, "test123!", {encoding: "utf8"});
+
+  const vcConfig = {
+    network: "prater",
+    importKeystoresPath: [`${keystoreDir.name}`],
+    importKeystoresPassword: `${passwordFile.name}`,
+    keymanagerEnabled: true,
+    keymanagerAuthEnabled: true,
+    keymanagerHost: "127.0.0.1",
+    keymanagerPort: 9666,
+    keymanagerCors: "*",
+  };
+
+  const logger = testLogger("Vali", testLoggerOpts);
+  const tmpDir = tmp.dirSync({unsafeCleanup: true});
+  const dbOps = {
+    config: node.config,
+    controller: new LevelDbController({name: tmpDir.name}, {logger}),
+  };
+  const slashingProtection = new SlashingProtection(dbOps);
+
+  const signers: SignerLocal[] = [];
+
+  const {secretKeys, unlockSecretKeys: _unlockSecretKeys} = await getLocalSecretKeys(
+    (vcConfig as unknown) as IValidatorCliArgs & IGlobalArgs
+  );
+  if (secretKeys.length > 0) {
+    // Log pubkeys for auditing
+    logger.info(`Decrypted ${secretKeys.length} local keystores`);
+    for (const secretKey of secretKeys) {
+      logger.info(secretKey.toPublicKey().toHex());
+      signers.push({
+        type: SignerType.Local,
+        secretKey,
+      });
+    }
+  }
+
+  const validator = await Validator.initializeFromBeaconNode({
+    dbOps,
+    api: useRestApi ? getNodeApiUrl(node) : node.api,
+    slashingProtection,
+    logger,
+    signers,
+  });
+
+  return {
+    validator,
+    secretKeys,
+    keystoreContent,
+    signers,
+    slashingProtection,
+    tempDirs: {
+      keystoreDir: keystoreDir,
+      passwordFile: passwordFile,
+    },
+  };
+}
+
+export async function getAndInitDevValidators({
+  node,
+  validatorsPerClient = 8,
+  validatorClientCount = 1,
+  startIndex = 0,
+  useRestApi,
+  testLoggerOpts,
+  externalSignerUrl,
+  defaultFeeRecipient,
+}: {
+  node: BeaconNode;
+  validatorsPerClient: number;
+  validatorClientCount: number;
+  startIndex: number;
+  useRestApi?: boolean;
+  testLoggerOpts?: TestLoggerOpts;
+  externalSignerUrl?: string;
+  defaultFeeRecipient?: string;
+}): Promise<{validators: Validator[]; secretKeys: SecretKey[]}> {
+  const validators: Promise<Validator>[] = [];
+  const secretKeys: SecretKey[] = [];
+
+  for (let clientIndex = 0; clientIndex < validatorClientCount; clientIndex++) {
+    const startIndexVc = startIndex + clientIndex * validatorsPerClient;
+    const endIndex = startIndexVc + validatorsPerClient - 1;
+    const logger = testLogger(`Vali ${startIndexVc}-${endIndex}`, testLoggerOpts);
+    const tmpDir = tmp.dirSync({unsafeCleanup: true});
+    const dbOps = {
+      config: node.config,
+      controller: new LevelDbController({name: tmpDir.name}, {logger}),
+    };
+    const slashingProtection = new SlashingProtection(dbOps);
+
+    const secretKeysValidator = Array.from({length: validatorsPerClient}, (_, i) => interopSecretKey(i + startIndexVc));
+    secretKeys.push(...secretKeysValidator);
+
+    const signers = externalSignerUrl
+      ? secretKeysValidator.map(
+          (secretKey): Signer => ({
+            type: SignerType.Remote,
+            externalSignerUrl,
+            pubkeyHex: secretKey.toPublicKey().toHex(),
+          })
+        )
+      : secretKeysValidator.map(
+          (secretKey): Signer => ({
+            type: SignerType.Local,
+            secretKey,
+          })
+        );
+
+    validators.push(
+      Validator.initializeFromBeaconNode({
+        dbOps,
+        api: useRestApi ? getNodeApiUrl(node) : node.api,
+        slashingProtection,
         logger,
+        signers,
+        defaultFeeRecipient,
       })
     );
   }
-  return vcs;
+
+  return {
+    validators: await Promise.all(validators),
+    // Return secretKeys to start the externalSigner
+    secretKeys,
+  };
 }
 
-export function getDevValidator({
-  node,
-  startIndex,
-  count,
-  logger,
-  useRestApi = false,
-}: {
-  node: BeaconNode;
-  startIndex: number;
-  count: number;
-  logger?: ILogger;
-  useRestApi?: boolean;
-}): Validator {
-  if (!logger) logger = testLogger(`validator-${startIndex}`);
-  const tmpDir = tmp.dirSync({unsafeCleanup: true});
-  return new Validator({
-    config: node.config,
-    api: useRestApi ? getDevValidatorRestApiClient(node, logger) : getDevValidatorInstanceApiClient(node, logger),
-    slashingProtection: new SlashingProtection({
-      config: node.config,
-      controller: new LevelDbController({name: tmpDir.name}, {logger}),
-    }),
-    logger,
-    secretKeys: Array.from({length: count}, (_, i) => interopSecretKey(i + startIndex)),
-  });
-}
-
-export function getDevValidatorRestApiClient(node: BeaconNode, logger: ILogger): IApiClient {
-  return new ApiClientOverRest(
-    node.config,
-    "http://127.0.0.1:9596",
-    logger.child({module: "api", level: LogLevel.warn})
-  );
-}
-
-export function getDevValidatorInstanceApiClient(node: BeaconNode, parentLogger: ILogger): IApiClient {
-  const logger = parentLogger.child({module: "api", level: LogLevel.warn});
-  return new ApiClientOverInstance({
-    config: node.config,
-    validator: new ValidatorApi({}, {...node, logger, eth1: new Eth1ForBlockProductionDisabled()}),
-    node: new NodeApi({}, {...node}),
-    events: new EventsApi({}, {...node}) as IEventsApi,
-    beacon: new BeaconApi({}, {...node}),
-    configApi: new ConfigApi({}, {config: node.config}),
-    logger,
-  });
+function getNodeApiUrl(node: BeaconNode): string {
+  const host = node.opts.api.rest.host || "127.0.0.1";
+  const port = node.opts.api.rest.port || 19596;
+  return `http://${host}:${port}`;
 }

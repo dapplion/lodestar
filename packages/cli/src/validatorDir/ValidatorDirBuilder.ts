@@ -1,19 +1,19 @@
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import {Keystore} from "@chainsafe/bls-keystore";
 import bls from "@chainsafe/bls";
 import {IEth2ValidatorKeys} from "@chainsafe/bls-keygen";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {ValidatorDir} from "./ValidatorDir";
-import {encodeDepositData} from "../depositContract/depositData";
-import {ensureDirExists, YargsError, writeValidatorPassphrase} from "../util";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
+import {ValidatorDir} from "./ValidatorDir.js";
+import {encodeDepositData} from "../depositContract/depositData.js";
+import {ensureDirExists, YargsError, writeValidatorPassphrase} from "../util/index.js";
 import {
   VOTING_KEYSTORE_FILE,
   WITHDRAWAL_KEYSTORE_FILE,
   ETH1_DEPOSIT_DATA_FILE,
   ETH1_DEPOSIT_AMOUNT_FILE,
   getValidatorDirPath,
-} from "./paths";
+} from "./paths.js";
 
 interface IValidatorDirBuildOptions {
   keystores: {[key in keyof IEth2ValidatorKeys]: Keystore};
@@ -34,8 +34,8 @@ interface IValidatorDirBuildOptions {
    * the withdrawal keystore is *always* stored to disk. This is to prevent data loss.
    */
   storeWithdrawalKeystore?: boolean;
-  depositGwei: bigint;
-  config: IBeaconConfig;
+  depositGwei: number;
+  config: IChainForkConfig;
 }
 
 /**

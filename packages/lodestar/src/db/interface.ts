@@ -2,13 +2,11 @@
  * @module db/api/beacon
  */
 
-import {phase0} from "@chainsafe/lodestar-types";
+import {IDbMetrics} from "@chainsafe/lodestar-db";
+import {Registry} from "prom-client";
 
 import {
-  AggregateAndProofRepository,
-  AttestationRepository,
   AttesterSlashingRepository,
-  BadBlockRepository,
   BlockArchiveRepository,
   BlockRepository,
   DepositEventRepository,
@@ -17,10 +15,13 @@ import {
   ProposerSlashingRepository,
   StateArchiveRepository,
   VoluntaryExitRepository,
-} from "./repositories";
-import {PreGenesisState, PreGenesisStateLastProcessedBlock} from "./single";
-import {SeenAttestationCache} from "./seenAttestationCache";
-import {PendingBlockRepository} from "./repositories/pendingBlock";
+  BestPartialLightClientUpdateRepository,
+  CheckpointHeaderRepository,
+  SyncCommitteeRepository,
+  SyncCommitteeWitnessRepository,
+  BackfilledRanges,
+} from "./repositories/index.js";
+import {PreGenesisState, PreGenesisStateLastProcessedBlock} from "./single/index.js";
 
 /**
  * The DB service manages the data layer of the beacon chain
@@ -28,17 +29,11 @@ import {PendingBlockRepository} from "./repositories/pendingBlock";
  * but instead expose relevent beacon chain objects
  */
 export interface IBeaconDb {
-  // bad blocks
-  badBlock: BadBlockRepository;
+  metrics?: IDbMetrics;
+  metricsRegistry?: Registry;
 
   // unfinalized blocks
   block: BlockRepository;
-
-  // pending block
-  pendingBlock: PendingBlockRepository;
-
-  // cache for attestations that have already been seen via gossip or other sources
-  seenAttestationCache: SeenAttestationCache;
 
   // finalized blocks
   blockArchive: BlockArchiveRepository;
@@ -47,8 +42,6 @@ export interface IBeaconDb {
   stateArchive: StateArchiveRepository;
 
   // op pool
-  attestation: AttestationRepository;
-  aggregateAndProof: AggregateAndProofRepository;
   voluntaryExit: VoluntaryExitRepository;
   proposerSlashing: ProposerSlashingRepository;
   attesterSlashing: AttesterSlashingRepository;
@@ -62,7 +55,13 @@ export interface IBeaconDb {
   depositDataRoot: DepositDataRootRepository;
   eth1Data: Eth1DataRepository;
 
-  processBlockOperations(signedBlock: phase0.SignedBeaconBlock): Promise<void>;
+  // lightclient
+  bestPartialLightClientUpdate: BestPartialLightClientUpdateRepository;
+  checkpointHeader: CheckpointHeaderRepository;
+  syncCommittee: SyncCommitteeRepository;
+  syncCommitteeWitness: SyncCommitteeWitnessRepository;
+
+  backfilledRanges: BackfilledRanges;
 
   /**
    * Start the connection to the db instance and open the db store.

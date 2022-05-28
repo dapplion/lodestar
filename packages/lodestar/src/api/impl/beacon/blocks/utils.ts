@@ -1,19 +1,20 @@
-import {phase0} from "@chainsafe/lodestar-types";
+import {allForks} from "@chainsafe/lodestar-types";
+import {routes} from "@chainsafe/lodestar-api";
 import {blockToHeader} from "@chainsafe/lodestar-beacon-state-transition";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
 import {IForkChoice} from "@chainsafe/lodestar-fork-choice";
-import {BlockId} from "./interface";
-import {IBeaconDb} from "../../../../db";
-import {GENESIS_SLOT} from "../../../../constants";
+import {IBeaconDb} from "../../../../db/index.js";
+import {GENESIS_SLOT} from "../../../../constants/index.js";
 import {fromHexString} from "@chainsafe/ssz";
+import {ApiError, ValidationError} from "../../errors.js";
 
 export function toBeaconHeaderResponse(
-  config: IBeaconConfig,
-  block: phase0.SignedBeaconBlock,
+  config: IChainForkConfig,
+  block: allForks.SignedBeaconBlock,
   canonical = false
-): phase0.SignedBeaconHeaderResponse {
+): routes.beacon.BlockHeaderResponse {
   return {
-    root: config.types.phase0.BeaconBlock.hashTreeRoot(block.message),
+    root: config.getForkTypes(block.message.slot).BeaconBlock.hashTreeRoot(block.message),
     canonical,
     header: {
       message: blockToHeader(config, block.message),
@@ -23,39 +24,65 @@ export function toBeaconHeaderResponse(
 }
 
 export async function resolveBlockId(
-  config: IBeaconConfig,
   forkChoice: IForkChoice,
   db: IBeaconDb,
-  blockId: BlockId
-): Promise<phase0.SignedBeaconBlock | null> {
-  blockId = blockId.toLowerCase();
+  blockId: routes.beacon.BlockId
+): Promise<allForks.SignedBeaconBlock> {
+  const block = await resolveBlockIdOrNull(forkChoice, db, blockId);
+  if (!block) {
+    throw new ApiError(404, `No block found for id '${blockId}'`);
+  }
+
+  return block;
+}
+
+async function resolveBlockIdOrNull(
+  forkChoice: IForkChoice,
+  db: IBeaconDb,
+  blockId: routes.beacon.BlockId
+): Promise<allForks.SignedBeaconBlock | null> {
+  blockId = String(blockId).toLowerCase();
   if (blockId === "head") {
     const head = forkChoice.getHead();
-    return db.block.get(head.blockRoot, head.slot);
+    return db.block.get(fromHexString(head.blockRoot));
   }
+
   if (blockId === "genesis") {
     return db.blockArchive.get(GENESIS_SLOT);
   }
+
   if (blockId === "finalized") {
-    return await db.blockArchive.get(forkChoice.getFinalizedCheckpoint().epoch);
+    return await db.blockArchive.get(forkChoice.getFinalizedBlock().slot);
   }
+
+  let blockSummary;
+  let getBlockByBlockArchive;
+
   if (blockId.startsWith("0x")) {
-    const root = fromHexString(blockId);
-    const summary = forkChoice.getBlock(root);
-    if (summary) {
-      return await db.block.get(summary.blockRoot, summary.slot);
-    } else {
-      return await db.blockArchive.getByRoot(root);
+    const blockHash = fromHexString(blockId);
+    blockSummary = forkChoice.getBlock(blockHash);
+    getBlockByBlockArchive = async () => await db.blockArchive.getByRoot(blockHash);
+  } else {
+    // block id must be slot
+    const blockSlot = parseInt(blockId, 10);
+    if (isNaN(blockSlot) && isNaN(blockSlot - 0)) {
+      throw new ValidationError(`Invalid block id '${blockId}'`, "blockId");
     }
+    blockSummary = forkChoice.getCanonicalBlockAtSlot(blockSlot);
+    getBlockByBlockArchive = async () => await db.blockArchive.get(blockSlot);
   }
-  // block id must be slot
-  const slot = parseInt(blockId, 10);
-  if (isNaN(slot) && isNaN(slot - 0)) {
-    throw new Error("Invalid block id");
-  }
-  const blockSummary = forkChoice.getCanonicalBlockSummaryAtSlot(slot);
+
   if (blockSummary) {
-    return db.block.get(blockSummary.blockRoot, blockSummary.slot);
+    // All unfinalized blocks **and the finalized block** are tracked by the fork choice.
+    // Unfinalized blocks are stored in the block repository, but the finalized block is in the block archive
+    const finalized = forkChoice.getFinalizedBlock();
+    if (blockSummary.slot === finalized.slot) {
+      return await db.blockArchive.get(finalized.slot);
+    } else {
+      return await db.block.get(fromHexString(blockSummary.blockRoot));
+    }
+  } else {
+    // Blocks not in the fork choice are in the block archive
+    return await getBlockByBlockArchive();
   }
-  return await db.blockArchive.get(slot);
 }

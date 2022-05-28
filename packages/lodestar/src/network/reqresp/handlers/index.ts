@@ -1,37 +1,32 @@
 import {phase0} from "@chainsafe/lodestar-types";
-import {IBeaconChain} from "../../../chain";
-import {IBeaconDb} from "../../../db";
-import {onBeaconBlocksByRange} from "./beaconBlocksByRange";
-import {onBeaconBlocksByRoot} from "./beaconBlocksByRoot";
+import {IBeaconChain} from "../../../chain/index.js";
+import {IBeaconDb} from "../../../db/index.js";
+import {ReqRespBlockResponse} from "../types.js";
+import {onBeaconBlocksByRange} from "./beaconBlocksByRange.js";
+import {onBeaconBlocksByRoot} from "./beaconBlocksByRoot.js";
 
-export interface IReqRespHandler {
+export type ReqRespHandlers = {
   onStatus(): AsyncIterable<phase0.Status>;
-  onBeaconBlocksByRange(req: phase0.RequestBody): AsyncIterable<phase0.SignedBeaconBlock>;
-  onBeaconBlocksByRoot(req: phase0.RequestBody): AsyncIterable<phase0.SignedBeaconBlock>;
-}
+  onBeaconBlocksByRange(req: phase0.BeaconBlocksByRangeRequest): AsyncIterable<ReqRespBlockResponse>;
+  onBeaconBlocksByRoot(req: phase0.BeaconBlocksByRootRequest): AsyncIterable<ReqRespBlockResponse>;
+};
 
 /**
  * The ReqRespHandler module handles app-level requests / responses from other peers,
  * fetching state from the chain and database as needed.
  */
-export class ReqRespHandler implements IReqRespHandler {
-  private db: IBeaconDb;
-  private chain: IBeaconChain;
+export function getReqRespHandlers({db, chain}: {db: IBeaconDb; chain: IBeaconChain}): ReqRespHandlers {
+  return {
+    async *onStatus() {
+      yield chain.getStatus();
+    },
 
-  constructor({db, chain}: {db: IBeaconDb; chain: IBeaconChain}) {
-    this.db = db;
-    this.chain = chain;
-  }
+    async *onBeaconBlocksByRange(req) {
+      yield* onBeaconBlocksByRange(req, chain, db);
+    },
 
-  async *onStatus(): AsyncIterable<phase0.Status> {
-    yield this.chain.getStatus();
-  }
-
-  async *onBeaconBlocksByRange(req: phase0.BeaconBlocksByRangeRequest): AsyncIterable<phase0.SignedBeaconBlock> {
-    yield* onBeaconBlocksByRange(req, this.chain, this.db);
-  }
-
-  async *onBeaconBlocksByRoot(req: phase0.BeaconBlocksByRootRequest): AsyncIterable<phase0.SignedBeaconBlock> {
-    yield* onBeaconBlocksByRoot(req, this.chain, this.db);
-  }
+    async *onBeaconBlocksByRoot(req) {
+      yield* onBeaconBlocksByRoot(req, chain, db);
+    },
+  };
 }

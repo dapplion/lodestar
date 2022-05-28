@@ -1,13 +1,13 @@
-import {fromHexString, List} from "@chainsafe/ssz";
+import {fromHexString} from "@chainsafe/ssz";
+import {FAR_FUTURE_EPOCH} from "@chainsafe/lodestar-params";
 import {phase0} from "@chainsafe/lodestar-types";
-import {FAR_FUTURE_EPOCH} from "../../src/constants";
 
 export interface IValidatorGeneratorOpts {
   activation?: number;
   exit?: number;
   withdrawableEpoch?: number;
   slashed?: boolean;
-  balance?: bigint;
+  balance?: number;
 }
 
 /**
@@ -19,7 +19,7 @@ export interface IValidatorGeneratorOpts {
  */
 export function generateValidator(opts: IValidatorGeneratorOpts = {}): phase0.Validator {
   const randNum = (): number => Math.floor(Math.random() * Math.floor(4));
-  const activationEpoch = opts.activation || opts.activation === 0 ? opts.activation : FAR_FUTURE_EPOCH;
+  const activationEpoch = opts.activation !== undefined || opts.activation === 0 ? opts.activation : FAR_FUTURE_EPOCH;
   return {
     pubkey: fromHexString(
       // randomly pregenerated pubkey
@@ -28,10 +28,10 @@ export function generateValidator(opts: IValidatorGeneratorOpts = {}): phase0.Va
     withdrawalCredentials: Buffer.alloc(32),
     activationEpoch,
     activationEligibilityEpoch: activationEpoch,
-    exitEpoch: opts.exit || randNum(),
+    exitEpoch: opts.exit ?? randNum(),
     withdrawableEpoch: opts.withdrawableEpoch ?? randNum(),
     slashed: opts.slashed || false,
-    effectiveBalance: opts.balance || BigInt(0),
+    effectiveBalance: opts.balance ?? 0,
   };
 }
 
@@ -40,6 +40,6 @@ export function generateValidator(opts: IValidatorGeneratorOpts = {}): phase0.Va
  * @param {number} n
  * @returns {Validator[]}
  */
-export function generateValidators(n: number, opts?: IValidatorGeneratorOpts): List<phase0.Validator> {
-  return Array.from({length: n}, () => generateValidator(opts)) as List<phase0.Validator>;
+export function generateValidators(n: number, opts?: IValidatorGeneratorOpts): phase0.Validator[] {
+  return Array.from({length: n}, () => generateValidator(opts));
 }

@@ -1,6 +1,6 @@
 import {BLSPubkey} from "@chainsafe/lodestar-types";
-import {IMinMaxSurround, IDistanceEntry, IDistanceStore, Att} from "./interface";
-import {SurroundAttestationError, SurroundAttestationErrorCode} from "./errors";
+import {IMinMaxSurround, IDistanceEntry, IDistanceStore, MinMaxSurroundAttestation} from "./interface.js";
+import {SurroundAttestationError, SurroundAttestationErrorCode} from "./errors.js";
 
 // surround vote checking with min-max surround
 // https://github.com/protolambda/eth2-surround#min-max-surround
@@ -11,31 +11,31 @@ export class MinMaxSurround implements IMinMaxSurround {
 
   constructor(store: IDistanceStore, options?: {maxEpochLookback?: number}) {
     this.store = store;
-    this.maxEpochLookback = options?.maxEpochLookback || Infinity;
+    this.maxEpochLookback = options?.maxEpochLookback ?? Infinity;
   }
 
-  async assertNoSurround(pubKey: BLSPubkey, att: Att): Promise<void> {
-    await this.assertNotSurrounding(pubKey, att);
-    await this.assertNotSurrounded(pubKey, att);
+  async assertNoSurround(pubKey: BLSPubkey, attestation: MinMaxSurroundAttestation): Promise<void> {
+    await this.assertNotSurrounding(pubKey, attestation);
+    await this.assertNotSurrounded(pubKey, attestation);
   }
 
-  async insertAttestation(pubKey: BLSPubkey, att: Att): Promise<void> {
-    await this.updateMinSpan(pubKey, att);
-    await this.updateMaxSpan(pubKey, att);
+  async insertAttestation(pubKey: BLSPubkey, attestation: MinMaxSurroundAttestation): Promise<void> {
+    await this.updateMinSpan(pubKey, attestation);
+    await this.updateMaxSpan(pubKey, attestation);
   }
 
   // min span
 
-  private async updateMinSpan(pubKey: BLSPubkey, att: Att): Promise<void> {
-    await this.assertNotSurrounding(pubKey, att);
+  private async updateMinSpan(pubKey: BLSPubkey, attestation: MinMaxSurroundAttestation): Promise<void> {
+    await this.assertNotSurrounding(pubKey, attestation);
 
-    const untilEpoch = Math.max(0, att.source - 1 - this.maxEpochLookback);
+    const untilEpoch = Math.max(0, attestation.sourceEpoch - 1 - this.maxEpochLookback);
 
     const values: IDistanceEntry[] = [];
-    for (let epoch = att.source - 1; epoch >= untilEpoch; epoch--) {
+    for (let epoch = attestation.sourceEpoch - 1; epoch >= untilEpoch; epoch--) {
       const minSpan = await this.store.minSpan.get(pubKey, epoch);
-      const distance = att.target - epoch;
-      if (!minSpan || distance < minSpan) {
+      const distance = attestation.targetEpoch - epoch;
+      if (minSpan === null || distance < minSpan) {
         values.push({source: epoch, distance});
       } else {
         break;
@@ -44,28 +44,28 @@ export class MinMaxSurround implements IMinMaxSurround {
     await this.store.minSpan.setBatch(pubKey, values);
   }
 
-  private async assertNotSurrounding(pubKey: BLSPubkey, att: Att): Promise<void> {
-    const minSpan = await this.store.minSpan.get(pubKey, att.source);
-    const distance = att.target - att.source;
+  private async assertNotSurrounding(pubKey: BLSPubkey, attestation: MinMaxSurroundAttestation): Promise<void> {
+    const minSpan = await this.store.minSpan.get(pubKey, attestation.sourceEpoch);
+    const distance = attestation.targetEpoch - attestation.sourceEpoch;
     if (minSpan != null && minSpan > 0 && minSpan < distance) {
       throw new SurroundAttestationError({
         code: SurroundAttestationErrorCode.IS_SURROUNDING,
-        att,
-        att2Target: att.source + minSpan,
+        attestation,
+        attestation2Target: attestation.sourceEpoch + minSpan,
       });
     }
   }
 
   // max span
 
-  private async updateMaxSpan(pubKey: BLSPubkey, att: Att): Promise<void> {
-    await this.assertNotSurrounded(pubKey, att);
+  private async updateMaxSpan(pubKey: BLSPubkey, attestation: MinMaxSurroundAttestation): Promise<void> {
+    await this.assertNotSurrounded(pubKey, attestation);
 
     const values: IDistanceEntry[] = [];
-    for (let epoch = att.source + 1; epoch < att.target; epoch++) {
+    for (let epoch = attestation.sourceEpoch + 1; epoch < attestation.targetEpoch; epoch++) {
       const maxSpan = await this.store.maxSpan.get(pubKey, epoch);
-      const distance = att.target - epoch;
-      if (!maxSpan || distance > maxSpan) {
+      const distance = attestation.targetEpoch - epoch;
+      if (maxSpan === null || distance > maxSpan) {
         values.push({source: epoch, distance});
       } else {
         break;
@@ -74,14 +74,14 @@ export class MinMaxSurround implements IMinMaxSurround {
     await this.store.maxSpan.setBatch(pubKey, values);
   }
 
-  private async assertNotSurrounded(pubKey: BLSPubkey, att: Att): Promise<void> {
-    const maxSpan = await this.store.maxSpan.get(pubKey, att.source);
-    const distance = att.target - att.source;
+  private async assertNotSurrounded(pubKey: BLSPubkey, attestation: MinMaxSurroundAttestation): Promise<void> {
+    const maxSpan = await this.store.maxSpan.get(pubKey, attestation.sourceEpoch);
+    const distance = attestation.targetEpoch - attestation.sourceEpoch;
     if (maxSpan != null && maxSpan > 0 && maxSpan > distance) {
       throw new SurroundAttestationError({
         code: SurroundAttestationErrorCode.IS_SURROUNDED,
-        att,
-        att2Target: att.source + maxSpan,
+        attestation: attestation,
+        attestation2Target: attestation.sourceEpoch + maxSpan,
       });
     }
   }

@@ -1,17 +1,17 @@
-import fs from "fs";
-import path from "path";
-import stream from "stream";
-import {promisify} from "util";
+import fs from "node:fs";
+import path from "node:path";
+import stream from "node:stream";
+import {promisify} from "node:util";
 import got from "got";
-import {load, dump, FAILSAFE_SCHEMA, Schema, Type} from "js-yaml";
-import {Json} from "@chainsafe/ssz";
+import yaml from "js-yaml";
+const {load, dump, FAILSAFE_SCHEMA, Schema, Type} = yaml;
 
 export const yamlSchema = new Schema({
   include: [FAILSAFE_SCHEMA],
   implicit: [
     new Type("tag:yaml.org,2002:str", {
       kind: "scalar",
-      construct: function (data) {
+      construct: function construct(data) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return data !== null ? data : "";
       },
@@ -36,7 +36,7 @@ export enum FileFormat {
 /**
  * Parse file contents as Json.
  */
-export function parse<T = Json>(contents: string, fileFormat: FileFormat): T {
+export function parse<T>(contents: string, fileFormat: FileFormat): T {
   switch (fileFormat) {
     case FileFormat.json:
       return JSON.parse(contents) as T;
@@ -44,14 +44,14 @@ export function parse<T = Json>(contents: string, fileFormat: FileFormat): T {
     case FileFormat.yml:
       return load(contents, {schema: yamlSchema}) as T;
     default:
-      throw new Error("Invalid filetype");
+      return (contents as unknown) as T;
   }
 }
 
 /**
  * Stringify file contents.
  */
-export function stringify<T = Json>(obj: T, fileFormat: FileFormat): string {
+export function stringify(obj: unknown, fileFormat: FileFormat): string {
   let contents: string;
   switch (fileFormat) {
     case FileFormat.json:
@@ -62,7 +62,7 @@ export function stringify<T = Json>(obj: T, fileFormat: FileFormat): string {
       contents = dump(obj, {schema: yamlSchema});
       break;
     default:
-      throw new Error("Invalid filetype");
+      contents = (obj as unknown) as string;
   }
   return contents;
 }
@@ -72,7 +72,7 @@ export function stringify<T = Json>(obj: T, fileFormat: FileFormat): string {
  *
  * Serialize either to json, yaml, or toml
  */
-export function writeFile(filepath: string, obj: Json): void {
+export function writeFile(filepath: string, obj: unknown): void {
   mkdir(path.dirname(filepath));
   const fileFormat = path.extname(filepath).substr(1);
   fs.writeFileSync(filepath, stringify(obj, fileFormat as FileFormat), "utf-8");
@@ -82,9 +82,11 @@ export function writeFile(filepath: string, obj: Json): void {
  * Read a JSON serializable object from a file
  *
  * Parse either from json, yaml, or toml
+ * Optional acceptedFormats object can be passed which can be an array of accepted formats, in future can be extended to include parseFn for the accepted formats
  */
-export function readFile<T = Json>(filepath: string): T {
+export function readFile<T>(filepath: string, acceptedFormats?: string[]): T {
   const fileFormat = path.extname(filepath).substr(1);
+  if (acceptedFormats && !acceptedFormats.includes(fileFormat)) throw new Error(`UnsupportedFileFormat: ${filepath}`);
   const contents = fs.readFileSync(filepath, "utf-8");
   return parse(contents, fileFormat as FileFormat);
 }
@@ -93,9 +95,9 @@ export function readFile<T = Json>(filepath: string): T {
  * @see readFile
  * If `filepath` does not exist returns null
  */
-export function readFileIfExists<T = Json>(filepath: string): T | null {
+export function readFileIfExists<T>(filepath: string, acceptedFormats?: string[]): T | null {
   try {
-    return readFile(filepath);
+    return readFile(filepath, acceptedFormats);
   } catch (e) {
     if ((e as {code: string}).code === "ENOENT") {
       return null;

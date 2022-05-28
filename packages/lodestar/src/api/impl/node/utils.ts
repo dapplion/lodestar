@@ -1,11 +1,11 @@
+import {routes} from "@chainsafe/lodestar-api";
 import {Connection} from "libp2p";
-import {PeerStatus, PeerState} from "../../../network";
-import {NodePeer} from "../../types";
+import {PeerStatus} from "../../../network/index.js";
 
 /**
  * Format a list of connections from libp2p connections manager into the API's format NodePeer
  */
-export function formatNodePeer(peerIdStr: string, connections: Connection[]): NodePeer {
+export function formatNodePeer(peerIdStr: string, connections: Connection[]): routes.node.NodePeer {
   const conn = getRevelantConnection(connections);
 
   return {
@@ -13,7 +13,7 @@ export function formatNodePeer(peerIdStr: string, connections: Connection[]): No
     // TODO: figure out how to get enr of peer
     enr: "",
     lastSeenP2pAddress: conn ? conn.remoteAddr.toString() : "",
-    direction: conn ? conn.stat.direction : null,
+    direction: conn ? (conn.stat.direction as routes.node.PeerDirection) : null,
     state: conn ? getPeerState(conn.stat.status) : "disconnected",
   };
 }
@@ -24,7 +24,7 @@ export function formatNodePeer(peerIdStr: string, connections: Connection[]): No
  * - Otherwise, the first closing connection
  * - Otherwise, the first closed connection
  */
-function getRevelantConnection(connections: Connection[]): Connection | null {
+export function getRevelantConnection(connections: Connection[]): Connection | null {
   const byStatus = new Map<PeerStatus, Connection>();
   for (const conn of connections) {
     if (conn.stat.status === "open") return conn;
@@ -38,7 +38,7 @@ function getRevelantConnection(connections: Connection[]): Connection | null {
  * Map libp2p connection status to the API's peer state notation
  * @param status
  */
-function getPeerState(status: PeerStatus): PeerState {
+function getPeerState(status: PeerStatus): routes.node.PeerState {
   switch (status) {
     case "open":
       return "connected";

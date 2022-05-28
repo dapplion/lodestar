@@ -2,7 +2,8 @@
  * @module logger
  */
 
-import {Writable} from "stream";
+import {Writable} from "node:stream";
+import {LogData} from "./json.js";
 
 export enum LogLevel {
   error = "error",
@@ -39,25 +40,28 @@ export const defaultLogLevel = LogLevel.info;
 export type LogFormat = "human" | "json";
 export const logFormats: LogFormat[] = ["human", "json"];
 
+export type EpochSlotOpts = {
+  genesisTime: number;
+  secondsPerSlot: number;
+  slotsPerEpoch: number;
+};
+export enum TimestampFormatCode {
+  DateRegular,
+  EpochSlot,
+}
+export type TimestampFormat =
+  | {format: TimestampFormatCode.DateRegular}
+  | ({format: TimestampFormatCode.EpochSlot} & EpochSlotOpts);
+
 export interface ILoggerOptions {
   level?: LogLevel;
   module?: string;
   format?: LogFormat;
   hideTimestamp?: boolean;
+  timestampFormat?: TimestampFormat;
 }
 
-export type Context =
-  | string
-  | number
-  | boolean
-  | bigint
-  | null
-  | {
-      [property: string]: Context;
-    }
-  | Context[];
-
-export type LogHandler = (message: string, context?: Context, error?: Error) => void;
+export type LogHandler = (message: string, context?: LogData, error?: Error) => void;
 
 export interface ILogger {
   error: LogHandler;
@@ -67,7 +71,6 @@ export interface ILogger {
   verbose: LogHandler;
   debug: LogHandler;
   silly: LogHandler;
-  profile(message: string, option?: {level: string; message: string}): void;
   stream(): Writable;
   // custom
   child(options: ILoggerOptions): ILogger;

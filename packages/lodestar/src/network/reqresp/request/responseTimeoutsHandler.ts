@@ -1,9 +1,14 @@
-import {AbortController} from "abort-controller";
-import {source as abortSource} from "abortable-iterator";
 import pipe from "it-pipe";
-import {timeoutOptions} from "../../../constants";
-import {onChunk} from "../utils/onChunk";
-import {RequestErrorCode, RequestInternalError} from "./errors";
+import {timeoutOptions} from "../../../constants/index.js";
+import {abortableSource} from "../../../util/abortableSource.js";
+import {onChunk} from "../utils/index.js";
+import {RequestErrorCode, RequestInternalError} from "./errors.js";
+
+/** Returns the maximum total timeout possible for a response. See @responseTimeoutsHandler */
+export function maxTotalResponseTimeout(maxResponses = 1, options?: Partial<typeof timeoutOptions>): number {
+  const {TTFB_TIMEOUT, RESP_TIMEOUT} = {...timeoutOptions, ...options};
+  return TTFB_TIMEOUT + maxResponses * RESP_TIMEOUT;
+}
 
 /**
  * Wraps responseDecoder to isolate the logic that handles response timeouts.
@@ -14,7 +19,7 @@ export function responseTimeoutsHandler<T>(
   responseDecoder: (source: AsyncIterable<Buffer>) => AsyncGenerator<T>,
   options?: Partial<typeof timeoutOptions>
 ): (source: AsyncIterable<Buffer>) => AsyncGenerator<T> {
-  return async function* (source) {
+  return async function* responseTimeoutsHandlerTransform(source) {
     const {TTFB_TIMEOUT, RESP_TIMEOUT} = {...timeoutOptions, ...options};
 
     const ttfbTimeoutController = new AbortController();
@@ -31,10 +36,17 @@ export function responseTimeoutsHandler<T>(
 
     try {
       yield* pipe(
-        abortSource(source, [
-          {signal: ttfbTimeoutController.signal, options: {abortMessage: RequestErrorCode.TTFB_TIMEOUT}},
-          {signal: respTimeoutController.signal, options: {abortMessage: RequestErrorCode.RESP_TIMEOUT}},
+        abortableSource(source, [
+          {
+            signal: ttfbTimeoutController.signal,
+            getError: () => new RequestInternalError({code: RequestErrorCode.TTFB_TIMEOUT}),
+          },
+          {
+            signal: respTimeoutController.signal,
+            getError: () => new RequestInternalError({code: RequestErrorCode.RESP_TIMEOUT}),
+          },
         ]),
+
         onChunk((bytesChunk) => {
           // Ignore null and empty chunks
           if (isFirstByte && bytesChunk.length > 0) {
@@ -45,25 +57,17 @@ export function responseTimeoutsHandler<T>(
           }
         }),
 
+        // Transforms `Buffer` chunks to yield `ResponseBody` chunks
         responseDecoder,
+
         onChunk(() => {
           // On <response_chunk>, cancel this chunk's RESP_TIMEOUT and start next's
           restartRespTimeout();
         })
       );
-    } catch (e) {
-      // Rethrow error properly typed so the peer score can pick it up
-      switch ((e as Error).message) {
-        case RequestErrorCode.TTFB_TIMEOUT:
-          throw new RequestInternalError({code: RequestErrorCode.TTFB_TIMEOUT});
-        case RequestErrorCode.RESP_TIMEOUT:
-          throw new RequestInternalError({code: RequestErrorCode.RESP_TIMEOUT});
-        default:
-          throw e;
-      }
     } finally {
       clearTimeout(timeoutTTFB);
-      if (timeoutRESP) clearTimeout(timeoutRESP);
+      if (timeoutRESP !== null) clearTimeout(timeoutRESP);
     }
   };
 }

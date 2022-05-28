@@ -2,37 +2,39 @@
  * @module node
  */
 
-import {AbortController} from "abort-controller";
 import LibP2p from "libp2p";
+import {Registry} from "prom-client";
 
-import {TreeBacked} from "@chainsafe/ssz";
 import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {allForks} from "@chainsafe/lodestar-types";
+import {phase0} from "@chainsafe/lodestar-types";
 import {ILogger} from "@chainsafe/lodestar-utils";
+import {Api} from "@chainsafe/lodestar-api";
+import {BeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
 
-import {IBeaconDb} from "../db";
-import {INetwork, Network, ReqRespHandler} from "../network";
-import {BeaconSync, IBeaconSync} from "../sync";
-import {BeaconChain, IBeaconChain, initBeaconMetrics} from "../chain";
-import {createMetrics, IMetrics, HttpMetricsServer} from "../metrics";
-import {Api, IApi, RestApi} from "../api";
-import {TasksService} from "../tasks";
-import {IBeaconNodeOptions} from "./options";
-import {Eth1ForBlockProduction, Eth1ForBlockProductionDisabled, Eth1Provider} from "../eth1";
-import {runNodeNotifier} from "./notifier";
+import {IBeaconDb} from "../db/index.js";
+import {INetwork, Network, getReqRespHandlers} from "../network/index.js";
+import {BeaconSync, IBeaconSync} from "../sync/index.js";
+import {BackfillSync} from "../sync/backfill/index.js";
+import {BeaconChain, IBeaconChain, initBeaconMetrics} from "../chain/index.js";
+import {createMetrics, IMetrics, HttpMetricsServer} from "../metrics/index.js";
+import {getApi, RestApi} from "../api/index.js";
+import {initializeExecutionEngine} from "../executionEngine/index.js";
+import {initializeEth1ForBlockProduction} from "../eth1/index.js";
+import {IBeaconNodeOptions} from "./options.js";
+import {runNodeNotifier} from "./notifier.js";
 
-export * from "./options";
+export * from "./options.js";
 
 export interface IBeaconNodeModules {
   opts: IBeaconNodeOptions;
   config: IBeaconConfig;
   db: IBeaconDb;
-  metrics?: IMetrics;
+  metrics: IMetrics | null;
   network: INetwork;
   chain: IBeaconChain;
-  api: IApi;
+  api: Api;
   sync: IBeaconSync;
-  chores: TasksService;
+  backfillSync: BackfillSync | null;
   metricsServer?: HttpMetricsServer;
   restApi?: RestApi;
   controller?: AbortController;
@@ -44,7 +46,9 @@ export interface IBeaconNodeInitModules {
   db: IBeaconDb;
   logger: ILogger;
   libp2p: LibP2p;
-  anchorState: TreeBacked<allForks.BeaconState>;
+  anchorState: BeaconStateAllForks;
+  wsCheckpoint?: phase0.Checkpoint;
+  metricsRegistries?: Registry[];
 }
 
 export enum BeaconNodeStatus {
@@ -55,20 +59,20 @@ export enum BeaconNodeStatus {
 
 /**
  * The main Beacon Node class.  Contains various components for getting and processing data from the
- * eth2 ecosystem as well as systems for getting beacon node metadata.
+ * Ethereum Consensus ecosystem as well as systems for getting beacon node metadata.
  */
 export class BeaconNode {
   opts: IBeaconNodeOptions;
   config: IBeaconConfig;
   db: IBeaconDb;
-  metrics?: IMetrics;
+  metrics: IMetrics | null;
   metricsServer?: HttpMetricsServer;
   network: INetwork;
   chain: IBeaconChain;
-  api: IApi;
+  api: Api;
   restApi?: RestApi;
   sync: IBeaconSync;
-  chores: TasksService;
+  backfillSync: BackfillSync | null;
 
   status: BeaconNodeStatus;
   private controller?: AbortController;
@@ -84,7 +88,7 @@ export class BeaconNode {
     api,
     restApi,
     sync,
-    chores,
+    backfillSync,
     controller,
   }: IBeaconNodeModules) {
     this.opts = opts;
@@ -97,7 +101,7 @@ export class BeaconNode {
     this.restApi = restApi;
     this.network = network;
     this.sync = sync;
-    this.chores = chores;
+    this.backfillSync = backfillSync;
     this.controller = controller;
 
     this.status = BeaconNodeStatus.started;
@@ -114,6 +118,8 @@ export class BeaconNode {
     logger,
     libp2p,
     anchorState,
+    wsCheckpoint,
+    metricsRegistries = [],
   }: IBeaconNodeInitModules): Promise<T> {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -121,27 +127,38 @@ export class BeaconNode {
     // start db if not already started
     await db.start();
 
-    const metrics = opts.metrics.enabled ? createMetrics() : undefined;
-    if (metrics) {
+    let metrics = null;
+    if (opts.metrics.enabled) {
+      // Since the db is managed separately, db metrics must be manually added to the registry
+      db.metricsRegistry && metricsRegistries.push(db.metricsRegistry);
+      metrics = createMetrics(opts.metrics, config, anchorState, logger.child({module: "VMON"}), metricsRegistries);
       initBeaconMetrics(metrics, anchorState);
     }
 
-    const chain = new BeaconChain({
-      opts: opts.chain,
+    const chain = new BeaconChain(opts.chain, {
       config,
       db,
       logger: logger.child(opts.logger.chain),
       metrics,
       anchorState,
+      eth1: initializeEth1ForBlockProduction(
+        opts.eth1,
+        {config, db, logger: logger.child(opts.logger.eth1), signal},
+        anchorState
+      ),
+      executionEngine: initializeExecutionEngine(opts.executionEngine, signal),
     });
+
+    // Load persisted data from disk to in-memory caches
+    await chain.loadFromDisk();
+
     const network = new Network(opts.network, {
       config,
       libp2p,
       logger: logger.child(opts.logger.network),
       metrics,
       chain,
-      db,
-      reqRespHandler: new ReqRespHandler({db, chain}),
+      reqRespHandlers: getReqRespHandlers({db, chain}),
       signal,
     });
     const sync = new BeaconSync(opts.sync, {
@@ -150,51 +167,53 @@ export class BeaconNode {
       chain,
       metrics,
       network,
+      wsCheckpoint,
       logger: logger.child(opts.logger.sync),
     });
-    const chores = new TasksService(config, {
-      db,
-      chain,
-      sync,
-      network,
-      logger: logger.child(opts.logger.chores),
-    });
 
-    const api = new Api(opts.api, {
+    const backfillSync =
+      opts.sync.backfillBatchSize > 0
+        ? await BackfillSync.init(opts.sync, {
+            config,
+            db,
+            chain,
+            metrics,
+            network,
+            wsCheckpoint,
+            anchorState,
+            logger: logger.child(opts.logger.backfill),
+            signal,
+          })
+        : null;
+
+    const api = getApi(opts.api, {
       config,
       logger: logger.child(opts.logger.api),
       db,
-      eth1: opts.eth1.enabled
-        ? new Eth1ForBlockProduction({
-            config,
-            db,
-            eth1Provider: new Eth1Provider(config, opts.eth1),
-            logger: logger.child(opts.logger.eth1),
-            opts: opts.eth1,
-            signal,
-          })
-        : new Eth1ForBlockProductionDisabled(),
       sync,
       network,
       chain,
+      metrics,
     });
 
     const metricsServer = metrics
-      ? new HttpMetricsServer(opts.metrics, {metrics, logger: logger.child(opts.logger.metrics)})
+      ? new HttpMetricsServer(opts.metrics, {register: metrics.register, logger: logger.child(opts.logger.metrics)})
       : undefined;
     if (metricsServer) {
       await metricsServer.start();
     }
 
-    const restApi = await RestApi.init(opts.api.rest, {
+    const restApi = new RestApi(opts.api.rest, {
       config,
       logger: logger.child(opts.logger.api),
       api,
+      metrics,
     });
+    if (opts.api.rest.enabled) {
+      await restApi.listen();
+    }
 
     await network.start();
-    await sync.start();
-    chores.start();
 
     void runNodeNotifier({network, chain, sync, config, logger, signal});
 
@@ -209,7 +228,7 @@ export class BeaconNode {
       api,
       restApi,
       sync,
-      chores,
+      backfillSync,
       controller,
     }) as T;
   }
@@ -220,12 +239,13 @@ export class BeaconNode {
   async close(): Promise<void> {
     if (this.status === BeaconNodeStatus.started) {
       this.status = BeaconNodeStatus.closing;
-      await this.chores.stop();
-      await this.sync.stop();
+      this.sync.close();
+      this.backfillSync?.close();
       await this.network.stop();
       if (this.metricsServer) await this.metricsServer.stop();
       if (this.restApi) await this.restApi.close();
 
+      await this.chain.persistToDisk();
       this.chain.close();
       await this.db.stop();
       if (this.controller) this.controller.abort();

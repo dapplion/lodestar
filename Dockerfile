@@ -1,23 +1,21 @@
-FROM node:14-alpine as build
+FROM node:16-alpine as build
 WORKDIR /usr/app
-RUN apk update && apk add --no-cache git g++ make python && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache g++ make python3 && rm -rf /var/cache/apk/*
 
-# Installs all deps in the root yarn.lock, which are most of them. To cache before copying the src
-COPY package.json yarn.lock ./
-RUN yarn install --non-interactive --frozen-lockfile --ignore-scripts
+ARG VERSION=latest
+ENV VERSION=$VERSION
+RUN npm install @chainsafe/lodestar-cli@$VERSION
 
-COPY . .
-RUN yarn install --non-interactive --frozen-lockfile
-
-# rm .git afterwards to prevent copying it to the final layer (~350MB)
-RUN node ./scripts/getGitData /usr/app/.git-data.json && rm -r .git
-
-
-# Copy built src + node_modules to a new layer to prune unnecessary fs
-# Previous layer weights 7.25GB, while this final 488MB (as of Oct 2020)
-FROM node:14-alpine
+FROM node:16-alpine
 WORKDIR /usr/app
 COPY --from=build /usr/app .
-ENV DOCKER_LODESTAR_GIT_DATA_FILEPATH /usr/app/.git-data.json
 
-ENTRYPOINT ["node", "./packages/cli/bin/lodestar"]
+# Sanity check
+RUN /usr/app/node_modules/.bin/lodestar --help
+
+# NodeJS applications have a default memory limit of 2.5GB.
+# This limit is bit tight for a Prater node, it is recommended to raise the limit
+# since memory may spike during certain network conditions.
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
+ENTRYPOINT ["node", "/usr/app/node_modules/.bin/lodestar"]

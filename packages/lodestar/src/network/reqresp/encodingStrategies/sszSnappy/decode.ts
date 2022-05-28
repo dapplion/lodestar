@@ -1,16 +1,11 @@
 import BufferList from "bl";
 import varint from "varint";
-import {CompositeType} from "@chainsafe/ssz";
-import {MAX_VARINT_BYTES} from "../../../../constants";
-import {SnappyFramesUncompress} from "./snappyFrames/uncompress";
-import {BufferedSource} from "../../utils/bufferedSource";
-import {RequestOrResponseType, RequestOrResponseBody} from "../../interface";
-import {maxEncodedLen} from "./utils";
-import {SszSnappyError, SszSnappyErrorCode} from "./errors";
-
-export interface ISszSnappyOptions {
-  isSszTree?: boolean;
-}
+import {MAX_VARINT_BYTES} from "../../../../constants/index.js";
+import {BufferedSource} from "../../utils/index.js";
+import {RequestOrResponseType, RequestOrIncomingResponseBody} from "../../types.js";
+import {SnappyFramesUncompress} from "./snappyFrames/uncompress.js";
+import {maxEncodedLen} from "./utils.js";
+import {SszSnappyError, SszSnappyErrorCode} from "./errors.js";
 
 /**
  * ssz_snappy encoding strategy reader.
@@ -19,15 +14,14 @@ export interface ISszSnappyOptions {
  * <encoding-dependent-header> | <encoded-payload>
  * ```
  */
-export async function readSszSnappyPayload<T extends RequestOrResponseBody>(
+export async function readSszSnappyPayload<T extends RequestOrIncomingResponseBody>(
   bufferedSource: BufferedSource,
-  type: RequestOrResponseType,
-  options?: ISszSnappyOptions
+  type: RequestOrResponseType
 ): Promise<T> {
   const sszDataLength = await readSszSnappyHeader(bufferedSource, type);
 
   const bytes = await readSszSnappyBody(bufferedSource, sszDataLength);
-  return deserializeSszBody<T>(bytes, type, options);
+  return deserializeSszBody<T>(bytes, type);
 }
 
 /**
@@ -41,18 +35,28 @@ async function readSszSnappyHeader(bufferedSource: BufferedSource, type: Request
       continue;
     }
 
-    const sszDataLength = varint.decode(buffer.slice());
+    // Use Number.MAX_SAFE_INTEGER to guard against this check https://github.com/chrisdickinson/varint/pull/20
+    // On varint v6 if the number is > Number.MAX_SAFE_INTEGER `varint.decode` throws.
+    // Since MAX_VARINT_BYTES = 10, this will always be the case for the condition below.
+    // The check for MAX_VARINT_BYTES is kept for completeness
+    let sszDataLength: number;
+    try {
+      sszDataLength = varint.decode(buffer.slice());
+    } catch (e) {
+      throw new SszSnappyError({code: SszSnappyErrorCode.INVALID_VARINT_BYTES_COUNT, bytes: Infinity});
+    }
 
     // MUST validate: the unsigned protobuf varint used for the length-prefix MUST not be longer than 10 bytes
+    // Check for varintBytes > 0 to guard against NaN, or 0 values
     const varintBytes = varint.decode.bytes;
-    if (varintBytes > MAX_VARINT_BYTES) {
+    if (varintBytes > MAX_VARINT_BYTES || !(varintBytes > 0)) {
       throw new SszSnappyError({code: SszSnappyErrorCode.INVALID_VARINT_BYTES_COUNT, bytes: varintBytes});
     }
     buffer.consume(varintBytes);
 
     // MUST validate: the length-prefix is within the expected size bounds derived from the payload SSZ type.
-    const minSize = type.getMinSerializedLength();
-    const maxSize = type.getMaxSerializedLength();
+    const minSize = type.minSize;
+    const maxSize = type.maxSize;
     if (sszDataLength < minSize) {
       throw new SszSnappyError({code: SszSnappyErrorCode.UNDER_SSZ_MIN_SIZE, minSize, sszDataLength});
     }
@@ -120,19 +124,9 @@ async function readSszSnappyBody(bufferedSource: BufferedSource, sszDataLength: 
  * Deseralizes SSZ body.
  * `isSszTree` option allows the SignedBeaconBlock type to be deserialized as a tree
  */
-function deserializeSszBody<T extends RequestOrResponseBody>(
-  bytes: Buffer,
-  type: RequestOrResponseType,
-  options?: ISszSnappyOptions
-): T {
+function deserializeSszBody<T extends RequestOrIncomingResponseBody>(bytes: Buffer, type: RequestOrResponseType): T {
   try {
-    if (options?.isSszTree) {
-      return (((type as unknown) as CompositeType<Record<string, unknown>>).createTreeBackedFromBytes(
-        bytes
-      ) as unknown) as T;
-    } else {
-      return type.deserialize(bytes) as T;
-    }
+    return type.deserialize(bytes) as T;
   } catch (e) {
     throw new SszSnappyError({code: SszSnappyErrorCode.DESERIALIZE_ERROR, deserializeError: e as Error});
   }

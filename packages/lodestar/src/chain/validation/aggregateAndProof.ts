@@ -1,161 +1,146 @@
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {allForks, ValidatorIndex} from "@chainsafe/lodestar-types";
-import {IAttestationJob, IBeaconChain} from "..";
-import {IBeaconDb} from "../../db";
+import {toHexString} from "@chainsafe/ssz";
+import {ssz, ValidatorIndex} from "@chainsafe/lodestar-types";
 import {
   phase0,
-  fast,
-  CachedBeaconState,
+  allForks,
   computeEpochAtSlot,
   isAggregatorFromCommitteeLength,
 } from "@chainsafe/lodestar-beacon-state-transition";
-import {isAttestingToInValidBlock} from "./attestation";
-import {getSelectionProofSignatureSet, getAggregateAndProofSignatureSet} from "./utils";
-import {verifySignatureSetsBatch} from "../bls";
-import {AttestationError, AttestationErrorCode} from "../errors";
-import {ATTESTATION_PROPAGATION_SLOT_RANGE} from "../../constants";
+import {IBeaconChain} from "..";
+import {getSelectionProofSignatureSet, getAggregateAndProofSignatureSet} from "./signatureSets/index.js";
+import {AttestationError, AttestationErrorCode, GossipAction} from "../errors/index.js";
+import {getCommitteeIndices, verifyHeadBlockAndTargetRoot, verifyPropagationSlotRange} from "./attestation.js";
+import {RegenCaller} from "../regen/index.js";
 
 export async function validateGossipAggregateAndProof(
-  config: IBeaconConfig,
   chain: IBeaconChain,
-  db: IBeaconDb,
-  signedAggregateAndProof: phase0.SignedAggregateAndProof,
-  attestationJob: IAttestationJob
-): Promise<void> {
+  signedAggregateAndProof: phase0.SignedAggregateAndProof
+): Promise<{indexedAttestation: phase0.IndexedAttestation; committeeIndices: ValidatorIndex[]}> {
+  // Do checks in this order:
+  // - do early checks (w/o indexed attestation)
+  // - > obtain indexed attestation and committes per slot
+  // - do middle checks w/ indexed attestation
+  // - > verify signature
+  // - do late checks w/ a valid signature
+
   const aggregateAndProof = signedAggregateAndProof.message;
   const aggregate = aggregateAndProof.aggregate;
+  const {aggregationBits} = aggregate;
+  const attData = aggregate.data;
+  const attDataRoot = toHexString(ssz.phase0.AttestationData.hashTreeRoot(attData));
+  const attSlot = attData.slot;
+  const attEpoch = computeEpochAtSlot(attSlot);
+  const attTarget = attData.target;
+  const targetEpoch = attTarget.epoch;
 
-  const latestPermissibleSlot = chain.clock.currentSlot;
-  const earliestPermissibleSlot = chain.clock.currentSlot - ATTESTATION_PROPAGATION_SLOT_RANGE;
-  const attestationSlot = aggregate.data.slot;
+  // [REJECT] The attestation's epoch matches its target -- i.e. attestation.data.target.epoch == compute_epoch_at_slot(attestation.data.slot)
+  if (targetEpoch !== attEpoch) {
+    throw new AttestationError(GossipAction.REJECT, {code: AttestationErrorCode.BAD_TARGET_EPOCH});
+  }
 
-  if (attestationSlot < earliestPermissibleSlot) {
-    throw new AttestationError({
-      code: AttestationErrorCode.PAST_SLOT,
-      earliestPermissibleSlot,
-      attestationSlot,
-      job: attestationJob,
+  // [IGNORE] aggregate.data.slot is within the last ATTESTATION_PROPAGATION_SLOT_RANGE slots (with a MAXIMUM_GOSSIP_CLOCK_DISPARITY allowance)
+  // -- i.e. aggregate.data.slot + ATTESTATION_PROPAGATION_SLOT_RANGE >= current_slot >= aggregate.data.slot
+  // (a client MAY queue future aggregates for processing at the appropriate slot).
+  verifyPropagationSlotRange(chain, attSlot);
+
+  // [IGNORE] The aggregate is the first valid aggregate received for the aggregator with
+  // index aggregate_and_proof.aggregator_index for the epoch aggregate.data.target.epoch.
+  const aggregatorIndex = aggregateAndProof.aggregatorIndex;
+  if (chain.seenAggregators.isKnown(targetEpoch, aggregatorIndex)) {
+    throw new AttestationError(GossipAction.IGNORE, {
+      code: AttestationErrorCode.AGGREGATOR_ALREADY_KNOWN,
+      targetEpoch,
+      aggregatorIndex,
     });
   }
 
-  if (attestationSlot > latestPermissibleSlot) {
-    throw new AttestationError({
-      code: AttestationErrorCode.FUTURE_SLOT,
-      attestationSlot,
-      latestPermissibleSlot,
-      job: attestationJob,
+  // _[IGNORE]_ A valid aggregate attestation defined by `hash_tree_root(aggregate.data)` whose `aggregation_bits`
+  // is a non-strict superset has _not_ already been seen.
+  if (chain.seenAggregatedAttestations.isKnown(targetEpoch, attDataRoot, aggregationBits)) {
+    throw new AttestationError(GossipAction.IGNORE, {
+      code: AttestationErrorCode.ATTESTERS_ALREADY_KNOWN,
+      targetEpoch,
+      aggregateRoot: attDataRoot,
     });
   }
 
-  if (db.seenAttestationCache.hasAggregateAndProof(aggregateAndProof)) {
-    throw new AttestationError({
-      code: AttestationErrorCode.AGGREGATE_ALREADY_KNOWN,
-      job: attestationJob,
-    });
-  }
+  // [IGNORE] The block being voted for (attestation.data.beacon_block_root) has been seen (via both gossip
+  // and non-gossip sources) (a client MAY queue attestations for processing once block is retrieved).
+  const attHeadBlock = verifyHeadBlockAndTargetRoot(chain, attData.beaconBlockRoot, attTarget.root, attEpoch);
 
-  if (!hasAttestationParticipants(aggregate)) {
+  // [IGNORE] The current finalized_checkpoint is an ancestor of the block defined by aggregate.data.beacon_block_root
+  // -- i.e. get_ancestor(store, aggregate.data.beacon_block_root, compute_start_slot_at_epoch(store.finalized_checkpoint.epoch)) == store.finalized_checkpoint.root
+  // > Altready check in `chain.forkChoice.hasBlock(attestation.data.beaconBlockRoot)`
+
+  const attHeadState = await chain.regen
+    .getState(attHeadBlock.stateRoot, RegenCaller.validateGossipAggregateAndProof)
+    .catch((e: Error) => {
+      throw new AttestationError(GossipAction.REJECT, {
+        code: AttestationErrorCode.MISSING_ATTESTATION_HEAD_STATE,
+        error: e as Error,
+      });
+    });
+
+  const committeeIndices = getCommitteeIndices(attHeadState, attSlot, attData.index);
+  const attestingIndices = aggregate.aggregationBits.intersectValues(committeeIndices);
+  const indexedAttestation: phase0.IndexedAttestation = {
+    attestingIndices,
+    data: attData,
+    signature: aggregate.signature,
+  };
+
+  // TODO: Check this before regen
+  // [REJECT] The attestation has participants -- that is,
+  // len(get_attesting_indices(state, aggregate.data, aggregate.aggregation_bits)) >= 1.
+  if (attestingIndices.length < 1) {
     // missing attestation participants
-    throw new AttestationError({
-      code: AttestationErrorCode.WRONG_NUMBER_OF_AGGREGATION_BITS,
-      job: attestationJob,
-    });
+    throw new AttestationError(GossipAction.REJECT, {code: AttestationErrorCode.EMPTY_AGGREGATION_BITFIELD});
   }
 
-  if (await isAttestingToInValidBlock(db, aggregate)) {
-    throw new AttestationError({
-      code: AttestationErrorCode.KNOWN_BAD_BLOCK,
-      job: attestationJob,
-    });
+  // [REJECT] aggregate_and_proof.selection_proof selects the validator as an aggregator for the slot
+  // -- i.e. is_aggregator(state, aggregate.data.slot, aggregate.data.index, aggregate_and_proof.selection_proof) returns True.
+  if (!isAggregatorFromCommitteeLength(committeeIndices.length, aggregateAndProof.selectionProof)) {
+    throw new AttestationError(GossipAction.REJECT, {code: AttestationErrorCode.INVALID_AGGREGATOR});
   }
 
-  // TODO: check pool of aggregates if already seen (not a dos vector check)
-
-  await validateAggregateAttestation(config, chain, signedAggregateAndProof, attestationJob);
-}
-
-export function hasAttestationParticipants(attestation: phase0.Attestation): boolean {
-  return Array.from(attestation.aggregationBits).filter((bit) => !!bit).length >= 1;
-}
-
-export async function validateAggregateAttestation(
-  config: IBeaconConfig,
-  chain: IBeaconChain,
-  aggregateAndProof: phase0.SignedAggregateAndProof,
-  attestationJob: IAttestationJob
-): Promise<void> {
-  const attestation = aggregateAndProof.message.aggregate;
-
-  let attestationTargetState: CachedBeaconState<allForks.BeaconState>;
-  try {
-    // the target state, advanced to the attestation slot
-    attestationTargetState = await chain.regen.getCheckpointState(attestation.data.target);
-  } catch (e) {
-    throw new AttestationError({
-      code: AttestationErrorCode.MISSING_ATTESTATION_TARGET_STATE,
-      error: e as Error,
-      job: attestationJob,
-    });
+  // [REJECT] The aggregator's validator index is within the committee
+  // -- i.e. aggregate_and_proof.aggregator_index in get_beacon_committee(state, aggregate.data.slot, aggregate.data.index).
+  if (!committeeIndices.includes(aggregateAndProof.aggregatorIndex)) {
+    throw new AttestationError(GossipAction.REJECT, {code: AttestationErrorCode.AGGREGATOR_NOT_IN_COMMITTEE});
   }
 
-  let committee: ValidatorIndex[];
-  try {
-    committee = attestationTargetState.getBeaconCommittee(attestation.data.slot, attestation.data.index);
-  } catch (error) {
-    throw new AttestationError({
-      code: AttestationErrorCode.AGGREGATOR_NOT_IN_COMMITTEE,
-      job: attestationJob,
-    });
-  }
-
-  if (!committee.includes(aggregateAndProof.message.aggregatorIndex)) {
-    throw new AttestationError({
-      code: AttestationErrorCode.AGGREGATOR_NOT_IN_COMMITTEE,
-      job: attestationJob,
-    });
-  }
-
-  if (!isAggregatorFromCommitteeLength(config, committee.length, aggregateAndProof.message.selectionProof)) {
-    throw new AttestationError({
-      code: AttestationErrorCode.INVALID_AGGREGATOR,
-      job: attestationJob,
-    });
-  }
-
-  const slot = attestation.data.slot;
-  const epoch = computeEpochAtSlot(config, slot);
-  const indexedAttestation = attestationTargetState.getIndexedAttestation(attestation);
-  const aggregator = attestationTargetState.index2pubkey[aggregateAndProof.message.aggregatorIndex];
-
+  // [REJECT] The aggregate_and_proof.selection_proof is a valid signature of the aggregate.data.slot
+  // by the validator with index aggregate_and_proof.aggregator_index.
+  // [REJECT] The aggregator signature, signed_aggregate_and_proof.signature, is valid.
+  // [REJECT] The signature of aggregate is valid.
+  const aggregator = attHeadState.epochCtx.index2pubkey[aggregateAndProof.aggregatorIndex];
   const signatureSets = [
-    getSelectionProofSignatureSet(config, attestationTargetState, slot, aggregator, aggregateAndProof),
-    getAggregateAndProofSignatureSet(config, attestationTargetState, epoch, aggregator, aggregateAndProof),
-    fast.getIndexedAttestationSignatureSet(
-      attestationTargetState as CachedBeaconState<allForks.BeaconState>,
-      indexedAttestation
-    ),
+    getSelectionProofSignatureSet(attHeadState, attSlot, aggregator, signedAggregateAndProof),
+    getAggregateAndProofSignatureSet(attHeadState, attEpoch, aggregator, signedAggregateAndProof),
+    allForks.getIndexedAttestationSignatureSet(attHeadState, indexedAttestation),
   ];
+  if (!(await chain.bls.verifySignatureSets(signatureSets, {batchable: true}))) {
+    throw new AttestationError(GossipAction.REJECT, {code: AttestationErrorCode.INVALID_SIGNATURE});
+  }
 
-  if (!verifySignatureSetsBatch(signatureSets)) {
-    throw new AttestationError({
-      code: AttestationErrorCode.INVALID_SIGNATURE,
-      job: attestationJob,
+  // It's important to double check that the attestation still hasn't been observed, since
+  // there can be a race-condition if we receive two attestations at the same time and
+  // process them in different threads.
+  if (chain.seenAggregators.isKnown(targetEpoch, aggregatorIndex)) {
+    throw new AttestationError(GossipAction.IGNORE, {
+      code: AttestationErrorCode.AGGREGATOR_ALREADY_KNOWN,
+      targetEpoch,
+      aggregatorIndex,
     });
   }
 
-  // TODO: once we have pool, check if aggregate block is seen and has target as ancestor
+  chain.seenAggregators.add(targetEpoch, aggregatorIndex);
+  chain.seenAggregatedAttestations.add(
+    targetEpoch,
+    attDataRoot,
+    {aggregationBits, trueBitCount: attestingIndices.length},
+    false
+  );
 
-  // verifySignature = false, verified in batch above
-  if (
-    !phase0.fast.isValidIndexedAttestation(
-      attestationTargetState as CachedBeaconState<allForks.BeaconState>,
-      indexedAttestation,
-      false
-    )
-  ) {
-    throw new AttestationError({
-      code: AttestationErrorCode.INVALID_INDEXED_ATTESTATION,
-      job: attestationJob,
-    });
-  }
+  return {indexedAttestation, committeeIndices};
 }

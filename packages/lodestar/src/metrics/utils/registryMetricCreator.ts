@@ -1,6 +1,7 @@
-import {Gauge, GaugeConfiguration, Registry, HistogramConfiguration} from "prom-client";
-import {GaugeExtra} from "./gauge";
-import {HistogramExtra} from "./histogram";
+import {Gauge, GaugeConfiguration, Registry, HistogramConfiguration, CounterConfiguration, Counter} from "prom-client";
+import {AvgMinMax} from "./avgMinMax.js";
+import {GaugeExtra} from "./gauge.js";
+import {HistogramExtra} from "./histogram.js";
 
 type StaticConfiguration<T extends string> = {
   name: GaugeConfiguration<string>["name"];
@@ -17,8 +18,16 @@ export class RegistryMetricCreator extends Registry {
     return new HistogramExtra<T>({...configuration, registers: [this]});
   }
 
+  avgMinMax<T extends string>(configuration: GaugeConfiguration<T>): AvgMinMax<T> {
+    return new AvgMinMax<T>({...configuration, registers: [this]});
+  }
+
   /** Static metric to send string-based data such as versions, config params, etc */
   static<T extends string>({name, help, value}: StaticConfiguration<T>): void {
     new Gauge({name, help, labelNames: Object.keys(value), registers: [this]}).set(value, 1);
+  }
+
+  counter<T extends string>(configuration: CounterConfiguration<T>): Counter<T> {
+    return new Counter<T>({...configuration, registers: [this]});
   }
 }

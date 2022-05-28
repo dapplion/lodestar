@@ -1,13 +1,12 @@
 import sinon, {SinonStubbedInstance} from "sinon";
 import chai, {expect} from "chai";
 import chaiAsPromised from "chai-as-promised";
-import pushable, {Pushable} from "it-pushable";
 import all from "it-all";
 
 import {ContainerType} from "@chainsafe/ssz";
-import {Bytes32} from "@chainsafe/lodestar-types";
-import {config} from "@chainsafe/lodestar-config/mainnet";
-import {IDatabaseController, LevelDbController, Repository, Bucket} from "@chainsafe/lodestar-db";
+import {Bytes32, ssz} from "@chainsafe/lodestar-types";
+import {config} from "@chainsafe/lodestar-config/default";
+import {Db, LevelDbController, Repository, Bucket} from "@chainsafe/lodestar-db";
 
 chai.use(chaiAsPromised);
 
@@ -18,15 +17,13 @@ interface TestType {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const TestSSZType = new ContainerType<TestType>({
-  fields: {
-    bool: config.types.Boolean,
-    bytes: config.types.Bytes32,
-  },
+const TestSSZType = new ContainerType({
+  bool: ssz.Boolean,
+  bytes: ssz.Bytes32,
 });
 
 class TestRepository extends Repository<string, TestType> {
-  constructor(db: IDatabaseController<Buffer, Buffer>) {
+  constructor(db: Db) {
     super(config, db, Bucket.phase0_depositEvent, TestSSZType);
   }
 }
@@ -105,19 +102,15 @@ describe("database repository", function () {
 
   it("should delete given items", async function () {
     await repository.batchDelete(["1", "2", "3"]);
-    expect(
-      controller.batchDelete.withArgs(sinon.match((criteria: ContainerType<TestType>[]) => criteria.length === 3))
-        .calledOnce
-    ).to.be.true;
+    expect(controller.batchDelete.withArgs(sinon.match((criteria: unknown[]) => criteria.length === 3)).calledOnce).to
+      .be.true;
   });
 
   it("should delete given items by value", async function () {
     const item = {bool: true, bytes: Buffer.alloc(32)};
     await repository.batchRemove([item, item]);
-    expect(
-      controller.batchDelete.withArgs(sinon.match((criteria: ContainerType<TestType>[]) => criteria.length === 2))
-        .calledOnce
-    ).to.be.true;
+    expect(controller.batchDelete.withArgs(sinon.match((criteria: unknown[]) => criteria.length === 2)).calledOnce).to
+      .be.true;
   });
 
   it("should add multiple values", async function () {
@@ -125,19 +118,17 @@ describe("database repository", function () {
       {bool: true, bytes: Buffer.alloc(32)},
       {bool: false, bytes: Buffer.alloc(32)},
     ]);
-    expect(
-      controller.batchPut.withArgs(sinon.match((criteria: ContainerType<TestType>[]) => criteria.length === 2))
-        .calledOnce
-    ).to.be.true;
+    expect(controller.batchPut.withArgs(sinon.match((criteria: unknown[]) => criteria.length === 2)).calledOnce).to.be
+      .true;
   });
 
   it("should fetch values stream", async function () {
-    const source: Pushable<Buffer> = pushable();
-    controller.valuesStream.returns(source);
+    async function* sample(): AsyncGenerator<Buffer> {
+      yield TestSSZType.serialize({bool: true, bytes: Buffer.alloc(32)}) as Buffer;
+      yield TestSSZType.serialize({bool: false, bytes: Buffer.alloc(32)}) as Buffer;
+    }
 
-    source.push(TestSSZType.serialize({bool: true, bytes: Buffer.alloc(32)}) as Buffer);
-    source.push(TestSSZType.serialize({bool: false, bytes: Buffer.alloc(32)}) as Buffer);
-    source.end();
+    controller.valuesStream.returns(sample());
 
     const result = await all(repository.valuesStream());
     expect(result.length).to.be.equal(2);

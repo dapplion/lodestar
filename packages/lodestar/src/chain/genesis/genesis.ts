@@ -2,33 +2,38 @@
  * @module chain/genesis
  */
 
-import {TreeBacked, List} from "@chainsafe/ssz";
-import {GENESIS_SLOT} from "@chainsafe/lodestar-params";
-import {Root, phase0, allForks} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {AbortSignal} from "abort-controller";
+import {GENESIS_EPOCH, GENESIS_SLOT} from "@chainsafe/lodestar-params";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
+import {IBeaconConfig, IChainForkConfig} from "@chainsafe/lodestar-config";
+import {toGindex, Tree} from "@chainsafe/persistent-merkle-tree";
 import {
   getTemporaryBlockHeader,
   getGenesisBeaconState,
   applyDeposits,
   applyTimestamp,
   applyEth1BlockHash,
-  isValidGenesisState,
-  isValidGenesisValidators,
+  CachedBeaconStateAllForks,
+  createCachedBeaconState,
+  BeaconStateAllForks,
+  createEmptyEpochContextImmutableData,
+  getActiveValidatorIndices,
 } from "@chainsafe/lodestar-beacon-state-transition";
 import {ILogger} from "@chainsafe/lodestar-utils";
-import {IEth1StreamParams, IEth1Provider, getDepositsAndBlockStreamForGenesis, getDepositsStream} from "../../eth1";
-import {IGenesisBuilder, IGenesisResult} from "./interface";
+import {IEth1Provider} from "../../eth1/index.js";
+import {IEth1StreamParams} from "../../eth1/interface.js";
+import {getDepositsAndBlockStreamForGenesis, getDepositsStream} from "../../eth1/stream.js";
+import {IGenesisBuilder, IGenesisResult} from "./interface.js";
+import {DepositTree} from "../../db/repositories/depositDataRoot.js";
 
 export interface IGenesisBuilderKwargs {
-  config: IBeaconConfig;
+  config: IChainForkConfig;
   eth1Provider: IEth1Provider;
   logger: ILogger;
 
   /** Use to restore pending progress */
   pendingStatus?: {
-    state: TreeBacked<allForks.BeaconState>;
-    depositTree: TreeBacked<List<Root>>;
+    state: BeaconStateAllForks;
+    depositTree: DepositTree;
     lastProcessedBlockNumber: number;
   };
 
@@ -38,8 +43,8 @@ export interface IGenesisBuilderKwargs {
 
 export class GenesisBuilder implements IGenesisBuilder {
   // Expose state to persist on error
-  state: TreeBacked<allForks.BeaconState>;
-  depositTree: TreeBacked<List<Root>>;
+  readonly state: CachedBeaconStateAllForks;
+  readonly depositTree: DepositTree;
   /** Is null if no block has been processed yet */
   lastProcessedBlockNumber: number | null = null;
 
@@ -52,31 +57,42 @@ export class GenesisBuilder implements IGenesisBuilder {
   private readonly fromBlock: number;
   private readonly logEvery = 30 * 1000;
   private lastLog = 0;
+  /** Current count of active validators in the state */
+  private activatedValidatorCount: number;
 
   constructor({config, eth1Provider, logger, signal, pendingStatus, maxBlocksPerPoll}: IGenesisBuilderKwargs) {
-    this.config = config;
+    // at genesis builder, there is no genesis validator so we don't have a real IBeaconConfig
+    // but we need IBeaconConfig to temporarily create CachedBeaconState, the cast here is safe since we don't use any getDomain here
+    // the use of state as CachedBeaconState is just for convenient, IGenesisResult returns TreeView anyway
     this.eth1Provider = eth1Provider;
     this.logger = logger;
     this.signal = signal;
     this.eth1Params = {
-      ...config.params,
-      maxBlocksPerPoll: maxBlocksPerPoll || 10000,
+      ...config,
+      maxBlocksPerPoll: maxBlocksPerPoll ?? 10000,
     };
+
+    let stateView: BeaconStateAllForks;
 
     if (pendingStatus) {
       this.logger.info("Restoring pending genesis state", {block: pendingStatus.lastProcessedBlockNumber});
-      this.state = pendingStatus.state;
+      stateView = pendingStatus.state;
       this.depositTree = pendingStatus.depositTree;
       this.fromBlock = Math.max(pendingStatus.lastProcessedBlockNumber + 1, this.eth1Provider.deployBlock);
     } else {
-      this.state = getGenesisBeaconState(
+      stateView = getGenesisBeaconState(
         config,
-        config.types.phase0.Eth1Data.defaultValue(),
-        getTemporaryBlockHeader(config, config.getTypes(GENESIS_SLOT).BeaconBlock.defaultValue())
+        ssz.phase0.Eth1Data.defaultValue(),
+        getTemporaryBlockHeader(config, config.getForkTypes(GENESIS_SLOT).BeaconBlock.defaultValue())
       );
-      this.depositTree = config.types.phase0.DepositDataRootList.defaultTreeBacked();
+      this.depositTree = ssz.phase0.DepositDataRootList.defaultViewDU();
       this.fromBlock = this.eth1Provider.deployBlock;
     }
+
+    // TODO - PENDING: Ensure EpochContextImmutableData is created only once
+    this.state = createCachedBeaconState(stateView, createEmptyEpochContextImmutableData(config, stateView));
+    this.config = this.state.config;
+    this.activatedValidatorCount = getActiveValidatorIndices(stateView, GENESIS_EPOCH).length;
   }
 
   /**
@@ -99,10 +115,13 @@ export class GenesisBuilder implements IGenesisBuilder {
     for await (const [depositEvents, block] of depositsAndBlocksStream) {
       this.applyDeposits(depositEvents);
       applyTimestamp(this.config, this.state, block.timestamp);
-      applyEth1BlockHash(this.config, this.state, block.blockHash);
+      applyEth1BlockHash(this.state, block.blockHash);
       this.lastProcessedBlockNumber = block.blockNumber;
 
-      if (isValidGenesisState(this.config, this.state)) {
+      if (
+        this.state.genesisTime >= this.config.MIN_GENESIS_TIME &&
+        this.activatedValidatorCount >= this.config.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT
+      ) {
         this.logger.info("Found genesis state", {blockNumber: block.blockNumber});
         return {
           state: this.state,
@@ -110,7 +129,7 @@ export class GenesisBuilder implements IGenesisBuilder {
           block,
         };
       } else {
-        this.throttledLog(`Waiting for min genesis time ${block.timestamp} / ${this.config.params.MIN_GENESIS_TIME}`);
+        this.throttledLog(`Waiting for min genesis time ${block.timestamp} / ${this.config.MIN_GENESIS_TIME}`);
       }
     }
 
@@ -129,12 +148,12 @@ export class GenesisBuilder implements IGenesisBuilder {
       this.applyDeposits(depositEvents);
       this.lastProcessedBlockNumber = blockNumber;
 
-      if (isValidGenesisValidators(this.config, this.state)) {
+      if (this.activatedValidatorCount >= this.config.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT) {
         this.logger.info("Found enough genesis validators", {blockNumber});
         return blockNumber;
       } else {
         this.throttledLog(
-          `Found ${this.state.validators.length} / ${this.config.params.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT} validators to genesis`
+          `Found ${this.state.validators.length} / ${this.config.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT} validators to genesis`
         );
       }
     }
@@ -147,14 +166,20 @@ export class GenesisBuilder implements IGenesisBuilder {
       .filter((depositEvent) => !this.depositCache.has(depositEvent.index))
       .map((depositEvent) => {
         this.depositCache.add(depositEvent.index);
-        this.depositTree.push(this.config.types.phase0.DepositData.hashTreeRoot(depositEvent.depositData));
+        this.depositTree.push(ssz.phase0.DepositData.hashTreeRoot(depositEvent.depositData));
+        const gindex = toGindex(this.depositTree.type.depth, BigInt(depositEvent.index));
+
+        // Apply changes from the push above
+        this.depositTree.commit();
+        const depositTreeNode = this.depositTree.node;
         return {
-          proof: this.depositTree.tree.getSingleProof(this.depositTree.type.getPropertyGindex(depositEvent.index)),
+          proof: new Tree(depositTreeNode).getSingleProof(gindex),
           data: depositEvent.depositData,
         };
       });
 
-    applyDeposits(this.config, this.state, newDeposits, this.depositTree);
+    const {activatedValidatorCount} = applyDeposits(this.config, this.state, newDeposits, this.depositTree);
+    this.activatedValidatorCount += activatedValidatorCount;
 
     // TODO: If necessary persist deposits here to this.db.depositData, this.db.depositDataRoot
   }

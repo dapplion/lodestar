@@ -1,12 +1,12 @@
-import {load, dump} from "js-yaml";
-import {schema} from "./schema";
-import {objectToExpectedCase} from "../objects";
+import yaml from "js-yaml";
+import {schema} from "./schema.js";
 
-export function loadYaml(yaml: string): Record<string, unknown> {
-  return objectToExpectedCase(load(yaml, {schema}));
+const {load, dump} = yaml;
+
+export function loadYaml<T = Record<string, unknown>>(yaml: string): T {
+  return load(yaml, {schema}) as T;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function dumpYaml(yaml: any): string {
+export function dumpYaml(yaml: unknown): string {
   return dump(yaml, {schema});
 }

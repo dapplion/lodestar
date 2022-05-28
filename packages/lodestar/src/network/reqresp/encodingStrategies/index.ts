@@ -1,11 +1,16 @@
-import {ReqRespEncoding} from "../../../constants";
-import {BufferedSource} from "../utils/bufferedSource";
-import {RequestOrResponseBody, RequestOrResponseType} from "../interface";
-import {readSszSnappyPayload, ISszSnappyOptions} from "./sszSnappy/decode";
-import {writeSszSnappyPayload} from "./sszSnappy/encode";
+import {
+  Encoding,
+  RequestOrResponseType,
+  RequestOrIncomingResponseBody,
+  RequestOrOutgoingResponseBody,
+  OutgoingSerializer,
+} from "../types.js";
+import {BufferedSource} from "../utils/index.js";
+import {readSszSnappyPayload} from "./sszSnappy/decode.js";
+import {writeSszSnappyPayload} from "./sszSnappy/encode.js";
 
-// For more info about eth2 request/response encoding strategies, see:
-// https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/p2p-interface.md#encoding-strategies
+// For more info about Ethereum Consensus request/response encoding strategies, see:
+// https://github.com/ethereum/consensus-specs/blob/v1.1.10/specs/phase0/p2p-interface.md#encoding-strategies
 // Supported encoding strategies:
 // - ssz_snappy
 
@@ -15,15 +20,14 @@ import {writeSszSnappyPayload} from "./sszSnappy/encode";
  * <encoding-dependent-header> | <encoded-payload>
  * ```
  */
-export async function readEncodedPayload<T extends RequestOrResponseBody>(
+export async function readEncodedPayload<T extends RequestOrIncomingResponseBody>(
   bufferedSource: BufferedSource,
-  encoding: ReqRespEncoding,
-  type: RequestOrResponseType,
-  options?: ISszSnappyOptions
+  encoding: Encoding,
+  type: RequestOrResponseType
 ): Promise<T> {
   switch (encoding) {
-    case ReqRespEncoding.SSZ_SNAPPY:
-      return await readSszSnappyPayload(bufferedSource, type, options);
+    case Encoding.SSZ_SNAPPY:
+      return await readSszSnappyPayload(bufferedSource, type);
 
     default:
       throw Error("Unsupported encoding");
@@ -36,14 +40,14 @@ export async function readEncodedPayload<T extends RequestOrResponseBody>(
  * <encoding-dependent-header> | <encoded-payload>
  * ```
  */
-export async function* writeEncodedPayload<T extends RequestOrResponseBody>(
+export async function* writeEncodedPayload<T extends RequestOrOutgoingResponseBody>(
   body: T,
-  encoding: ReqRespEncoding,
-  type: RequestOrResponseType
+  encoding: Encoding,
+  serializer: OutgoingSerializer
 ): AsyncGenerator<Buffer> {
   switch (encoding) {
-    case ReqRespEncoding.SSZ_SNAPPY:
-      yield* writeSszSnappyPayload(body, type);
+    case Encoding.SSZ_SNAPPY:
+      yield* writeSszSnappyPayload(body, serializer);
       break;
 
     default:

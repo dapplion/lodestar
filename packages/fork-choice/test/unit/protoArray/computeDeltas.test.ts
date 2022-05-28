@@ -1,6 +1,7 @@
+import {getEffectiveBalanceIncrementsZeroed} from "@chainsafe/lodestar-beacon-state-transition";
 import {expect} from "chai";
 
-import {computeDeltas} from "../../../src/protoArray/computeDeltas";
+import {computeDeltas} from "../../../src/protoArray/computeDeltas.js";
 
 describe("computeDeltas", () => {
   it("zero hash", () => {
@@ -8,8 +9,8 @@ describe("computeDeltas", () => {
 
     const indices = new Map();
     const votes = [];
-    const oldBalances = [];
-    const newBalances = [];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
+    const newBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
 
     for (const i of Array.from({length: validatorCount}, (_, i) => i)) {
       indices.set(i.toString(), i);
@@ -18,14 +19,14 @@ describe("computeDeltas", () => {
         nextRoot: "0",
         nextEpoch: 0,
       });
-      oldBalances.push(BigInt(0));
-      newBalances.push(BigInt(0));
+      oldBalances[i] = 0;
+      newBalances[i] = 0;
     }
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
 
     expect(deltas.length).to.eql(validatorCount);
-    expect(deltas).to.deep.equal(Array.from({length: validatorCount}, () => BigInt(0)));
+    expect(deltas).to.deep.equal(Array.from({length: validatorCount}, () => 0));
 
     for (const vote of votes) {
       expect(vote.currentRoot).to.eql(vote.nextRoot);
@@ -33,13 +34,13 @@ describe("computeDeltas", () => {
   });
 
   it("all voted the same", () => {
-    const balance = BigInt(42);
+    const balance = 42;
     const validatorCount = 16;
 
     const indices = new Map();
     const votes = [];
-    const oldBalances = [];
-    const newBalances = [];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
+    const newBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
 
     for (const i of Array.from({length: validatorCount}, (_, i) => i)) {
       indices.set((i + 1).toString(), i);
@@ -48,8 +49,8 @@ describe("computeDeltas", () => {
         nextRoot: "1",
         nextEpoch: 0,
       });
-      oldBalances.push(balance);
-      newBalances.push(balance);
+      oldBalances[i] = balance;
+      newBalances[i] = balance;
     }
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
@@ -58,21 +59,21 @@ describe("computeDeltas", () => {
 
     for (const [i, delta] of deltas.entries()) {
       if (i === 0) {
-        expect(delta.toString()).to.equal((balance * BigInt(validatorCount)).toString());
+        expect(delta.toString()).to.equal((balance * validatorCount).toString());
       } else {
-        expect(delta.toString()).to.equal(BigInt(0).toString());
+        expect(delta.toString()).to.equal("0");
       }
     }
   });
 
   it("different votes", () => {
-    const balance = BigInt(42);
+    const balance = 42;
     const validatorCount = 16;
 
     const indices = new Map();
     const votes = [];
-    const oldBalances = [];
-    const newBalances = [];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
+    const newBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
 
     for (const i of Array.from({length: validatorCount}, (_, i) => i)) {
       indices.set((i + 1).toString(), i);
@@ -81,8 +82,8 @@ describe("computeDeltas", () => {
         nextRoot: (i + 1).toString(),
         nextEpoch: 0,
       });
-      oldBalances.push(balance);
-      newBalances.push(balance);
+      oldBalances[i] = balance;
+      newBalances[i] = balance;
     }
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
@@ -95,13 +96,13 @@ describe("computeDeltas", () => {
   });
 
   it("moving votes", () => {
-    const balance = BigInt(42);
+    const balance = 42;
     const validatorCount = 16;
 
     const indices = new Map();
     const votes = [];
-    const oldBalances = [];
-    const newBalances = [];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
+    const newBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
 
     for (const i of Array.from({length: validatorCount}, (_, i) => i)) {
       indices.set((i + 1).toString(), i);
@@ -110,29 +111,29 @@ describe("computeDeltas", () => {
         nextRoot: "2",
         nextEpoch: 0,
       });
-      oldBalances.push(balance);
-      newBalances.push(balance);
+      oldBalances[i] = balance;
+      newBalances[i] = balance;
     }
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
 
     expect(deltas.length).to.eql(validatorCount);
 
-    const totalDelta = balance * BigInt(validatorCount);
+    const totalDelta = balance * validatorCount;
 
     for (const [i, delta] of deltas.entries()) {
       if (i === 0) {
-        expect(delta.toString()).to.equal((BigInt(0) - totalDelta).toString());
+        expect(delta.toString()).to.equal((0 - totalDelta).toString());
       } else if (i === 1) {
         expect(delta.toString()).to.equal(totalDelta.toString());
       } else {
-        expect(delta.toString()).to.equal(BigInt(0).toString());
+        expect(delta.toString()).to.equal("0");
       }
     }
   });
 
   it("move out of tree", () => {
-    const balance = BigInt(42);
+    const balance = 42;
 
     const indices = new Map();
     // there is only one block
@@ -153,14 +154,20 @@ describe("computeDeltas", () => {
         nextEpoch: 0,
       },
     ];
-    const oldBalances = [balance, balance];
-    const newBalances = [balance, balance];
+
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(votes.length);
+    const newBalances = getEffectiveBalanceIncrementsZeroed(votes.length);
+    for (const balances of [oldBalances, newBalances]) {
+      for (let i = 0; i < votes.length; i++) {
+        balances[i] = balance;
+      }
+    }
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
 
     expect(deltas.length).to.eql(1);
 
-    expect(deltas[0].toString()).to.eql((BigInt(0) - balance * BigInt(2)).toString());
+    expect(deltas[0].toString()).to.eql((0 - balance * 2).toString());
 
     for (const vote of votes) {
       expect(vote.currentRoot).to.equal(vote.nextRoot);
@@ -168,14 +175,14 @@ describe("computeDeltas", () => {
   });
 
   it("changing balances", () => {
-    const oldBalance = BigInt(42);
-    const newBalance = BigInt(42 * 2);
+    const oldBalance = 42;
+    const newBalance = 42 * 2;
     const validatorCount = 16;
 
     const indices = new Map();
     const votes = [];
-    const oldBalances = [];
-    const newBalances = [];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
+    const newBalances = getEffectiveBalanceIncrementsZeroed(validatorCount);
 
     for (const i of Array.from({length: validatorCount}, (_, i) => i)) {
       indices.set((i + 1).toString(), i);
@@ -184,8 +191,8 @@ describe("computeDeltas", () => {
         nextRoot: "2",
         nextEpoch: 0,
       });
-      oldBalances.push(oldBalance);
-      newBalances.push(newBalance);
+      oldBalances[i] = oldBalance;
+      newBalances[i] = newBalance;
     }
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
@@ -194,17 +201,17 @@ describe("computeDeltas", () => {
 
     for (const [i, delta] of deltas.entries()) {
       if (i === 0) {
-        expect(delta.toString()).to.equal((BigInt(0) - oldBalance * BigInt(validatorCount)).toString());
+        expect(delta.toString()).to.equal((0 - oldBalance * validatorCount).toString());
       } else if (i === 1) {
-        expect(delta.toString()).to.equal((newBalance * BigInt(validatorCount)).toString());
+        expect(delta.toString()).to.equal((newBalance * validatorCount).toString());
       } else {
-        expect(delta.toString()).to.equal(BigInt(0).toString());
+        expect(delta.toString()).to.equal("0");
       }
     }
   });
 
   it("validator appears", () => {
-    const balance = BigInt(42);
+    const balance = 42;
 
     const indices = new Map();
     // there are two block
@@ -217,17 +224,21 @@ describe("computeDeltas", () => {
       nextRoot: "3",
       nextEpoch: 0,
     }));
+
     // There is only one validator in the old balances.
-    const oldBalances = [balance];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(1);
+    oldBalances[0] = balance;
     // There are two validators in the new balances.
-    const newBalances = [balance, balance];
+    const newBalances = getEffectiveBalanceIncrementsZeroed(2);
+    newBalances[0] = balance;
+    newBalances[1] = balance;
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
 
     expect(deltas.length).to.eql(2);
 
-    expect(deltas[0].toString()).to.eql((BigInt(0) - balance).toString());
-    expect(deltas[1].toString()).to.eql((balance * BigInt(2)).toString());
+    expect(deltas[0].toString()).to.eql((0 - balance).toString());
+    expect(deltas[1].toString()).to.eql((balance * 2).toString());
 
     for (const vote of votes) {
       expect(vote.currentRoot).to.equal(vote.nextRoot);
@@ -235,7 +246,7 @@ describe("computeDeltas", () => {
   });
 
   it("validator disappears", () => {
-    const balance = BigInt(42);
+    const balance = 42;
 
     const indices = new Map();
     // there are two block
@@ -249,15 +260,18 @@ describe("computeDeltas", () => {
       nextEpoch: 0,
     }));
     // There are two validators in the old balances.
-    const oldBalances = [balance, balance];
+    const oldBalances = getEffectiveBalanceIncrementsZeroed(2);
+    oldBalances[0] = balance;
+    oldBalances[1] = balance;
     // There is only one validator in the new balances.
-    const newBalances = [balance];
+    const newBalances = getEffectiveBalanceIncrementsZeroed(1);
+    newBalances[0] = balance;
 
     const deltas = computeDeltas(indices, votes, oldBalances, newBalances);
 
     expect(deltas.length).to.eql(2);
 
-    expect(deltas[0].toString()).to.eql((BigInt(0) - balance * BigInt(2)).toString());
+    expect(deltas[0].toString()).to.eql((0 - balance * 2).toString());
     expect(deltas[1].toString()).to.eql(balance.toString());
 
     for (const vote of votes) {

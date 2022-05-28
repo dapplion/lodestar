@@ -2,12 +2,16 @@
  * @module logger
  */
 
-import {createLogger, Logger} from "winston";
-import {Context, defaultLogLevel, ILogger, ILoggerOptions, LogLevel, logLevelNum} from "./interface";
+import winston from "winston";
+import type {Logger} from "winston";
+import {defaultLogLevel, ILogger, ILoggerOptions, LogLevel, logLevelNum} from "./interface.js";
 import chalk from "chalk";
-import {getFormat} from "./format";
-import {Writable} from "stream";
-import {TransportOpts, TransportType, fromTransportOpts} from "./transport";
+import {getFormat} from "./format.js";
+import {Writable} from "node:stream";
+import {TransportOpts, TransportType, fromTransportOpts} from "./transport.js";
+import {LogData} from "./json.js";
+
+const {createLogger} = winston;
 
 const defaultTransportOpts: TransportOpts = {type: TransportType.console};
 
@@ -24,49 +28,50 @@ export class WinstonLogger implements ILogger {
   constructor(options: Partial<ILoggerOptions> = {}, transportOptsArr: TransportOpts[] = [defaultTransportOpts]) {
     // `options.level` can override the level in the transport
     // This is necessary for child logger opts to take effect
-    let minLevel = options?.level || defaultLogLevel;
+    let minLevel = options?.level;
     for (const transportOpts of transportOptsArr) {
-      transportOpts.level = minLevel = getMinLevel([minLevel, transportOpts.level || defaultLogLevel]);
+      transportOpts.level = getMinLevel(options?.level, transportOpts.level); // General level may override transport level
+      minLevel = getMinLevel(minLevel, transportOpts.level); // Compute the minLevel from general and all transports
     }
 
     this.winston = createLogger({
       level: options?.level || defaultLogLevel,
       defaultMeta: {module: options?.module || ""} as DefaultMeta,
-      format: getFormat(options || {}),
+      format: getFormat(options),
       transports: transportOptsArr.map((transportOpts) => fromTransportOpts(transportOpts)),
       exitOnError: false,
     });
-    this._level = minLevel;
+    this._level = minLevel || defaultLogLevel;
     // Store for child logger
     this._options = options;
     this._transportOptsArr = transportOptsArr;
   }
 
-  error(message: string, context?: Context, error?: Error): void {
+  error(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.error, message, context, error);
   }
 
-  warn(message: string, context?: Context, error?: Error): void {
+  warn(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.warn, message, context, error);
   }
 
-  info(message: string, context?: Context, error?: Error): void {
+  info(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.info, message, context, error);
   }
 
-  important(message: string, context?: Context, error?: Error): void {
+  important(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.info, chalk.red(message), context, error);
   }
 
-  verbose(message: string, context?: Context, error?: Error): void {
+  verbose(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.verbose, message, context, error);
   }
 
-  debug(message: string, context?: Context, error?: Error): void {
+  debug(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.debug, message, context, error);
   }
 
-  silly(message: string, context?: Context, error?: Error): void {
+  silly(message: string, context?: LogData, error?: Error): void {
     this.createLogEntry(LogLevel.silly, message, context, error);
   }
 
@@ -84,7 +89,7 @@ export class WinstonLogger implements ILogger {
     return new WinstonLogger({...this._options, ...options}, this._transportOptsArr);
   }
 
-  private createLogEntry(level: LogLevel, message: string, context?: Context, error?: Error): void {
+  private createLogEntry(level: LogLevel, message: string, context?: LogData, error?: Error): void {
     // don't propagate if silenced or message level is more detailed than logger level
     if (logLevelNum[level] > logLevelNum[this._level]) {
       return;
@@ -94,10 +99,14 @@ export class WinstonLogger implements ILogger {
 }
 
 /** Return the min LogLevel from multiple transports */
-function getMinLevel(levels: LogLevel[]): LogLevel {
+function getMinLevel(...levelsArg: (LogLevel | undefined)[]): LogLevel {
+  const levels = levelsArg.filter((level): level is LogLevel => Boolean(level));
+
+  // Only if there are no levels to compute min from, consider defaultLogLevel
+  if (levels.length === 0) return defaultLogLevel;
+
   return levels.reduce(
     // error: 0, warn: 1, info: 2, ...
-    (minLevel, level) => (logLevelNum[level] > logLevelNum[minLevel] ? level : minLevel),
-    defaultLogLevel
+    (minLevel, level) => (logLevelNum[level] > logLevelNum[minLevel] ? level : minLevel)
   );
 }

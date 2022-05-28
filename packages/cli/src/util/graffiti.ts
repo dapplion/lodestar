@@ -1,28 +1,18 @@
-// eslint-disable-next-line import/default
-import readPkgUp from "read-pkg-up";
+import {getVersionData} from "./version.js";
 
-const lodestarPackageName = "chainsafe/lodestar";
-
-/**
- * Guesses the package version finding up the closest package.json
- */
-function guessVersion(): string {
-  const res = readPkgUp.sync();
-  if (!res) throw Error("No package.json found");
-  const version = res.packageJson.version;
-  if (!version) throw Error(`No version in ${res.path}`);
-  return version;
-}
+const lodestarPackageName = "Lodestar";
 
 /**
- * Computes a default graffiti fetching dynamically the package info
+ * Computes a default graffiti fetching dynamically the package info.
+ * @returns a string containing package name and version.
  */
 export function getDefaultGraffiti(): string {
   try {
-    return `${lodestarPackageName}-${guessVersion()}`;
+    const {version} = getVersionData();
+    return `${lodestarPackageName}-${version}`;
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error("Error guessing lodestar version", e);
+    console.error("Error guessing lodestar version", e as Error);
     return lodestarPackageName;
   }
 }

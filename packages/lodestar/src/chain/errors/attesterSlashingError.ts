@@ -1,15 +1,11 @@
-import {LodestarError} from "@chainsafe/lodestar-utils";
+import {GossipActionError} from "./gossipValidation.js";
 
 export enum AttesterSlashingErrorCode {
-  SLASHING_ALREADY_EXISTS = "ATTESTATION_SLASHING_ERROR_SLASHING_ALREADY_EXISTS",
-  INVALID_SLASHING = "ATTESTATION_SLASHING_ERROR_INVALID_SLASHING",
+  ALREADY_EXISTS = "ATTESTATION_SLASHING_ERROR_ALREADY_EXISTS",
+  INVALID = "ATTESTATION_SLASHING_ERROR_INVALID",
 }
 export type AttesterSlashingErrorType =
-  | {code: AttesterSlashingErrorCode.SLASHING_ALREADY_EXISTS}
-  | {code: AttesterSlashingErrorCode.INVALID_SLASHING};
+  | {code: AttesterSlashingErrorCode.ALREADY_EXISTS}
+  | {code: AttesterSlashingErrorCode.INVALID; error: Error};
 
-export class AttesterSlashingError extends LodestarError<AttesterSlashingErrorType> {
-  constructor(type: AttesterSlashingErrorType) {
-    super(type);
-  }
-}
+export class AttesterSlashingError extends GossipActionError<AttesterSlashingErrorType> {}

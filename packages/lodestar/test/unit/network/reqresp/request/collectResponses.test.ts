@@ -1,18 +1,17 @@
 import {expect} from "chai";
-import {phase0} from "@chainsafe/lodestar-types";
-import {collectResponses} from "../../../../../src/network/reqresp/request/collectResponses";
-import {Method} from "../../../../../src/constants";
-import {arrToSource} from "../utils";
+import {collectResponses} from "../../../../../src/network/reqresp/request/collectResponses.js";
+import {Method, IncomingResponseBody} from "../../../../../src/network/reqresp/types.js";
+import {arrToSource} from "../utils.js";
 
 describe("network / reqresp / request / collectResponses", () => {
-  const chunk: phase0.ResponseBody = BigInt(1);
+  const chunk: IncomingResponseBody = BigInt(1);
 
   const testCases: {
     id: string;
     method: Method;
     maxResponses?: number;
-    sourceChunks: phase0.ResponseBody[];
-    expectedReturn: phase0.ResponseBody | phase0.ResponseBody[];
+    sourceChunks: IncomingResponseBody[];
+    expectedReturn: IncomingResponseBody | IncomingResponseBody[];
   }[] = [
     {
       id: "Return first chunk only for a single-chunk method",

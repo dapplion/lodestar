@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {getGlobalPaths} from "../../../src/paths/global";
+import {getGlobalPaths} from "../../../src/paths/global.js";
 
 describe("paths / global", () => {
   process.env.XDG_DATA_HOME = "/my-root-dir";
@@ -15,15 +15,15 @@ describe("paths / global", () => {
       args: {},
       globalPaths: {
         rootDir: defaultRootDir,
-        paramsFile: "/my-root-dir/lodestar/mainnet/config.yaml",
+        paramsFile: undefined,
       },
     },
     {
       id: "Network paths",
-      args: {network: "pyrmont"},
+      args: {network: "prater"},
       globalPaths: {
-        rootDir: "/my-root-dir/lodestar/pyrmont",
-        paramsFile: "/my-root-dir/lodestar/pyrmont/config.yaml",
+        rootDir: "/my-root-dir/lodestar/prater",
+        paramsFile: undefined,
       },
     },
     {
@@ -31,7 +31,7 @@ describe("paths / global", () => {
       args: {rootDir: "./attack-network"},
       globalPaths: {
         rootDir: "./attack-network",
-        paramsFile: "attack-network/config.yaml",
+        paramsFile: undefined,
       },
     },
     {

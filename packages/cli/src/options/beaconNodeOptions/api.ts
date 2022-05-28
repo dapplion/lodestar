@@ -1,7 +1,10 @@
-import {defaultOptions, IBeaconNodeOptions} from "@chainsafe/lodestar";
-import {ICliCommandOptions} from "../../util";
+import {defaultOptions, IBeaconNodeOptions, allNamespaces} from "@chainsafe/lodestar";
+import {ICliCommandOptions} from "../../util/index.js";
+
+const enabledAll = "*";
 
 export interface IApiArgs {
+  "api.maxGindicesInProof": number;
   "api.rest.api": string[];
   "api.rest.cors": string;
   "api.rest.enabled": boolean;
@@ -11,6 +14,7 @@ export interface IApiArgs {
 
 export function parseArgs(args: IApiArgs): IBeaconNodeOptions["api"] {
   return {
+    maxGindicesInProof: args["api.maxGindicesInProof"],
     rest: {
       api: args["api.rest.api"] as IBeaconNodeOptions["api"]["rest"]["api"],
       cors: args["api.rest.cors"],
@@ -22,12 +26,26 @@ export function parseArgs(args: IApiArgs): IBeaconNodeOptions["api"] {
 }
 
 export const options: ICliCommandOptions<IApiArgs> = {
+  "api.maxGindicesInProof": {
+    hidden: true,
+    type: "number",
+    description: "Limit max number of gindices in a single proof request. DoS vector protection",
+    defaultDescription: String(defaultOptions.api.maxGindicesInProof),
+    group: "api",
+  },
+
   "api.rest.api": {
     type: "array",
-    choices: ["beacon", "validator", "node", "events", "debug", "lodestar"],
-    description: "Pick namespaces to expose for HTTP API",
+    choices: [...allNamespaces, enabledAll],
+    description: `Pick namespaces to expose for HTTP API. Set to '${enabledAll}' to enable all namespaces`,
     defaultDescription: JSON.stringify(defaultOptions.api.rest.api),
     group: "api",
+    coerce: (namespaces: string[]): string[] => {
+      // Enable all
+      if (namespaces.includes(enabledAll)) return allNamespaces;
+      // Parse ["debug,lodestar"] to ["debug", "lodestar"]
+      return namespaces.map((val) => val.split(",")).flat(1);
+    },
   },
 
   "api.rest.cors": {

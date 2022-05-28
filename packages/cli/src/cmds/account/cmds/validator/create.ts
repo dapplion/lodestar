@@ -1,10 +1,11 @@
-import {getAccountPaths} from "../../paths";
-import {WalletManager} from "../../../../wallet";
-import {ValidatorDirBuilder} from "../../../../validatorDir";
-import {getBeaconConfigFromArgs} from "../../../../config";
-import {ICliCommand, YargsError, readPassphraseFile, add0xPrefix, initBLS, ICliCommandOptions} from "../../../../util";
-import {IAccountValidatorArgs} from "./options";
-import {IGlobalArgs} from "../../../../options";
+import {getAccountPaths} from "../../paths.js";
+import {WalletManager} from "../../../../wallet/index.js";
+import {ValidatorDirBuilder} from "../../../../validatorDir/index.js";
+import {getBeaconConfigFromArgs} from "../../../../config/index.js";
+import {ICliCommand, YargsError, readPassphraseFile, add0xPrefix, ICliCommandOptions} from "../../../../util/index.js";
+import {IAccountValidatorArgs} from "./options.js";
+import {IGlobalArgs} from "../../../../options/index.js";
+import {MAX_EFFECTIVE_BALANCE} from "@chainsafe/lodestar-params";
 
 export interface IValidatorCreateArgs {
   name: string;
@@ -71,15 +72,12 @@ and pre-computed deposit RPL data",
   options: validatorCreateOptions,
 
   handler: async (args) => {
-    // Necessary to compute validator pubkey from privKey
-    await initBLS();
-
     const config = getBeaconConfigFromArgs(args);
 
     const {name, passphraseFile, storeWithdrawalKeystore, count} = args;
     const accountPaths = getAccountPaths(args);
-    const maxEffectiveBalance = config.params.MAX_EFFECTIVE_BALANCE;
-    const depositGwei = BigInt(args.depositGwei || 0) || maxEffectiveBalance;
+    const maxEffectiveBalance = MAX_EFFECTIVE_BALANCE;
+    const depositGwei = Number(args.depositGwei || 0) || maxEffectiveBalance;
 
     if (depositGwei > maxEffectiveBalance)
       throw new YargsError(`depositGwei ${depositGwei} is higher than MAX_EFFECTIVE_BALANCE ${maxEffectiveBalance}`);

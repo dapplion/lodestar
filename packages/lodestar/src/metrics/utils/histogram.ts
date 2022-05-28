@@ -1,5 +1,5 @@
 import {Histogram, HistogramConfiguration} from "prom-client";
-import {IHistogram} from "../interface";
+import {IHistogram} from "../interface.js";
 
 type Labels<T extends string> = Partial<Record<T, string | number>>;
 
@@ -32,9 +32,9 @@ export class HistogramChild<T extends string> implements IHistogram {
   observe(labels: Labels<T>, value?: number): void;
   observe(arg1?: Labels<T> | number, arg2?: number): void {
     if (typeof arg1 === "object") {
-      this.histogram.observe({...this.labelsParent, ...arg1}, arg2 || 0);
+      this.histogram.observe({...this.labelsParent, ...arg1}, arg2 ?? 0);
     } else {
-      this.histogram.observe(this.labelsParent, arg1 || 0);
+      this.histogram.observe(this.labelsParent, arg1 ?? 0);
     }
   }
 

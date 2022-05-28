@@ -1,26 +1,27 @@
-import {BLSPubkey, phase0, Root} from "@chainsafe/lodestar-types";
+import {BLSPubkey, Root} from "@chainsafe/lodestar-types";
 import {DatabaseService, IDatabaseApiOptions} from "@chainsafe/lodestar-db";
-import {BlockBySlotRepository, SlashingProtectionBlockService} from "./block";
+import {uniqueVectorArr} from "../slashingProtection/utils.js";
+import {BlockBySlotRepository, SlashingProtectionBlockService} from "./block/index.js";
 import {
   AttestationByTargetRepository,
   AttestationLowerBoundRepository,
   SlashingProtectionAttestationService,
-} from "./attestation";
-import {ISlashingProtection} from "./interface";
+} from "./attestation/index.js";
+import {ISlashingProtection} from "./interface.js";
 import {
   IInterchangeLodestar,
   Interchange,
   InterchangeFormatVersion,
   parseInterchange,
   serializeInterchange,
-} from "./interchange";
-import {MinMaxSurround, DistanceStoreRepository} from "./minMaxSurround";
-import {uniqueVectorArr} from "../slashingProtection/utils";
+} from "./interchange/index.js";
+import {MinMaxSurround, DistanceStoreRepository} from "./minMaxSurround/index.js";
+import {SlashingProtectionBlock, SlashingProtectionAttestation} from "./types.js";
 
-export {InvalidAttestationError, InvalidAttestationErrorCode} from "./attestation";
-export {InvalidBlockError, InvalidBlockErrorCode} from "./block";
-export {InterchangeError, InterchangeErrorErrorCode} from "./interchange";
-export {ISlashingProtection, InterchangeFormatVersion};
+export {InvalidAttestationError, InvalidAttestationErrorCode} from "./attestation/index.js";
+export {InvalidBlockError, InvalidBlockErrorCode} from "./block/index.js";
+export {InterchangeError, InterchangeErrorErrorCode, Interchange, InterchangeFormat} from "./interchange/index.js";
+export {ISlashingProtection, InterchangeFormatVersion, SlashingProtectionBlock, SlashingProtectionAttestation};
 
 /**
  * Handles slashing protection for validator proposer and attester duties as well as slashing protection
@@ -38,25 +39,24 @@ export class SlashingProtection extends DatabaseService implements ISlashingProt
     const distanceStoreRepository = new DistanceStoreRepository(opts);
     const minMaxSurround = new MinMaxSurround(distanceStoreRepository);
 
-    this.blockService = new SlashingProtectionBlockService(opts.config, blockBySlotRepository);
+    this.blockService = new SlashingProtectionBlockService(blockBySlotRepository);
     this.attestationService = new SlashingProtectionAttestationService(
-      opts.config,
       attestationByTargetRepository,
       attestationLowerBoundRepository,
       minMaxSurround
     );
   }
 
-  async checkAndInsertBlockProposal(pubKey: BLSPubkey, block: phase0.SlashingProtectionBlock): Promise<void> {
+  async checkAndInsertBlockProposal(pubKey: BLSPubkey, block: SlashingProtectionBlock): Promise<void> {
     await this.blockService.checkAndInsertBlockProposal(pubKey, block);
   }
 
-  async checkAndInsertAttestation(pubKey: BLSPubkey, attestation: phase0.SlashingProtectionAttestation): Promise<void> {
+  async checkAndInsertAttestation(pubKey: BLSPubkey, attestation: SlashingProtectionAttestation): Promise<void> {
     await this.attestationService.checkAndInsertAttestation(pubKey, attestation);
   }
 
   async importInterchange(interchange: Interchange, genesisValidatorsRoot: Root): Promise<void> {
-    const {data} = parseInterchange(this.config, interchange, genesisValidatorsRoot);
+    const {data} = parseInterchange(interchange, genesisValidatorsRoot);
     for (const validator of data) {
       await this.blockService.importBlocks(validator.pubkey, validator.signedBlocks);
       await this.attestationService.importAttestations(validator.pubkey, validator.signedAttestations);
@@ -76,7 +76,7 @@ export class SlashingProtection extends DatabaseService implements ISlashingProt
         signedAttestations: await this.attestationService.exportAttestations(pubkey),
       });
     }
-    return serializeInterchange(this.config, {data: validatorData, genesisValidatorsRoot}, formatVersion);
+    return serializeInterchange({data: validatorData, genesisValidatorsRoot}, formatVersion);
   }
 
   async listPubkeys(): Promise<BLSPubkey[]> {

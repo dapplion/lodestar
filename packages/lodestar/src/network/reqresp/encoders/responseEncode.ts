@@ -1,29 +1,47 @@
+import {ForkName} from "@chainsafe/lodestar-params";
+import {RespStatus, RpcResponseStatusError} from "../../../constants/index.js";
 import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {phase0} from "@chainsafe/lodestar-types";
-import {Method, Methods, ReqRespEncoding, RpcResponseStatus, RpcResponseStatusError} from "../../../constants";
-import {writeEncodedPayload} from "../encodingStrategies";
-import {encodeErrorMessage} from "../utils/errorMessage";
+import {writeEncodedPayload} from "../encodingStrategies/index.js";
+import {encodeErrorMessage} from "../utils/index.js";
+import {
+  Method,
+  Protocol,
+  OutgoingResponseBody,
+  ResponseTypedContainer,
+  OutgoingResponseBodyByMethod,
+  ContextBytesType,
+  contextBytesTypeByProtocol,
+  IncomingResponseBodyByMethod,
+  getOutgoingSerializerByMethod,
+} from "../types.js";
 
 /**
  * Yields byte chunks for a `<response>` with a zero response code `<result>`
  * ```bnf
  * response        ::= <response_chunk>*
- * response_chunk  ::= <result> | <encoding-dependent-header> | <encoded-payload>
+ * response_chunk  ::= <result> | <context-bytes> | <encoding-dependent-header> | <encoded-payload>
  * result          ::= "0"
  * ```
  * Note: `response` has zero or more chunks (denoted by `<>*`)
  */
 export function responseEncodeSuccess(
   config: IBeaconConfig,
-  method: Method,
-  encoding: ReqRespEncoding
-): (source: AsyncIterable<phase0.ResponseBody>) => AsyncIterable<Buffer> {
-  const type = Methods[method].responseSSZType(config);
+  protocol: Protocol
+): (source: AsyncIterable<OutgoingResponseBody>) => AsyncIterable<Buffer> {
+  const contextBytesType = contextBytesTypeByProtocol(protocol);
 
-  return async function* (source) {
+  return async function* responseEncodeSuccessTransform(source) {
     for await (const chunk of source) {
-      yield Buffer.from([RpcResponseStatus.SUCCESS]);
-      yield* writeEncodedPayload(chunk, encoding, type);
+      // <result>
+      yield Buffer.from([RespStatus.SUCCESS]);
+
+      // <context-bytes> - from altair
+      const forkName = getForkNameFromResponseBody(config, protocol, chunk);
+      yield* writeContextBytes(config, contextBytesType, forkName);
+
+      // <encoding-dependent-header> | <encoded-payload>
+      const serializer = getOutgoingSerializerByMethod(protocol);
+      yield* writeEncodedPayload(chunk, protocol.encoding, serializer);
     }
   };
 }
@@ -42,10 +60,51 @@ export async function* responseEncodeError(
   status: RpcResponseStatusError,
   errorMessage: string
 ): AsyncGenerator<Buffer> {
+  // <result>
   yield Buffer.from([status]);
 
-  // errorMessage is optional
+  // <error_message>? is optional
   if (errorMessage) {
     yield encodeErrorMessage(errorMessage);
+  }
+}
+
+/**
+ * Yields byte chunks for a `<context-bytes>`. See `ContextBytesType` for possible types.
+ * This item is mandatory but may be empty.
+ */
+export async function* writeContextBytes(
+  config: IBeaconConfig,
+  contextBytesType: ContextBytesType,
+  forkName: ForkName
+): AsyncGenerator<Buffer> {
+  switch (contextBytesType) {
+    // Yield nothing
+    case ContextBytesType.Empty:
+      return;
+
+    // Yield a fixed-width 4 byte chunk, set to the `ForkDigest`
+    case ContextBytesType.ForkDigest:
+      yield config.forkName2ForkDigest(forkName) as Buffer;
+  }
+}
+
+export function getForkNameFromResponseBody<K extends Method>(
+  config: IBeaconConfig,
+  protocol: Protocol,
+  body: OutgoingResponseBodyByMethod[K] | IncomingResponseBodyByMethod[K]
+): ForkName {
+  const requestTyped = {method: protocol.method, body} as ResponseTypedContainer;
+
+  switch (requestTyped.method) {
+    case Method.Status:
+    case Method.Goodbye:
+    case Method.Ping:
+    case Method.Metadata:
+      return ForkName.phase0;
+
+    case Method.BeaconBlocksByRange:
+    case Method.BeaconBlocksByRoot:
+      return config.getForkName(requestTyped.body.slot);
   }
 }

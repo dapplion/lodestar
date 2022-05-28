@@ -2,40 +2,37 @@
  * @module chain/stateTransition/util
  */
 
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {allForks, Gwei, ValidatorIndex} from "@chainsafe/lodestar-types";
+import {EFFECTIVE_BALANCE_INCREMENT} from "@chainsafe/lodestar-params";
+import {Gwei, ValidatorIndex} from "@chainsafe/lodestar-types";
 import {bigIntMax} from "@chainsafe/lodestar-utils";
-import {CachedBeaconState} from "../fast";
-import {getCurrentEpoch} from "./epoch";
-import {getActiveValidatorIndices, isActiveValidator} from "./validator";
+import {EffectiveBalanceIncrements} from "../cache/effectiveBalanceIncrements.js";
+import {BeaconStateAllForks} from "..";
+import {CachedBeaconStateAllForks} from "../types.js";
 
 /**
  * Return the combined effective balance of the [[indices]].
  * `EFFECTIVE_BALANCE_INCREMENT` Gwei minimum to avoid divisions by zero.
+ *
+ * SLOW CODE - 🐢
  */
-export function getTotalBalance(config: IBeaconConfig, state: allForks.BeaconState, indices: ValidatorIndex[]): Gwei {
-  return bigIntMax(
-    config.params.EFFECTIVE_BALANCE_INCREMENT,
-    indices.reduce(
-      (total: Gwei, index: ValidatorIndex): Gwei => total + state.validators[index].effectiveBalance,
-      BigInt(0)
-    )
-  );
-}
+export function getTotalBalance(state: BeaconStateAllForks, indices: ValidatorIndex[]): Gwei {
+  let total = BigInt(0);
 
-/**
- * Return the combined effective balance of the active validators.
- * Note: `getTotalBalance` returns `EFFECTIVE_BALANCE_INCREMENT` Gwei minimum to avoid divisions by zero.
- */
-export function getTotalActiveBalance(config: IBeaconConfig, state: allForks.BeaconState): Gwei {
-  return getTotalBalance(config, state, getActiveValidatorIndices(state, getCurrentEpoch(config, state)));
+  // TODO: Use a fast cache to get the effective balance 🐢
+  const validatorsArr = state.validators.getAllReadonlyValues();
+  for (let i = 0; i < indices.length; i++) {
+    total += BigInt(validatorsArr[indices[i]].effectiveBalance);
+  }
+
+  return bigIntMax(BigInt(EFFECTIVE_BALANCE_INCREMENT), total);
 }
 
 /**
  * Increase the balance for a validator with the given ``index`` by ``delta``.
  */
-export function increaseBalance(state: allForks.BeaconState, index: ValidatorIndex, delta: Gwei): void {
-  state.balances[index] = state.balances[index] + delta;
+export function increaseBalance(state: BeaconStateAllForks, index: ValidatorIndex, delta: number): void {
+  // TODO: Inline this
+  state.balances.set(index, state.balances.get(index) + delta);
 }
 
 /**
@@ -43,19 +40,37 @@ export function increaseBalance(state: allForks.BeaconState, index: ValidatorInd
  *
  * Set to ``0`` when underflow.
  */
-export function decreaseBalance(state: allForks.BeaconState, index: ValidatorIndex, delta: Gwei): void {
-  const currentBalance = state.balances[index];
-  state.balances[index] = delta > currentBalance ? BigInt(0) : currentBalance - delta;
+export function decreaseBalance(state: BeaconStateAllForks, index: ValidatorIndex, delta: number): void {
+  const newBalance = state.balances.get(index) - delta;
+  // TODO: Is it necessary to protect against underflow here? Add unit test
+  state.balances.set(index, Math.max(0, newBalance));
 }
 
 /**
  * This method is used to get justified balances from a justified state.
+ * This is consumed by forkchoice which based on delta so we return "by increment" (in ether) value,
+ * ie [30, 31, 32] instead of [30e9, 31e9, 32e9]
  */
-export function getEffectiveBalances(justifiedState: CachedBeaconState<allForks.BeaconState>): Gwei[] {
-  const justifiedEpoch = justifiedState.currentShuffling.epoch;
-  const effectiveBalances: Gwei[] = [];
-  justifiedState.validators.forEach((v) => {
-    effectiveBalances.push(isActiveValidator(v, justifiedEpoch) ? v.effectiveBalance : BigInt(0));
-  });
-  return effectiveBalances;
+export function getEffectiveBalanceIncrementsZeroInactive(
+  justifiedState: CachedBeaconStateAllForks
+): EffectiveBalanceIncrements {
+  const {activeIndices} = justifiedState.epochCtx.currentShuffling;
+  // 5x faster than reading from state.validators, with validator Nodes as values
+  const validatorCount = justifiedState.validators.length;
+  const {effectiveBalanceIncrements} = justifiedState.epochCtx;
+  // Slice up to `validatorCount` since it won't be mutated, nor accessed beyond `validatorCount`
+  const effectiveBalanceIncrementsZeroInactive = effectiveBalanceIncrements.slice(0, validatorCount);
+
+  let j = 0;
+  for (let i = 0; i < validatorCount; i++) {
+    if (i === activeIndices[j]) {
+      // active validator
+      j++;
+    } else {
+      // inactive validator
+      effectiveBalanceIncrementsZeroInactive[i] = 0;
+    }
+  }
+
+  return effectiveBalanceIncrementsZeroInactive;
 }

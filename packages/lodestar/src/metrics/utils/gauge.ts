@@ -1,5 +1,5 @@
 import {Gauge, GaugeConfiguration} from "prom-client";
-import {IGauge} from "../interface";
+import {IGauge} from "../interface.js";
 
 type CollectFn<T extends string> = (metric: IGauge<T>) => void;
 type Labels<T extends string> = Partial<Record<T, string | number>>;
@@ -48,9 +48,9 @@ export class GaugeChild<T extends string> implements IGauge {
   inc(labels: Labels<T>, value?: number): void;
   inc(arg1?: Labels<T> | number, arg2?: number): void {
     if (typeof arg1 === "object") {
-      this.gauge.inc({...this.labelsParent, ...arg1}, arg2 || 0);
+      this.gauge.inc({...this.labelsParent, ...arg1}, arg2 ?? 1);
     } else {
-      this.gauge.inc(this.labelsParent, arg1 || 0);
+      this.gauge.inc(this.labelsParent, arg1 ?? 1);
     }
   }
 
@@ -58,9 +58,9 @@ export class GaugeChild<T extends string> implements IGauge {
   set(labels: Labels<T>, value: number): void;
   set(arg1?: Labels<T> | number, arg2?: number): void {
     if (typeof arg1 === "object") {
-      this.gauge.set({...this.labelsParent, ...arg1}, arg2 || 0);
+      this.gauge.set({...this.labelsParent, ...arg1}, arg2 ?? 0);
     } else {
-      this.gauge.set(this.labelsParent, arg1 || 0);
+      this.gauge.set(this.labelsParent, arg1 ?? 0);
     }
   }
 

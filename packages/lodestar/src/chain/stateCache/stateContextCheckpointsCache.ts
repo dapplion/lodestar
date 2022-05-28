@@ -1,8 +1,12 @@
-import {toHexString, fromHexString} from "@chainsafe/ssz";
-import {phase0, Epoch, allForks} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {CachedBeaconState} from "@chainsafe/lodestar-beacon-state-transition";
+import {toHexString} from "@chainsafe/ssz";
+import {phase0, Epoch, RootHex} from "@chainsafe/lodestar-types";
+import {CachedBeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {routes} from "@chainsafe/lodestar-api";
+import {IMetrics} from "../../metrics/index.js";
+import {MapTracker} from "./mapMetrics.js";
+import {MapDef} from "../../util/map.js";
 
+type CheckpointHex = {epoch: Epoch; rootHex: RootHex};
 const MAX_EPOCHS = 10;
 
 /**
@@ -12,51 +16,71 @@ const MAX_EPOCHS = 10;
  * Similar API to Repository
  */
 export class CheckpointStateCache {
-  private readonly config: IBeaconConfig;
-  private cache = new Map<string, CachedBeaconState<allForks.BeaconState>>();
+  private readonly cache: MapTracker<string, CachedBeaconStateAllForks>;
   /** Epoch -> Set<blockRoot> */
-  private epochIndex = new Map<Epoch, Set<string>>();
+  private readonly epochIndex = new MapDef<Epoch, Set<string>>(() => new Set<string>());
+  private readonly metrics: IMetrics["cpStateCache"] | null | undefined;
+  private preComputedCheckpoint: string | null = null;
+  private preComputedCheckpointHits: number | null = null;
 
-  constructor(config: IBeaconConfig) {
-    this.config = config;
+  constructor({metrics}: {metrics?: IMetrics | null}) {
+    this.cache = new MapTracker(metrics?.cpStateCache);
+    if (metrics) {
+      this.metrics = metrics.cpStateCache;
+      metrics.cpStateCache.size.addCollect(() => metrics.cpStateCache.size.set(this.cache.size));
+      metrics.cpStateCache.epochSize.addCollect(() => metrics.cpStateCache.epochSize.set(this.epochIndex.size));
+    }
   }
 
-  get(cp: phase0.Checkpoint): CachedBeaconState<allForks.BeaconState> | null {
-    const item = this.cache.get(toHexString(this.config.types.phase0.Checkpoint.hashTreeRoot(cp)));
+  get(cp: CheckpointHex): CachedBeaconStateAllForks | null {
+    this.metrics?.lookups.inc();
+    const cpKey = toCheckpointKey(cp);
+    const item = this.cache.get(cpKey);
+    if (item) {
+      this.metrics?.hits.inc();
+      if (cpKey === this.preComputedCheckpoint) {
+        this.preComputedCheckpointHits = (this.preComputedCheckpointHits ?? 0) + 1;
+      }
+    }
     return item ? item.clone() : null;
   }
 
-  add(cp: phase0.Checkpoint, item: CachedBeaconState<allForks.BeaconState>): void {
-    const key = toHexString(this.config.types.phase0.Checkpoint.hashTreeRoot(cp));
+  add(cp: phase0.Checkpoint, item: CachedBeaconStateAllForks): void {
+    const cpHex = toCheckpointHex(cp);
+    const key = toCheckpointKey(cpHex);
     if (this.cache.has(key)) {
       return;
     }
+    this.metrics?.adds.inc();
     this.cache.set(key, item.clone());
-    const epochKey = toHexString(cp.root);
-    const value = this.epochIndex.get(cp.epoch);
-    if (value) {
-      value.add(epochKey);
-    } else {
-      this.epochIndex.set(cp.epoch, new Set([epochKey]));
-    }
+    this.epochIndex.getOrDefault(cp.epoch).add(cpHex.rootHex);
   }
 
   /**
    * Searches for the latest cached state with a `root`, starting with `epoch` and descending
    */
-  getLatest({root, epoch}: phase0.Checkpoint): CachedBeaconState<allForks.BeaconState> | null {
-    const hexRoot = toHexString(root);
+  getLatest(rootHex: RootHex, maxEpoch: Epoch): CachedBeaconStateAllForks | null {
     // sort epochs in descending order, only consider epochs lte `epoch`
     const epochs = Array.from(this.epochIndex.keys())
       .sort((a, b) => b - a)
-      .filter((e) => e <= epoch);
+      .filter((e) => e <= maxEpoch);
     for (const epoch of epochs) {
-      const rootSet = this.epochIndex.get(epoch);
-      if (rootSet && rootSet.has(hexRoot)) {
-        return this.get({root, epoch});
+      if (this.epochIndex.get(epoch)?.has(rootHex)) {
+        return this.get({rootHex, epoch});
       }
     }
     return null;
+  }
+
+  /**
+   * Update the precomputed checkpoint and return the number of his for the
+   * previous one (if any).
+   */
+  updatePreComputedCheckpoint(rootHex: RootHex, epoch: Epoch): number | null {
+    const previousHits = this.preComputedCheckpointHits;
+    this.preComputedCheckpoint = toCheckpointKey({rootHex, epoch});
+    this.preComputedCheckpointHits = 0;
+    return previousHits;
   }
 
   pruneFinalized(finalizedEpoch: Epoch): void {
@@ -79,8 +103,7 @@ export class CheckpointStateCache {
   }
 
   delete(cp: phase0.Checkpoint): void {
-    const key = toHexString(this.config.types.phase0.Checkpoint.hashTreeRoot(cp));
-    this.cache.delete(key);
+    this.cache.delete(toCheckpointKey(toCheckpointHex(cp)));
     const epochKey = toHexString(cp.root);
     const value = this.epochIndex.get(cp.epoch);
     if (value) {
@@ -92,10 +115,8 @@ export class CheckpointStateCache {
   }
 
   deleteAllEpochItems(epoch: Epoch): void {
-    for (const hexRoot of this.epochIndex.get(epoch) || []) {
-      this.cache.delete(
-        toHexString(this.config.types.phase0.Checkpoint.hashTreeRoot({root: fromHexString(hexRoot), epoch}))
-      );
+    for (const rootHex of this.epochIndex.get(epoch) || []) {
+      this.cache.delete(toCheckpointKey({rootHex, epoch}));
     }
     this.epochIndex.delete(epoch);
   }
@@ -104,4 +125,30 @@ export class CheckpointStateCache {
     this.cache.clear();
     this.epochIndex.clear();
   }
+
+  /** ONLY FOR DEBUGGING PURPOSES. For lodestar debug API */
+  dumpSummary(): routes.lodestar.StateCacheItem[] {
+    return Array.from(this.cache.entries()).map(([key, state]) => ({
+      slot: state.slot,
+      root: toHexString(state.hashTreeRoot()),
+      reads: this.cache.readCount.get(key) ?? 0,
+      lastRead: this.cache.lastRead.get(key) ?? 0,
+    }));
+  }
+
+  /** ONLY FOR DEBUGGING PURPOSES. For spec tests on error */
+  dumpCheckpointKeys(): string[] {
+    return Array.from(this.cache.keys());
+  }
+}
+
+export function toCheckpointHex(checkpoint: phase0.Checkpoint): CheckpointHex {
+  return {
+    epoch: checkpoint.epoch,
+    rootHex: toHexString(checkpoint.root),
+  };
+}
+
+export function toCheckpointKey(cp: CheckpointHex): string {
+  return `${cp.rootHex}:${cp.epoch}`;
 }

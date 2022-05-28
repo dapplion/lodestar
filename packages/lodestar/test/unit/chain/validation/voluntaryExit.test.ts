@@ -1,36 +1,81 @@
-import {expect} from "chai";
 import sinon, {SinonStubbedInstance} from "sinon";
 
-import {config} from "@chainsafe/lodestar-config/minimal";
-import {createCachedBeaconState} from "@chainsafe/lodestar-beacon-state-transition";
-import * as validatorStatusUtils from "@chainsafe/lodestar-beacon-state-transition/lib/util/validatorStatus";
+import {config} from "@chainsafe/lodestar-config/default";
+import {
+  phase0,
+  CachedBeaconStateAllForks,
+  computeEpochAtSlot,
+  computeDomain,
+  computeSigningRoot,
+} from "@chainsafe/lodestar-beacon-state-transition";
 import {ForkChoice} from "@chainsafe/lodestar-fork-choice";
+import {ssz} from "@chainsafe/lodestar-types";
 
-import {BeaconChain} from "../../../../src/chain";
-import {StateRegenerator} from "../../../../src/chain/regen";
-import {StubbedBeaconDb, StubbedChain} from "../../../utils/stub";
-import {generateValidators} from "../../../utils/validator";
-import {generateInitialMaxBalances} from "../../../utils/balances";
-import {generateState} from "../../../utils/state";
-import {generateEmptySignedVoluntaryExit} from "../../../utils/attestation";
-import {validateGossipVoluntaryExit} from "../../../../src/chain/validation/voluntaryExit";
-import {VoluntaryExitErrorCode} from "../../../../src/chain/errors/voluntaryExitError";
-import {SinonStubFn} from "../../../utils/types";
-import {VoluntaryExitError} from "../../../../src/chain/errors";
+import {BeaconChain} from "../../../../src/chain/index.js";
+import {StubbedChain} from "../../../utils/stub/index.js";
+import {generateState} from "../../../utils/state.js";
+import {validateGossipVoluntaryExit} from "../../../../src/chain/validation/voluntaryExit.js";
+import {VoluntaryExitErrorCode} from "../../../../src/chain/errors/voluntaryExitError.js";
+import {OpPool} from "../../../../src/chain/opPools/index.js";
+import {expectRejectedWithLodestarError} from "../../../utils/errors.js";
+import {DOMAIN_VOLUNTARY_EXIT, FAR_FUTURE_EPOCH, SLOTS_PER_EPOCH} from "@chainsafe/lodestar-params";
+import bls from "@chainsafe/bls";
+import {PointFormat} from "@chainsafe/bls/types";
+import {createIBeaconConfig} from "@chainsafe/lodestar-config";
+import {createCachedBeaconStateTest} from "../../../utils/cachedBeaconState.js";
 
 describe("validate voluntary exit", () => {
   const sandbox = sinon.createSandbox();
-  let dbStub: StubbedBeaconDb,
-    isValidIncomingVoluntaryExitStub: SinonStubFn<typeof validatorStatusUtils["isValidVoluntaryExit"]>,
-    chainStub: StubbedChain,
-    regenStub: SinonStubbedInstance<StateRegenerator>;
+  let chainStub: StubbedChain;
+  let state: CachedBeaconStateAllForks;
+  let signedVoluntaryExit: phase0.SignedVoluntaryExit;
+  let opPool: OpPool & SinonStubbedInstance<OpPool>;
+
+  before(() => {
+    const sk = bls.SecretKey.fromKeygen();
+
+    const stateEmpty = ssz.phase0.BeaconState.defaultValue();
+
+    // Validator has to be active for long enough
+    stateEmpty.slot = config.SHARD_COMMITTEE_PERIOD * SLOTS_PER_EPOCH;
+
+    // Add a validator that's active since genesis and ready to exit
+    const validator = ssz.phase0.Validator.toViewDU({
+      pubkey: sk.toPublicKey().toBytes(PointFormat.compressed),
+      withdrawalCredentials: Buffer.alloc(32, 0),
+      effectiveBalance: 32e9,
+      slashed: false,
+      activationEligibilityEpoch: 0,
+      activationEpoch: 0,
+      exitEpoch: FAR_FUTURE_EPOCH,
+      withdrawableEpoch: FAR_FUTURE_EPOCH,
+    });
+    stateEmpty.validators[0] = validator;
+
+    const voluntaryExit = {
+      epoch: 0,
+      validatorIndex: 0,
+    };
+    const domain = computeDomain(
+      DOMAIN_VOLUNTARY_EXIT,
+      stateEmpty.fork.currentVersion,
+      stateEmpty.genesisValidatorsRoot
+    );
+    const signingRoot = computeSigningRoot(ssz.phase0.VoluntaryExit, voluntaryExit, domain);
+    signedVoluntaryExit = {message: voluntaryExit, signature: sk.sign(signingRoot).toBytes()};
+    const _state = generateState(stateEmpty, config);
+
+    state = createCachedBeaconStateTest(_state, createIBeaconConfig(config, _state.genesisValidatorsRoot));
+  });
 
   beforeEach(() => {
-    isValidIncomingVoluntaryExitStub = sandbox.stub(validatorStatusUtils, "isValidVoluntaryExit");
     chainStub = sandbox.createStubInstance(BeaconChain) as StubbedChain;
     chainStub.forkChoice = sandbox.createStubInstance(ForkChoice);
-    regenStub = chainStub.regen = sandbox.createStubInstance(StateRegenerator);
-    dbStub = new StubbedBeaconDb(sandbox);
+    opPool = sandbox.createStubInstance(OpPool) as OpPool & SinonStubbedInstance<OpPool>;
+    (chainStub as {opPool: OpPool}).opPool = opPool;
+    chainStub.getHeadStateAtCurrentEpoch.resolves(state);
+    // TODO: Use actual BLS verification
+    chainStub.bls = {verifySignatureSets: async () => true};
   });
 
   afterEach(() => {
@@ -38,67 +83,37 @@ describe("validate voluntary exit", () => {
   });
 
   it("should return invalid Voluntary Exit - existing", async () => {
-    const voluntaryExit = generateEmptySignedVoluntaryExit();
-    dbStub.voluntaryExit.has.resolves(true);
-    const state = generateState(
-      {
-        genesisTime: Math.floor(Date.now() / 1000) - config.params.SECONDS_PER_SLOT,
-        validators: generateValidators(config.params.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT, {
-          activationEpoch: 0,
-          effectiveBalance: config.params.MAX_EFFECTIVE_BALANCE,
-        }),
-        balances: generateInitialMaxBalances(config),
-      },
-      config
+    const signedVoluntaryExitInvalidSig: phase0.SignedVoluntaryExit = {
+      message: signedVoluntaryExit.message,
+      signature: Buffer.alloc(96, 1),
+    };
+
+    // Return SignedVoluntaryExit known
+    opPool.hasSeenVoluntaryExit.returns(true);
+
+    await expectRejectedWithLodestarError(
+      validateGossipVoluntaryExit(chainStub, signedVoluntaryExitInvalidSig),
+      VoluntaryExitErrorCode.ALREADY_EXISTS
     );
-    regenStub.getCheckpointState.resolves(createCachedBeaconState(config, state));
-    try {
-      await validateGossipVoluntaryExit(config, chainStub, dbStub, voluntaryExit);
-    } catch (error) {
-      expect((error as VoluntaryExitError).type).to.have.property("code", VoluntaryExitErrorCode.EXIT_ALREADY_EXISTS);
-    }
   });
 
   it("should return invalid Voluntary Exit - invalid", async () => {
-    const voluntaryExit = generateEmptySignedVoluntaryExit();
-    dbStub.voluntaryExit.has.resolves(false);
-    const state = generateState(
-      {
-        genesisTime: Math.floor(Date.now() / 1000) - config.params.SECONDS_PER_SLOT,
-        validators: generateValidators(config.params.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT, {
-          activationEpoch: 0,
-          effectiveBalance: config.params.MAX_EFFECTIVE_BALANCE,
-        }),
-        balances: generateInitialMaxBalances(config),
+    const signedVoluntaryExitInvalid: phase0.SignedVoluntaryExit = {
+      message: {
+        // Force an invalid epoch
+        epoch: computeEpochAtSlot(state.slot) + 1,
+        validatorIndex: 0,
       },
-      config
+      signature: Buffer.alloc(96, 1),
+    };
+
+    await expectRejectedWithLodestarError(
+      validateGossipVoluntaryExit(chainStub, signedVoluntaryExitInvalid),
+      VoluntaryExitErrorCode.INVALID
     );
-    regenStub.getCheckpointState.resolves(createCachedBeaconState(config, state));
-    isValidIncomingVoluntaryExitStub.returns(false);
-    try {
-      await validateGossipVoluntaryExit(config, chainStub, dbStub, voluntaryExit);
-    } catch (error) {
-      expect((error as VoluntaryExitError).type).to.have.property("code", VoluntaryExitErrorCode.INVALID_EXIT);
-    }
   });
 
   it("should return valid Voluntary Exit", async () => {
-    const voluntaryExit = generateEmptySignedVoluntaryExit();
-    dbStub.voluntaryExit.has.resolves(false);
-    const state = generateState(
-      {
-        genesisTime: Math.floor(Date.now() / 1000) - config.params.SECONDS_PER_SLOT,
-        validators: generateValidators(config.params.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT, {
-          activationEpoch: 0,
-          effectiveBalance: config.params.MAX_EFFECTIVE_BALANCE,
-        }),
-        balances: generateInitialMaxBalances(config),
-      },
-      config
-    );
-    regenStub.getCheckpointState.resolves(createCachedBeaconState(config, state));
-    isValidIncomingVoluntaryExitStub.returns(true);
-    const validationTest = await validateGossipVoluntaryExit(config, chainStub, dbStub, voluntaryExit);
-    expect(validationTest).to.not.throw;
+    await validateGossipVoluntaryExit(chainStub, signedVoluntaryExit);
   });
 });

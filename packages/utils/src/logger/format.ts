@@ -1,9 +1,11 @@
-import {Json} from "@chainsafe/ssz";
-import {format} from "winston";
-import {toJson, toString} from "../json";
-import {Context, ILoggerOptions} from "./interface";
+import winston from "winston";
+import {logCtxToJson, logCtxToString, LogData} from "./json.js";
+import {ILoggerOptions, TimestampFormatCode} from "./interface.js";
+import {formatEpochSlotTime} from "./util.js";
 
-type Format = ReturnType<typeof format.combine>;
+const {format} = winston;
+
+type Format = ReturnType<typeof winston.format.combine>;
 
 // TODO: Find a more typesafe way of enforce this properties
 interface IWinstonInfoArg {
@@ -11,9 +13,8 @@ interface IWinstonInfoArg {
   message: string;
   module?: string;
   namespace?: string;
-  timestamp?: string;
-  durationMs?: string;
-  context: Context;
+  timestamp: string;
+  context: LogData;
   error: Error;
 }
 
@@ -30,10 +31,28 @@ export function getFormat(opts: ILoggerOptions): Format {
 
 function humanReadableLogFormat(opts: ILoggerOptions): Format {
   return format.combine(
-    ...(opts.hideTimestamp ? [] : [format.timestamp({format: "MMM-DD HH:mm:ss.SSS"})]),
+    ...(opts.hideTimestamp ? [] : [formatTimestamp(opts)]),
     format.colorize(),
     format.printf(humanReadableTemplateFn)
   );
+}
+
+function formatTimestamp(opts: ILoggerOptions): Format {
+  const {timestampFormat} = opts;
+
+  switch (timestampFormat?.format) {
+    case TimestampFormatCode.EpochSlot:
+      return {
+        transform: (info) => {
+          info.timestamp = formatEpochSlotTime(timestampFormat);
+          return info;
+        },
+      };
+
+    case TimestampFormatCode.DateRegular:
+    default:
+      return format.timestamp({format: "MMM-DD HH:mm:ss.SSS"});
+  }
 }
 
 function jsonLogFormat(opts: ILoggerOptions): Format {
@@ -42,8 +61,8 @@ function jsonLogFormat(opts: ILoggerOptions): Format {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     format((_info) => {
       const info = _info as IWinstonInfoArg;
-      info.context = toJson(info.context);
-      info.error = (toJson(info.error) as unknown) as Error;
+      info.context = logCtxToJson(info.context);
+      info.error = (logCtxToJson(info.error) as unknown) as Error;
       return info;
     })(),
     format.json()
@@ -62,55 +81,14 @@ function humanReadableTemplateFn(_info: {[key: string]: any; level: string; mess
   const infoString = info.module || info.namespace || "";
   const infoPad = paddingBetweenInfo - infoString.length;
 
-  const logParts: (string | undefined)[] = [
-    info.timestamp,
-    `[${infoString.toUpperCase()}]`,
-    `${info.level.padStart(infoPad)}:`,
-    info.message,
-    info.context ? printStackTraceLast(info.context) : undefined,
-    info.error ? printStackTraceLast(info.error) : undefined,
-    info.durationMs && ` - duration=${info.durationMs}ms`,
-  ];
+  let str = "";
 
-  return logParts.filter((s) => s).join(" ");
-}
+  if (info.timestamp) str += info.timestamp;
 
-/**
- * Extract stack property from context to allow appending at the end of the log
- */
-export function printStackTraceLast(context?: Context | Error): string {
-  if (!context) {
-    return "";
-  }
+  str += `[${infoString.toUpperCase()}] ${info.level.padStart(infoPad)}: ${info.message}`;
 
-  const json = toJson(context);
-  const stackTraces = extractStackTraceFromJson(json);
+  if (info.context !== undefined) str += " " + logCtxToString(info.context);
+  if (info.error !== undefined) str += " " + logCtxToString(info.error);
 
-  if (stackTraces.length > 0) {
-    return [toString(json), ...stackTraces].join("\n");
-  } else {
-    return toString(json);
-  }
-}
-
-/**
- * Extract 'stack' from Json-ified error recursively.
- * Mutates the `json` argument deleting all 'stack' properties.
- * `json` argument must not contain circular properties, which should be guaranteed by `toJson()`
- */
-export function extractStackTraceFromJson(json: Json, stackTraces: string[] = []): string[] {
-  if (typeof json === "object" && json !== null && !Array.isArray(json)) {
-    let stack: string | null = null;
-    for (const [key, value] of Object.entries(json)) {
-      if (key === "stack" && typeof value === "string") {
-        stack = value;
-        delete ((json as unknown) as Error)[key];
-      } else {
-        extractStackTraceFromJson(value as Json, stackTraces);
-      }
-    }
-    // Push stack trace last so nested errors come first
-    if (stack) stackTraces.push(stack);
-  }
-  return stackTraces;
+  return str;
 }

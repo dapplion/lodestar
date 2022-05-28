@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {unlinkSync, writeFileSync} from "fs";
-import {join} from "path";
+import {unlinkSync, writeFileSync} from "node:fs";
+import path, {join} from "node:path";
+import {fileURLToPath} from "node:url";
+import {ContainerType, Type} from "@chainsafe/ssz";
+import {ssz} from "@chainsafe/lodestar-types";
+import {describeDirectorySpecTest, InputType, loadYamlFile} from "../../../src/single.js";
 
-import {ContainerType, Type, Json} from "@chainsafe/ssz";
-import {Boolean, Number64} from "@chainsafe/lodestar-types/lib/primitive/ssz";
-import {describeDirectorySpecTest} from "../../../src/single";
-import {loadYamlFile} from "../../../src/util";
+// Global variable __dirname no longer available in ES6 modules.
+// Solutions: https://stackoverflow.com/questions/46745014/alternative-for-dirname-in-node-js-when-using-es6-modules
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/* eslint-disable @typescript-eslint/naming-convention */
 
 export interface ISimpleStruct {
   test: boolean;
@@ -15,20 +21,21 @@ export interface ISimpleStruct {
 export interface ISimpleCase extends Iterable<string> {
   input: ISimpleStruct;
   output: number;
+  meta?: {
+    bls_setting?: BigInt;
+  };
 }
 
-const inputSchema = new ContainerType({
-  fields: {
-    test: Boolean,
-    number: Number64,
-  },
+const sampleContainerType = new ContainerType({
+  test: ssz.Boolean,
+  number: ssz.UintNum64,
 });
 
 before(() => {
-  yamlToSSZ(join(__dirname, "../_test_files/single/case0/input.yaml"), inputSchema);
-  yamlToSSZ(join(__dirname, "../_test_files/single/case0/output.yaml"), Number64);
-  yamlToSSZ(join(__dirname, "../_test_files/single/case1/input.yaml"), inputSchema);
-  yamlToSSZ(join(__dirname, "../_test_files/single/case1/output.yaml"), Number64);
+  yamlToSSZ(join(__dirname, "../_test_files/single/case0/input.yaml"), sampleContainerType);
+  yamlToSSZ(join(__dirname, "../_test_files/single/case0/output.yaml"), ssz.UintNum64);
+  yamlToSSZ(join(__dirname, "../_test_files/single/case1/input.yaml"), sampleContainerType);
+  yamlToSSZ(join(__dirname, "../_test_files/single/case1/output.yaml"), ssz.UintNum64);
 });
 
 after(() => {
@@ -45,9 +52,13 @@ describeDirectorySpecTest<ISimpleCase, number>(
     return testCase.input.number;
   },
   {
+    inputTypes: {
+      input: InputType.YAML,
+      output: InputType.YAML,
+    },
     sszTypes: {
-      input: inputSchema,
-      output: Number64,
+      input: sampleContainerType,
+      output: ssz.UintNum64,
     },
     shouldError: (testCase) => !testCase.input.test,
     getExpected: (testCase) => testCase.output,
@@ -55,10 +66,6 @@ describeDirectorySpecTest<ISimpleCase, number>(
 );
 
 function yamlToSSZ(file: string, sszSchema: Type<any>): void {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const input: any = sszSchema.fromJson(loadYamlFile(file) as Json);
-  if (input.number) {
-    input.number = Number(input.number);
-  }
+  const input = sszSchema.fromJson(loadYamlFile(file)) as {test: boolean; number: number};
   writeFileSync(file.replace(".yaml", ".ssz"), sszSchema.serialize(input));
 }

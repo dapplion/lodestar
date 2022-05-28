@@ -1,213 +1,115 @@
-import bls from "@chainsafe/bls";
-import {config} from "@chainsafe/lodestar-config/mainnet";
-import {phase0} from "@chainsafe/lodestar-types";
-import {LodestarEventIterator} from "@chainsafe/lodestar-utils";
-import {
-  generateAttestation,
-  generateAttestationData,
-  generateEmptyAttestation,
-} from "@chainsafe/lodestar/test/utils/attestation";
-import {toHexString} from "@chainsafe/ssz";
-import {toBufferBE} from "bigint-buffer";
 import {expect} from "chai";
 import sinon from "sinon";
-import {InvalidAttestationError, InvalidAttestationErrorCode, SlashingProtection} from "../../../src";
-import {BeaconEventType} from "../../../src/api/interface/events";
-import {LocalClock} from "../../../src/api/LocalClock";
-import {AttestationService} from "../../../src/services/attestation";
-import {mapSecretKeysToValidators} from "../../../src/services/utils";
-import {SinonStubbedApi} from "../../utils/apiStub";
-import {generateFork} from "../../utils/fork";
-import {testLogger} from "../../utils/logger";
+import bls from "@chainsafe/bls";
+import {toHexString} from "@chainsafe/ssz";
+import {
+  generateEmptyAttestation,
+  generateEmptySignedAggregateAndProof,
+} from "../../../../lodestar/test/utils/attestation.js";
+import {AttestationService} from "../../../src/services/attestation.js";
+import {AttDutyAndProof} from "../../../src/services/attestationDuties.js";
+import {ValidatorStore} from "../../../src/services/validatorStore.js";
+import {getApiClientStub} from "../../utils/apiStub.js";
+import {loggerVc, testLogger} from "../../utils/logger.js";
+import {ClockMock} from "../../utils/clock.js";
+import {IndicesService} from "../../../src/services/indices.js";
+import {ChainHeaderTracker} from "../../../src/services/chainHeaderTracker.js";
+import {ValidatorEventEmitter} from "../../../src/services/emitter.js";
 
-const clock = sinon.useFakeTimers({now: Date.now(), shouldAdvanceTime: true, toFake: ["setTimeout"]});
-
-describe("validator attestation service", function () {
+describe("AttestationService", function () {
   const sandbox = sinon.createSandbox();
-
-  let rpcClientStub: SinonStubbedApi;
-  let slashingProtectionStub: sinon.SinonStubbedInstance<SlashingProtection>;
   const logger = testLogger();
+  const ZERO_HASH = Buffer.alloc(32, 0);
 
-  beforeEach(() => {
-    rpcClientStub = new SinonStubbedApi(sandbox);
-    rpcClientStub.clock = sandbox.createStubInstance(LocalClock);
-    rpcClientStub.beacon.state.getFork.resolves(generateFork());
-    rpcClientStub.events.getEventStream.returns(
-      new LodestarEventIterator(() => {
-        return;
-      })
-    );
-    slashingProtectionStub = sandbox.createStubInstance(SlashingProtection);
-    rpcClientStub.beacon.state.getStateValidator.resolves(config.types.phase0.ValidatorResponse.defaultValue());
+  const api = getApiClientStub(sandbox);
+  const validatorStore = sinon.createStubInstance(ValidatorStore) as ValidatorStore &
+    sinon.SinonStubbedInstance<ValidatorStore>;
+  const emitter = sinon.createStubInstance(ValidatorEventEmitter) as ValidatorEventEmitter &
+    sinon.SinonStubbedInstance<ValidatorEventEmitter>;
+  const chainHeadTracker = sinon.createStubInstance(ChainHeaderTracker) as ChainHeaderTracker &
+    sinon.SinonStubbedInstance<ChainHeaderTracker>;
+  let pubkeys: Uint8Array[]; // Initialize pubkeys in before() so bls is already initialized
+
+  before(() => {
+    const secretKeys = Array.from({length: 1}, (_, i) => bls.SecretKey.fromBytes(Buffer.alloc(32, i + 1)));
+    pubkeys = secretKeys.map((sk) => sk.toPublicKey().toBytes());
+    validatorStore.votingPubkeys.returns(pubkeys.map(toHexString));
+    validatorStore.hasVotingPubkey.returns(true);
+    validatorStore.hasSomeValidators.returns(true);
+    validatorStore.signAttestationSelectionProof.resolves(ZERO_HASH);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  let controller: AbortController; // To stop clock
+  beforeEach(() => (controller = new AbortController()));
+  afterEach(() => controller.abort());
 
-  after(function () {
-    clock.restore();
-  });
-
-  it("on new epoch - no duty", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-    const service = new AttestationService(
-      config,
-      mapSecretKeysToValidators(secretKeys),
-      rpcClientStub,
-      slashingProtectionStub,
-      logger
-    );
-    rpcClientStub.validator.getAttesterDuties.resolves([]);
-    await service.onClockEpoch({epoch: 1});
-    expect(rpcClientStub.validator.getAttesterDuties.withArgs(2, [0]).calledOnce).to.be.true;
-  });
-
-  it("on new epoch - with duty", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-    const service = new AttestationService(
-      config,
-      mapSecretKeysToValidators(secretKeys),
-      rpcClientStub,
-      slashingProtectionStub,
-      logger
-    );
-    const duty: phase0.AttesterDuty = {
-      slot: 1,
-      committeeIndex: 1,
-      committeeLength: 120,
-      committeesAtSlot: 120,
-      validatorCommitteeIndex: 1,
-      validatorIndex: 0,
-      pubkey: secretKeys[0].toPublicKey().toBytes(),
-    };
-    rpcClientStub.validator.getAttesterDuties.resolves([duty]);
-    await service.onClockEpoch({epoch: 1});
-    expect(rpcClientStub.validator.getAttesterDuties.withArgs(2, [0]).calledOnce).to.be.true;
-    expect(rpcClientStub.beacon.state.getFork.calledOnce).to.be.true;
-  });
-
-  it("on  new slot - without duty", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-    const service = new AttestationService(
-      config,
-      mapSecretKeysToValidators(secretKeys),
-      rpcClientStub,
-      slashingProtectionStub,
-      logger
-    );
-    rpcClientStub.validator.getAttesterDuties.resolves([]);
-    await service.onClockSlot({slot: 0});
-  });
-
-  it("on new slot - with duty - not aggregator", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-    const service = new AttestationService(
-      config,
-      mapSecretKeysToValidators(secretKeys),
-      rpcClientStub,
-      slashingProtectionStub,
-      logger
-    );
-    rpcClientStub.validator.getAttesterDuties.resolves([]);
-    sandbox.stub(rpcClientStub.clock, "currentEpoch").get(() => 1);
-    await service.start();
-    const pubkey = secretKeys[0].toPublicKey().toBytes();
-    const duty: phase0.AttesterDuty = {
-      slot: 1,
-      committeeIndex: 2,
-      committeeLength: 120,
-      committeesAtSlot: 120,
-      validatorCommitteeIndex: 1,
-      validatorIndex: 0,
-      pubkey,
-    };
-    service["nextAttesterDuties"].set(1, new Map([[toHexString(pubkey), {...duty, isAggregator: false}]]));
-    rpcClientStub.beacon.state.getFork.resolves(generateFork());
-    rpcClientStub.validator.produceAttestationData.resolves(generateEmptyAttestation().data);
-    rpcClientStub.beacon.pool.submitAttestation.resolves();
-    slashingProtectionStub.checkAndInsertAttestation.resolves();
-    const promise = service.onClockSlot({slot: 1});
-    clock.tick(4000);
-    await Promise.resolve(promise);
-    expect(rpcClientStub.validator.produceAttestationData.withArgs(2, 1).calledOnce).to.be.true;
-    expect(rpcClientStub.beacon.pool.submitAttestation.calledOnce).to.be.true;
-    expect(slashingProtectionStub.checkAndInsertAttestation.calledOnce).to.be.true;
-  });
-
-  it("on new slot - with duty - conflicting attestation", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-    const service = new AttestationService(
-      config,
-      mapSecretKeysToValidators(secretKeys),
-      rpcClientStub,
-      slashingProtectionStub,
-      logger
-    );
-    rpcClientStub.validator.getAttesterDuties.resolves([]);
-    sandbox.stub(rpcClientStub.clock, "currentEpoch").get(() => 1);
-    await service.start();
-    const pubkey = secretKeys[0].toPublicKey().toBytes();
-    const duty: phase0.AttesterDuty = {
-      slot: 1,
-      committeeIndex: 3,
-      committeeLength: 120,
-      committeesAtSlot: 120,
-      validatorCommitteeIndex: 1,
-      validatorIndex: 0,
-      pubkey,
-    };
-    service["nextAttesterDuties"].set(1, new Map([[toHexString(pubkey), {...duty, isAggregator: false}]]));
-    rpcClientStub.beacon.state.getFork.resolves(generateFork());
-
-    // Simulate double vote detection
-    const attestation1 = generateAttestation({data: generateAttestationData(0, 1)});
-    rpcClientStub.validator.produceAttestationData.resolves(attestation1.data);
-    rpcClientStub.beacon.pool.submitAttestation.resolves();
-    slashingProtectionStub.checkAndInsertAttestation.rejects(
-      new InvalidAttestationError({code: InvalidAttestationErrorCode.DOUBLE_VOTE} as any)
+  it("Should produce, sign, and publish an attestation + aggregate", async () => {
+    const clock = new ClockMock();
+    const indicesService = new IndicesService(logger, api, validatorStore, null);
+    const attestationService = new AttestationService(
+      loggerVc,
+      api,
+      clock,
+      validatorStore,
+      emitter,
+      indicesService,
+      chainHeadTracker,
+      null
     );
 
-    const promise = service.onClockSlot({slot: 1});
-    clock.tick(4000);
-    await Promise.resolve(promise);
-    expect(rpcClientStub.validator.produceAttestationData.withArgs(3, 1).calledOnce).to.be.true;
-    expect(rpcClientStub.beacon.pool.submitAttestation.notCalled).to.be.true;
-  });
+    const attestation = generateEmptyAttestation();
+    const aggregate = generateEmptySignedAggregateAndProof();
+    const duties: AttDutyAndProof[] = [
+      {
+        duty: {
+          slot: 0,
+          committeeIndex: attestation.data.index,
+          committeeLength: 120,
+          committeesAtSlot: 120,
+          validatorCommitteeIndex: 1,
+          validatorIndex: 0,
+          pubkey: pubkeys[0],
+        },
+        selectionProof: ZERO_HASH,
+      },
+    ];
 
-  it("on new slot - with duty - SSE message comes before 1/3 slot time", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-    const service = new AttestationService(
-      config,
-      mapSecretKeysToValidators(secretKeys),
-      rpcClientStub,
-      slashingProtectionStub,
-      logger
+    // Return empty replies to duties service
+    api.beacon.getStateValidators.resolves({data: []});
+    api.validator.getAttesterDuties.resolves({dependentRoot: ZERO_HASH, data: []});
+
+    // Mock duties service to return some duties directly
+    attestationService["dutiesService"].getDutiesAtSlot = sinon.stub().returns(duties);
+
+    // Mock beacon's attestation and aggregates endpoints
+
+    api.validator.produceAttestationData.resolves({data: attestation.data});
+    api.validator.getAggregatedAttestation.resolves({data: attestation});
+    api.beacon.submitPoolAttestations.resolves();
+    api.validator.publishAggregateAndProofs.resolves();
+
+    // Mock signing service
+    validatorStore.signAttestation.resolves(attestation);
+    validatorStore.signAggregateAndProof.resolves(aggregate);
+
+    // Trigger clock onSlot for slot 0
+    await clock.tickSlotFns(0, controller.signal);
+
+    // Must submit the attestation received through produceAttestationData()
+    expect(api.beacon.submitPoolAttestations.callCount).to.equal(1, "submitAttestations() must be called once");
+    expect(api.beacon.submitPoolAttestations.getCall(0).args).to.deep.equal(
+      [[attestation]], // 1 arg, = attestation[]
+      "wrong submitAttestations() args"
     );
-    rpcClientStub.validator.getAttesterDuties.resolves([]);
-    sandbox.stub(rpcClientStub.clock, "currentEpoch").get(() => 1);
-    await service.start();
-    const pubkey = secretKeys[0].toPublicKey().toBytes();
-    const duty: phase0.AttesterDuty = {
-      slot: 10,
-      committeeIndex: 1,
-      committeeLength: 120,
-      committeesAtSlot: 120,
-      validatorCommitteeIndex: 1,
-      validatorIndex: 0,
-      pubkey,
-    };
-    service["nextAttesterDuties"].set(10, new Map([[toHexString(pubkey), {...duty, isAggregator: false}]]));
-    rpcClientStub.beacon.state.getFork.resolves(generateFork());
-    rpcClientStub.validator.produceAttestationData.resolves(generateEmptyAttestation().data);
-    rpcClientStub.beacon.pool.submitAttestation.resolves();
-    slashingProtectionStub.checkAndInsertAttestation.resolves();
-    const promise = service.onClockSlot({slot: 10});
-    rpcClientStub.emit(BeaconEventType.BLOCK, {block: new Uint8Array(32), slot: 10});
-    // don't need to wait for 1/3 slot time which is 4000
-    clock.tick(1001);
-    await promise;
-    expect(rpcClientStub.validator.produceAttestationData.withArgs(1, 10).calledOnce).to.be.true;
+
+    // Must submit the aggregate received through getAggregatedAttestation() then createAndSignAggregateAndProof()
+    expect(api.validator.publishAggregateAndProofs.callCount).to.equal(
+      1,
+      "publishAggregateAndProofs() must be called once"
+    );
+    expect(api.validator.publishAggregateAndProofs.getCall(0).args).to.deep.equal(
+      [[aggregate]], // 1 arg, = aggregate[]
+      "wrong publishAggregateAndProofs() args"
+    );
   });
 });

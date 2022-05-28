@@ -2,39 +2,39 @@
  * @module chain/stateTransition/util
  */
 
-import {Epoch, Slot, Root, phase0, altair, allForks} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {assert} from "@chainsafe/lodestar-utils";
+import {Epoch, Slot, Root, phase0, allForks} from "@chainsafe/lodestar-types";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
 
-import {ZERO_HASH} from "../constants";
-import {computeStartSlotAtEpoch} from "./epoch";
-import {ContainerType} from "@chainsafe/ssz";
+import {ZERO_HASH} from "../constants/index.js";
+import {computeStartSlotAtEpoch} from "./epoch.js";
+import {SLOTS_PER_HISTORICAL_ROOT} from "@chainsafe/lodestar-params";
+import {BeaconStateAllForks} from "../types.js";
 
 /**
  * Return the block root at a recent [[slot]].
  */
-export function getBlockRootAtSlot(config: IBeaconConfig, state: allForks.BeaconState, slot: Slot): Root {
-  assert.lt(slot, state.slot, "Cannot get block root for slot in the future");
-  assert.lte(
-    state.slot,
-    slot + config.params.SLOTS_PER_HISTORICAL_ROOT,
-    `Cannot get block root from slot more than ${config.params.SLOTS_PER_HISTORICAL_ROOT} in the past`
-  );
-  return state.blockRoots[slot % config.params.SLOTS_PER_HISTORICAL_ROOT];
+export function getBlockRootAtSlot(state: BeaconStateAllForks, slot: Slot): Root {
+  if (slot >= state.slot) {
+    throw Error(`Can only get block root in the past currentSlot=${state.slot} slot=${slot}`);
+  }
+  if (slot < state.slot - SLOTS_PER_HISTORICAL_ROOT) {
+    throw Error(`Cannot get block root more than ${SLOTS_PER_HISTORICAL_ROOT} in the past`);
+  }
+  return state.blockRoots.get(slot % SLOTS_PER_HISTORICAL_ROOT);
 }
 
 /**
  * Return the block root at the start of a recent [[epoch]].
  */
-export function getBlockRoot(config: IBeaconConfig, state: allForks.BeaconState, epoch: Epoch): Root {
-  return getBlockRootAtSlot(config, state, computeStartSlotAtEpoch(config, epoch));
+export function getBlockRoot(state: BeaconStateAllForks, epoch: Epoch): Root {
+  return getBlockRootAtSlot(state, computeStartSlotAtEpoch(epoch));
 }
 /**
  * Return the block header corresponding to a block with ``state_root`` set to ``ZERO_HASH``.
  */
 export function getTemporaryBlockHeader(
-  config: IBeaconConfig,
-  block: phase0.BeaconBlock | altair.BeaconBlock
+  config: IChainForkConfig,
+  block: allForks.BeaconBlock
 ): phase0.BeaconBlockHeader {
   return {
     slot: block.slot,
@@ -42,34 +42,19 @@ export function getTemporaryBlockHeader(
     parentRoot: block.parentRoot,
     // `state_root` is zeroed and overwritten in the next `process_slot` call
     stateRoot: ZERO_HASH,
-    bodyRoot: (config.getTypes(block.slot).BeaconBlockBody as ContainerType<allForks.BeaconBlockBody>).hashTreeRoot(
-      block.body
-    ),
+    bodyRoot: config.getForkTypes(block.slot).BeaconBlockBody.hashTreeRoot(block.body),
   };
 }
 
 /**
  * Receives a BeaconBlock, and produces the corresponding BeaconBlockHeader.
  */
-export function blockToHeader(config: IBeaconConfig, block: phase0.BeaconBlock): phase0.BeaconBlockHeader {
+export function blockToHeader(config: IChainForkConfig, block: allForks.BeaconBlock): phase0.BeaconBlockHeader {
   return {
     stateRoot: block.stateRoot,
     proposerIndex: block.proposerIndex,
     slot: block.slot,
     parentRoot: block.parentRoot,
-    bodyRoot: config.types.phase0.BeaconBlockBody.hashTreeRoot(block.body),
-  };
-}
-
-/**
- * Receives a SignedBeaconBlock, and produces the corresponding SignedBeaconBlockHeader.
- */
-export function signedBlockToSignedHeader(
-  config: IBeaconConfig,
-  signedBlock: phase0.SignedBeaconBlock
-): phase0.SignedBeaconBlockHeader {
-  return {
-    message: blockToHeader(config, signedBlock.message),
-    signature: signedBlock.signature,
+    bodyRoot: config.getForkTypes(block.slot).BeaconBlockBody.hashTreeRoot(block.body),
   };
 }

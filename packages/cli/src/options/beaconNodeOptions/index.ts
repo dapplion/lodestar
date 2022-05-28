@@ -1,15 +1,19 @@
 import {IBeaconNodeOptions} from "@chainsafe/lodestar";
 import {RecursivePartial} from "@chainsafe/lodestar-utils";
-import {removeUndefinedRecursive} from "../../util";
-import * as api from "./api";
-import * as eth1 from "./eth1";
-import * as logger from "./logger";
-import * as metrics from "./metrics";
-import * as network from "./network";
-import * as sync from "./sync";
+import {removeUndefinedRecursive} from "../../util/index.js";
+import * as api from "./api.js";
+import * as chain from "./chain.js";
+import * as eth1 from "./eth1.js";
+import * as execution from "./execution.js";
+import * as logger from "./logger.js";
+import * as metrics from "./metrics.js";
+import * as network from "./network.js";
+import * as sync from "./sync.js";
 
 export type IBeaconNodeArgs = api.IApiArgs &
+  chain.IChainArgs &
   eth1.IEth1Args &
+  execution.ExecutionEngineArgs &
   logger.ILoggerArgs &
   metrics.IMetricsArgs &
   network.INetworkArgs &
@@ -19,9 +23,10 @@ export function parseBeaconNodeArgs(args: IBeaconNodeArgs): RecursivePartial<IBe
   // Remove undefined values to allow deepmerge to inject default values downstream
   return removeUndefinedRecursive({
     api: api.parseArgs(args),
-    // chain: {},
+    chain: chain.parseArgs(args),
     // db: {},
     eth1: eth1.parseArgs(args),
+    executionEngine: execution.parseArgs(args),
     logger: logger.parseArgs(args),
     metrics: metrics.parseArgs(args),
     network: network.parseArgs(args),
@@ -31,7 +36,9 @@ export function parseBeaconNodeArgs(args: IBeaconNodeArgs): RecursivePartial<IBe
 
 export const beaconNodeOptions = {
   ...api.options,
+  ...chain.options,
   ...eth1.options,
+  ...execution.options,
   ...logger.options,
   ...metrics.options,
   ...network.options,

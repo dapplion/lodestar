@@ -1,11 +1,10 @@
 import "mocha";
 import chai, {expect} from "chai";
 import chaiAsPromised from "chai-as-promised";
-import http from "http";
-import {AbortController} from "abort-controller";
-import {JsonRpcHttpClient} from "../../../src/eth1/jsonRpcHttpClient";
-import {goerliRpcUrl} from "../../testParams";
-import {IRpcPayload} from "../../../src/eth1/interface";
+import http from "node:http";
+import {JsonRpcHttpClient} from "../../../src/eth1/provider/jsonRpcHttpClient.js";
+import {getGoerliRpcUrl} from "../../testParams.js";
+import {IRpcPayload} from "../../../src/eth1/interface.js";
 
 chai.use(chaiAsPromised);
 
@@ -22,6 +21,7 @@ describe("eth1 / jsonRpcHttpClient", function () {
     payload?: IRpcPayload;
     requestListener?: http.RequestListener;
     abort?: true;
+    timeout?: number;
     error: any;
   }[] = [
     {
@@ -54,7 +54,7 @@ describe("eth1 / jsonRpcHttpClient", function () {
         res.statusCode = 404;
         res.end();
       },
-      error: "404 Not Found",
+      error: "Not Found",
     },
     {
       id: "RPC payload with error",
@@ -89,12 +89,20 @@ describe("eth1 / jsonRpcHttpClient", function () {
       error: "no result",
     },
     {
-      id: "Abort request",
+      id: "Aborted request",
       abort: true,
       requestListener: () => {
         // leave the request open until aborted
       },
-      error: "The user aborted a request",
+      error: "Aborted request",
+    },
+    {
+      id: "Timeout request",
+      timeout: 1,
+      requestListener: () => {
+        // leave the request open until timeout
+      },
+      error: "Timeout request",
     },
   ];
 
@@ -104,7 +112,7 @@ describe("eth1 / jsonRpcHttpClient", function () {
     while (afterHooks.length) {
       const afterHook = afterHooks.pop();
       if (afterHook)
-        await afterHook().catch((e) => {
+        await afterHook().catch((e: Error) => {
           // eslint-disable-next-line no-console
           console.error("Error in afterEach hook", e);
         });
@@ -112,7 +120,7 @@ describe("eth1 / jsonRpcHttpClient", function () {
   });
 
   for (const testCase of testCases) {
-    const {id, requestListener, abort} = testCase;
+    const {id, requestListener, abort, timeout} = testCase;
     const error = testCase.error as Error;
     let {url, payload} = testCase;
 
@@ -133,13 +141,13 @@ describe("eth1 / jsonRpcHttpClient", function () {
         );
       }
 
-      if (!url) url = goerliRpcUrl;
+      if (!url) url = getGoerliRpcUrl();
       if (!payload) payload = {method: "no-method", params: []};
 
-      const eth1JsonRpcClient = new JsonRpcHttpClient(url);
       const controller = new AbortController();
       if (abort) setTimeout(() => controller.abort(), 50);
-      await expect(eth1JsonRpcClient.fetch(payload, controller.signal)).to.be.rejectedWith(error);
+      const eth1JsonRpcClient = new JsonRpcHttpClient([url], {signal: controller.signal});
+      await expect(eth1JsonRpcClient.fetch(payload, {timeout})).to.be.rejectedWith(error);
     });
   }
 });

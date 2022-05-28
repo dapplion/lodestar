@@ -1,18 +1,6 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import {IBeaconParamsUnparsed} from "../config/types";
+export {mainnetChainConfig as chainConfig} from "@chainsafe/lodestar-config/networks";
 
 /* eslint-disable max-len */
-
-export const beaconParams: IBeaconParamsUnparsed = {
-  DEPOSIT_CONTRACT_ADDRESS: "0x00000000219ab540356cBB839Cbe05303d7705Fa",
-
-  DEPOSIT_CHAIN_ID: 1,
-  DEPOSIT_NETWORK_ID: 1,
-
-  MIN_GENESIS_TIME: 1606824000, // Tuesday, December 1, 2020 12:00:00 PM UTC
-  GENESIS_DELAY: 604800,
-  GENESIS_FORK_VERSION: "0x00000000",
-};
 
 export const depositContractDeployBlock = 11052984;
 export const genesisFileUrl =

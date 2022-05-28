@@ -1,8 +1,8 @@
 import varint from "varint";
 import {source} from "stream-to-it";
-import {createCompressStream} from "@chainsafe/snappy-stream";
-import {RequestOrResponseBody, RequestOrResponseType} from "../../interface";
-import {SszSnappyError, SszSnappyErrorCode} from "./errors";
+import snappy from "@chainsafe/snappy-stream";
+import {RequestOrOutgoingResponseBody, OutgoingSerializer} from "../../types.js";
+import {SszSnappyError, SszSnappyErrorCode} from "./errors.js";
 
 /**
  * ssz_snappy encoding strategy writer.
@@ -11,11 +11,11 @@ import {SszSnappyError, SszSnappyErrorCode} from "./errors";
  * <encoding-dependent-header> | <encoded-payload>
  * ```
  */
-export async function* writeSszSnappyPayload<T extends RequestOrResponseBody>(
+export async function* writeSszSnappyPayload<T extends RequestOrOutgoingResponseBody>(
   body: T,
-  type: RequestOrResponseType
+  serializer: OutgoingSerializer
 ): AsyncGenerator<Buffer> {
-  const serializedBody = serializeSszBody(body, type);
+  const serializedBody = serializeSszBody(body, serializer);
 
   // MUST encode the length of the raw SSZ bytes, encoded as an unsigned protobuf varint
   yield Buffer.from(varint.encode(serializedBody.length));
@@ -29,7 +29,15 @@ export async function* writeSszSnappyPayload<T extends RequestOrResponseBody>(
  * Buffered Snappy writer
  */
 function encodeSszSnappy(bytes: Buffer): AsyncGenerator<Buffer> {
-  const stream = createCompressStream();
+  /**
+   * Use sync version (default) for compress as it is almost 2x faster than async
+   * one and most payloads are "1 chunk" and 100kb payloads (which would mostly be
+   * big bellatrix blocks with transactions) are just 2 chunks
+   *
+   * To use async version (for e.g. on big payloads) instantiate the stream with
+   * `createCompressStream({asyncCompress: true})`
+   */
+  const stream = snappy.createCompressStream();
   stream.write(bytes);
   stream.end();
   return source<Buffer>(stream);
@@ -38,10 +46,10 @@ function encodeSszSnappy(bytes: Buffer): AsyncGenerator<Buffer> {
 /**
  * Returns SSZ serialized body. Wrapps errors with SszSnappyError.SERIALIZE_ERROR
  */
-function serializeSszBody<T extends RequestOrResponseBody>(body: T, type: RequestOrResponseType): Buffer {
+function serializeSszBody<T extends RequestOrOutgoingResponseBody>(body: T, serializer: OutgoingSerializer): Buffer {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const bytes = type.serialize(body as any);
+    const bytes = serializer.serialize(body as any);
     return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.length);
   } catch (e) {
     throw new SszSnappyError({code: SszSnappyErrorCode.SERIALIZE_ERROR, serializeError: e as Error});

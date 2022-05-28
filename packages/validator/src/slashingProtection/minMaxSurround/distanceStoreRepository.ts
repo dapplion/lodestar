@@ -1,9 +1,9 @@
 import {Bucket, encodeKey, IDatabaseApiOptions} from "@chainsafe/lodestar-db";
-import {BLSPubkey, Epoch} from "@chainsafe/lodestar-types";
+import {BLSPubkey, Epoch, ssz} from "@chainsafe/lodestar-types";
 import {intToBytes} from "@chainsafe/lodestar-utils";
 import {Type} from "@chainsafe/ssz";
-import {LodestarValidatorDatabaseController} from "../../types";
-import {IDistanceEntry, IDistanceStore} from "./interface";
+import {LodestarValidatorDatabaseController} from "../../types.js";
+import {IDistanceEntry, IDistanceStore} from "./interface.js";
 
 /**
  * Manages validator db storage of min/max ranges for min/max surround vote slashing protection.
@@ -25,7 +25,7 @@ class SpanDistanceRepository {
 
   constructor(opts: IDatabaseApiOptions, bucket: Bucket) {
     this.db = opts.controller;
-    this.type = opts.config.types.Epoch;
+    this.type = ssz.Epoch;
     this.bucket = bucket;
   }
 
@@ -43,7 +43,7 @@ class SpanDistanceRepository {
     );
   }
 
-  private encodeKey(pubkey: BLSPubkey, epoch: Epoch): Buffer {
+  private encodeKey(pubkey: BLSPubkey, epoch: Epoch): Uint8Array {
     return encodeKey(
       this.bucket,
       Buffer.concat([Buffer.from(pubkey as Uint8Array), intToBytes(BigInt(epoch), 8, "be")])

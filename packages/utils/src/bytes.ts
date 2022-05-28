@@ -2,6 +2,18 @@ import {toBufferLE, toBigIntLE, toBufferBE, toBigIntBE} from "bigint-buffer";
 
 type Endianness = "le" | "be";
 
+const hexByByte: string[] = [];
+export function toHexString(bytes: Uint8Array): string {
+  let hex = "0x";
+  for (const byte of bytes) {
+    if (!hexByByte[byte]) {
+      hexByByte[byte] = byte < 16 ? "0" + byte.toString(16) : byte.toString(16);
+    }
+    hex += hexByByte[byte];
+  }
+  return hex;
+}
+
 /**
  * Return a byte array from a number or BigInt
  */
@@ -34,7 +46,7 @@ export function bytesToBigInt(value: Uint8Array, endianness: Endianness = "le"):
   throw new Error("endianness must be either 'le' or 'be'");
 }
 
-export function toHex(buffer: Parameters<typeof Buffer.from>[0]): string {
+export function toHex(buffer: Uint8Array | Parameters<typeof Buffer.from>[0]): string {
   if (Buffer.isBuffer(buffer)) {
     return "0x" + buffer.toString("hex");
   } else if (buffer instanceof Uint8Array) {

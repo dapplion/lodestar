@@ -1,20 +1,43 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
-import {toExpectedCase} from "@chainsafe/ssz/lib/util/json";
+import Case from "case";
 
-/**
- * @module objects
- */
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
+
+export type KeyCase =
+  | "snake"
+  | "constant"
+  | "camel"
+  | "param"
+  | "header"
+  | "pascal" //Same as squish
+  | "dot"
+  | "notransform";
+
+export function toExpectedCase(
+  value: string,
+  expectedCase: KeyCase = "camel",
+  customCasingMap?: Record<string, string>
+): string {
+  if (expectedCase === "notransform") return value;
+  if (customCasingMap && customCasingMap[value]) return customCasingMap[value];
+  switch (expectedCase) {
+    case "param":
+      return Case.kebab(value);
+    case "dot":
+      return Case.lower(value, ".", true);
+    default:
+      return Case[expectedCase](value);
+  }
+}
 
 function isObjectObject(val: unknown): boolean {
   return val != null && typeof val === "object" && Array.isArray(val) === false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isPlainObject(o: any): boolean {
+export function isPlainObject(o: unknown): boolean {
   if (isObjectObject(o) === false) return false;
 
   // If has modified constructor
-  const ctor = o.constructor;
+  const ctor = (o as Record<string, unknown>).constructor;
   if (typeof ctor !== "function") return false;
 
   // If has modified prototype
@@ -48,16 +71,16 @@ export function mapValues<T extends {[K: string]: any}, R>(
   return output;
 }
 
-export function objectToExpectedCase(
-  obj: Record<string, unknown>,
-  expectedCase: "snake" | "camel" = "camel"
-): Record<string, unknown> {
+export function objectToExpectedCase<T extends Record<string, unknown> | Record<string, unknown>[]>(
+  obj: T,
+  expectedCase: "snake" | "constant" | "camel" | "param" | "header" | "pascal" | "dot" | "notransform" = "camel"
+): T {
   if (Array.isArray(obj)) {
     const newArr: unknown[] = [];
     for (let i = 0; i < obj.length; i++) {
       newArr[i] = objectToExpectedCase(obj[i], expectedCase);
     }
-    return (newArr as unknown) as Record<string, unknown>;
+    return (newArr as unknown) as T;
   }
 
   if (Object(obj) === obj) {
@@ -68,9 +91,12 @@ export function objectToExpectedCase(
         throw new Error(`object already has a ${newName} property`);
       }
 
-      newObj[newName] = objectToExpectedCase(obj[name] as Record<string, unknown>, expectedCase);
+      newObj[newName] = objectToExpectedCase(
+        (obj as Record<string, unknown>)[name] as Record<string, unknown>,
+        expectedCase
+      );
     }
-    return newObj;
+    return newObj as T;
   }
 
   return obj;

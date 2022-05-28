@@ -1,18 +1,38 @@
 import {Options} from "yargs";
-import {defaultLogLevel, LogLevel, LogLevels} from "@chainsafe/lodestar-utils";
-import {beaconNodeOptions, paramsOptions, IBeaconNodeArgs, IENRArgs, enrOptions} from "../../options";
-import {defaultBeaconPaths, IBeaconPaths} from "./paths";
-import {ICliCommandOptions} from "../../util";
+import {defaultLogLevel, LogLevels} from "@chainsafe/lodestar-utils";
+import {
+  beaconNodeOptions,
+  paramsOptions,
+  IBeaconNodeArgs,
+  IENRArgs,
+  enrOptions,
+  IWSSArgs,
+  wssOptions,
+} from "../../options/index.js";
+import {defaultBeaconPaths, IBeaconPaths} from "./paths.js";
+import {ICliCommandOptions, ILogArgs} from "../../util/index.js";
 
 interface IBeaconExtraArgs {
+  port?: number;
+  discoveryPort?: number;
   forceGenesis?: boolean;
   genesisStateFile?: string;
-  weakSubjectivityStateFile?: string;
-  logLevel?: LogLevel;
-  logLevelFile?: LogLevel;
 }
 
 export const beaconExtraOptions: ICliCommandOptions<IBeaconExtraArgs> = {
+  port: {
+    description: "The TCP/UDP port to listen on. The UDP port can be modified by the --discovery-port flag.",
+    type: "number",
+    // TODO: Derive from BeaconNode defaults
+    defaultDescription: "9000",
+  },
+
+  discoveryPort: {
+    description: "The UDP port that discovery will listen on. Defaults to `port`",
+    type: "number",
+    defaultDescription: "`port`",
+  },
+
   forceGenesis: {
     description: "Force beacon to create genesis without file",
     type: "boolean",
@@ -22,12 +42,9 @@ export const beaconExtraOptions: ICliCommandOptions<IBeaconExtraArgs> = {
     description: "Path or URL to download a genesis state file in ssz-encoded format",
     type: "string",
   },
+};
 
-  weakSubjectivityStateFile: {
-    description: "Path or URL to download a weak subjectivity state file in ssz-encoded format",
-    type: "string",
-  },
-
+export const logOptions: ICliCommandOptions<ILogArgs> = {
   logLevel: {
     choices: LogLevels,
     description: "Logging verbosity level",
@@ -40,6 +57,28 @@ export const beaconExtraOptions: ICliCommandOptions<IBeaconExtraArgs> = {
     description: "Logging verbosity level for file transport",
     defaultDescription: defaultLogLevel,
     type: "string",
+  },
+
+  logFormatGenesisTime: {
+    hidden: true,
+    description: "Logger format - Use EpochSlot TimestampFormat",
+    type: "number",
+  },
+
+  logFormatId: {
+    hidden: true,
+    description: "Logger format - Prefix module field with a string ID",
+    type: "string",
+  },
+
+  logRotate: {
+    description: "Daily rotate log files",
+    type: "boolean",
+  },
+
+  logMaxFiles: {
+    description: "Number of log files to maintain while rotating logs(if provided with logRotate)",
+    type: "number",
   },
 };
 
@@ -58,9 +97,15 @@ export const beaconPathsOptions: ICliCommandOptions<IBeaconPaths> = {
     type: "string",
   },
 
+  persistInvalidSszObjectsDir: {
+    description: "Directory to persist invalid ssz objects",
+    defaultDescription: defaultBeaconPaths.persistInvalidSszObjectsDir,
+    hidden: true,
+    type: "string",
+  },
+
   configFile: {
     description: "Beacon node configuration file path",
-    defaultDescription: defaultBeaconPaths.configFile,
     type: "string",
   },
 
@@ -89,14 +134,22 @@ export const beaconPathsOptions: ICliCommandOptions<IBeaconPaths> = {
     description: "Path to output all logs to a persistent log file",
     type: "string",
   },
+
+  bootnodesFile: {
+    hidden: true,
+    description: "Bootnodes file path",
+    type: "string",
+  },
 };
 
-export type IBeaconArgs = IBeaconNodeArgs & IBeaconPaths & IENRArgs & IBeaconExtraArgs;
+export type IBeaconArgs = IBeaconExtraArgs & ILogArgs & IBeaconPaths & IBeaconNodeArgs & IENRArgs & IWSSArgs;
 
 export const beaconOptions: {[k: string]: Options} = {
-  ...beaconPathsOptions,
   ...beaconExtraOptions,
+  ...logOptions,
+  ...beaconPathsOptions,
   ...beaconNodeOptions,
   ...paramsOptions,
   ...enrOptions,
+  ...wssOptions,
 };

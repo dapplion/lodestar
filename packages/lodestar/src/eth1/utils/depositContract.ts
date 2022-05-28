@@ -4,8 +4,7 @@
 
 import {Interface} from "@ethersproject/abi";
 import {fromHexString} from "@chainsafe/ssz";
-import {phase0} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
 
 const depositEventFragment =
   "event DepositEvent(bytes pubkey, bytes withdrawal_credentials, bytes amount, bytes signature, bytes index)";
@@ -20,21 +19,23 @@ export const depositEventTopics = [depositContractInterface.getEventTopic("Depos
 /**
  * Parse DepositEvent log
  */
-export function parseDepositLog(
-  config: IBeaconConfig,
-  log: {blockNumber: number; data: string; topics: string[]}
-): phase0.DepositEvent {
+export function parseDepositLog(log: {blockNumber: number; data: string; topics: string[]}): phase0.DepositEvent {
   const event = depositContractInterface.parseLog(log);
   const values = event.args;
-  if (!values) throw Error(`DepositEvent at ${log.blockNumber} has no values`);
+  if (values === undefined) throw Error(`DepositEvent at ${log.blockNumber} has no values`);
   return {
     blockNumber: log.blockNumber,
-    index: config.types.Number64.deserialize(fromHexString(values.index)),
+    index: parseHexNumLittleEndian(values.index),
     depositData: {
       pubkey: fromHexString(values.pubkey),
       withdrawalCredentials: fromHexString(values.withdrawal_credentials),
-      amount: config.types.Gwei.deserialize(fromHexString(values.amount)),
+      amount: parseHexNumLittleEndian(values.amount),
       signature: fromHexString(values.signature),
     },
   };
+}
+
+function parseHexNumLittleEndian(hex: string): number {
+  // Can't use parseInt() because amount is a hex string in little endian
+  return ssz.UintNum64.deserialize(fromHexString(hex));
 }

@@ -1,7 +1,5 @@
-import {phase0} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {Method, Methods, ReqRespEncoding} from "../../../constants";
-import {writeEncodedPayload} from "../encodingStrategies";
+import {Protocol, getRequestSzzTypeByMethod, RequestBody} from "../types.js";
+import {writeEncodedPayload} from "../encodingStrategies/index.js";
 
 /**
  * Yields byte chunks for a `<request>`
@@ -12,14 +10,12 @@ import {writeEncodedPayload} from "../encodingStrategies";
  * if so, it would yield no byte chunks
  */
 export async function* requestEncode(
-  config: IBeaconConfig,
-  method: Method,
-  encoding: ReqRespEncoding,
-  requestBody: phase0.RequestBody
+  protocol: Pick<Protocol, "method" | "encoding">,
+  requestBody: RequestBody
 ): AsyncGenerator<Buffer> {
-  const type = Methods[method].requestSSZType(config);
+  const type = getRequestSzzTypeByMethod(protocol.method);
 
   if (type && requestBody !== null) {
-    yield* writeEncodedPayload(requestBody, encoding, type);
+    yield* writeEncodedPayload(requestBody, protocol.encoding, type);
   }
 }

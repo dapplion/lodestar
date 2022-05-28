@@ -1,87 +1,69 @@
-import bls from "@chainsafe/bls";
-import {ZERO_HASH} from "@chainsafe/lodestar-beacon-state-transition";
-import {config} from "@chainsafe/lodestar-config/mainnet";
-import {generateEmptyBlock, generateEmptySignedBlock} from "@chainsafe/lodestar/test/utils/block";
-import {toBufferBE} from "bigint-buffer";
 import {expect} from "chai";
 import sinon from "sinon";
-import {InvalidBlockError, InvalidBlockErrorCode, SlashingProtection} from "../../../src";
-import BlockProposingService from "../../../src/services/block";
-import {mapSecretKeysToValidators} from "../../../src/services/utils";
-import {SinonStubbedApi} from "../../utils/apiStub";
-import {generateFork} from "../../utils/fork";
-import {testLogger} from "../../utils/logger";
+import bls from "@chainsafe/bls";
+import {toHexString} from "@chainsafe/ssz";
+import {createIChainForkConfig} from "@chainsafe/lodestar-config";
+import {config as mainnetConfig} from "@chainsafe/lodestar-config/default";
+import {Root} from "@chainsafe/lodestar-types";
+import {sleep} from "@chainsafe/lodestar-utils";
+import {routes} from "@chainsafe/lodestar-api";
+import {generateEmptySignedBlock} from "../../../../lodestar/test/utils/block.js";
+import {BlockProposingService} from "../../../src/services/block.js";
+import {ValidatorStore} from "../../../src/services/validatorStore.js";
+import {getApiClientStub} from "../../utils/apiStub.js";
+import {loggerVc} from "../../utils/logger.js";
+import {ClockMock} from "../../utils/clock.js";
 
-describe("block proposing service", function () {
+type ProposerDutiesRes = {dependentRoot: Root; data: routes.validator.ProposerDuty[]};
+
+describe("BlockDutiesService", function () {
   const sandbox = sinon.createSandbox();
+  const ZERO_HASH = Buffer.alloc(32, 0);
 
-  let rpcClientStub: SinonStubbedApi;
-  let slashingProtectionStub: sinon.SinonStubbedInstance<SlashingProtection>;
-  const logger = testLogger();
+  const api = getApiClientStub(sandbox);
+  const validatorStore = sinon.createStubInstance(ValidatorStore) as ValidatorStore &
+    sinon.SinonStubbedInstance<ValidatorStore>;
+  let pubkeys: Uint8Array[]; // Initialize pubkeys in before() so bls is already initialized
 
-  beforeEach(() => {
-    rpcClientStub = new SinonStubbedApi(sandbox);
-    slashingProtectionStub = sandbox.createStubInstance(SlashingProtection);
+  const config = createIChainForkConfig(mainnetConfig);
+
+  before(() => {
+    const secretKeys = Array.from({length: 2}, (_, i) => bls.SecretKey.fromBytes(Buffer.alloc(32, i + 1)));
+    pubkeys = secretKeys.map((sk) => sk.toPublicKey().toBytes());
+    validatorStore.votingPubkeys.returns(pubkeys.map(toHexString));
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  let controller: AbortController; // To stop clock
+  beforeEach(() => (controller = new AbortController()));
+  afterEach(() => controller.abort());
 
-  it("should not produce block in same slot", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
+  it("Should produce, sign, and publish a block", async function () {
+    // Reply with some duties
+    const slot = 0; // genesisTime is right now, so test with slot = currentSlot
+    const duties: ProposerDutiesRes = {
+      dependentRoot: ZERO_HASH,
+      data: [{slot: slot, validatorIndex: 0, pubkey: pubkeys[0]}],
+    };
+    api.validator.getProposerDuties.resolves(duties);
 
-    const lastBlock = generateEmptySignedBlock();
-    lastBlock.message.slot = 1;
+    const clock = new ClockMock();
+    const blockService = new BlockProposingService(config, loggerVc, api, clock, validatorStore, null, {});
 
-    // Simulate a double vote detection
-    slashingProtectionStub.checkAndInsertBlockProposal.rejects(
-      new InvalidBlockError({code: InvalidBlockErrorCode.DOUBLE_BLOCK_PROPOSAL} as any)
-    );
-    const validators = mapSecretKeysToValidators(secretKeys);
-    const service = new BlockProposingService(config, validators, rpcClientStub, slashingProtectionStub, logger);
-    const result = await service.createAndPublishBlock(validators.values().next().value, 1, generateFork(), ZERO_HASH);
-    expect(result).to.be.null;
-  });
+    const signedBlock = generateEmptySignedBlock();
+    validatorStore.signRandao.resolves(signedBlock.message.body.randaoReveal);
+    validatorStore.signBlock.callsFake(async (_, block) => ({message: block, signature: signedBlock.signature}));
+    api.validator.produceBlock.resolves({data: signedBlock.message});
+    api.beacon.publishBlock.resolves();
 
-  it("should produce correct block - last signed is null", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
+    // Triger block production for slot 1
+    const notifyBlockProductionFn = blockService["dutiesService"]["notifyBlockProductionFn"];
+    notifyBlockProductionFn(1, [pubkeys[0]]);
 
-    const slot = 2;
-    rpcClientStub.beacon.blocks.publishBlock = sandbox.stub();
-    rpcClientStub.validator.produceBlock.resolves(generateEmptyBlock());
+    // Resolve all promises
+    await sleep(20, controller.signal);
 
-    slashingProtectionStub.checkAndInsertBlockProposal.resolves();
-    const validators = mapSecretKeysToValidators(secretKeys);
-    const service = new BlockProposingService(config, validators, rpcClientStub, slashingProtectionStub, logger);
-    const result = await service.createAndPublishBlock(
-      validators.values().next().value,
-      slot,
-      generateFork(),
-      ZERO_HASH
-    );
-    expect(result).to.not.be.null;
-    expect(rpcClientStub.beacon.blocks.publishBlock.calledOnce).to.be.true;
-  });
-
-  it("should produce correct block - last signed in previous epoch", async function () {
-    const secretKeys = [bls.SecretKey.fromBytes(toBufferBE(BigInt(98), 32))];
-
-    const slot = config.params.SLOTS_PER_EPOCH;
-    rpcClientStub.validator.produceBlock = sandbox.stub();
-    rpcClientStub.beacon.blocks.publishBlock = sandbox.stub();
-    rpcClientStub.validator.produceBlock.resolves(generateEmptyBlock());
-
-    slashingProtectionStub.checkAndInsertBlockProposal.resolves();
-    const validators = mapSecretKeysToValidators(secretKeys);
-    const service = new BlockProposingService(config, validators, rpcClientStub, slashingProtectionStub, logger);
-    const result = await service.createAndPublishBlock(
-      validators.values().next().value,
-      slot,
-      generateFork(),
-      ZERO_HASH
-    );
-    expect(result).to.not.be.null;
-    expect(rpcClientStub.beacon.blocks.publishBlock.calledOnce).to.be.true;
+    // Must have submited the block received on signBlock()
+    expect(api.beacon.publishBlock.callCount).to.equal(1, "publishBlock() must be called once");
+    expect(api.beacon.publishBlock.getCall(0).args).to.deep.equal([signedBlock], "wrong publishBlock() args");
   });
 });

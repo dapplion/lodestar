@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import {expect} from "chai";
-import {config} from "@chainsafe/lodestar-config/mainnet";
-import {Root} from "@chainsafe/lodestar-types";
+import {Root, ssz} from "@chainsafe/lodestar-types";
 import {toHexString} from "@chainsafe/ssz";
-import {Interchange, parseInterchange, serializeInterchange} from "../../../../src/slashingProtection/interchange";
+import {
+  Interchange,
+  parseInterchange,
+  serializeInterchange,
+} from "../../../../src/slashingProtection/interchange/index.js";
 
 describe("interchange", () => {
   it("Should parseInterchange and serializeInterchange", () => {
-    const expectedGenesisValidatorsRoot: Root = config.types.Root.defaultValue();
+    const expectedGenesisValidatorsRoot: Root = ssz.Root.defaultValue();
     const interchange: Interchange = {
       metadata: {
         interchange_format: "complete",
@@ -23,8 +26,8 @@ describe("interchange", () => {
       ],
     };
 
-    const interchangeLodestar = parseInterchange(config, interchange, expectedGenesisValidatorsRoot);
-    const serializedInterchange = serializeInterchange(config, interchangeLodestar, {format: "complete", version: "4"});
+    const interchangeLodestar = parseInterchange(interchange, expectedGenesisValidatorsRoot);
+    const serializedInterchange = serializeInterchange(interchangeLodestar, {format: "complete", version: "4"});
     // Stringify and parse to simulate writing and reading. It ignores undefined values
     expect(JSON.parse(JSON.stringify(serializedInterchange))).to.deep.equal(interchange);
   });

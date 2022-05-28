@@ -2,132 +2,224 @@
  * @module chain
  */
 
+import fs from "node:fs";
 import {
-  CachedBeaconState,
-  computeEpochAtSlot,
-  computeForkDigest,
-  computeForkNameFromForkDigest,
+  BeaconStateAllForks,
+  CachedBeaconStateAllForks,
   computeStartSlotAtEpoch,
+  createCachedBeaconState,
+  Index2PubkeyCache,
+  PubkeyIndexMap,
 } from "@chainsafe/lodestar-beacon-state-transition";
-import {phase0} from "@chainsafe/lodestar-beacon-state-transition";
-import {IBeaconConfig, IForkName} from "@chainsafe/lodestar-config";
+import {IBeaconConfig} from "@chainsafe/lodestar-config";
 import {IForkChoice} from "@chainsafe/lodestar-fork-choice";
-import {allForks, ForkDigest, Number64, Root, Slot} from "@chainsafe/lodestar-types";
+import {allForks, UintNum64, Root, phase0, Slot, RootHex, Epoch} from "@chainsafe/lodestar-types";
 import {ILogger} from "@chainsafe/lodestar-utils";
-import {TreeBacked} from "@chainsafe/ssz";
-import {AbortController} from "abort-controller";
-import {FAR_FUTURE_EPOCH, GENESIS_EPOCH, ZERO_HASH} from "../constants";
-import {IBeaconDb} from "../db";
-import {CheckpointStateCache, StateContextCache} from "./stateCache";
-import {IMetrics} from "../metrics";
-import {AttestationPool, AttestationProcessor} from "./attestation";
-import {BlockPool, BlockProcessor} from "./blocks";
-import {IBeaconClock, LocalClock} from "./clock";
-import {ChainEventEmitter} from "./emitter";
-import {handleChainEvents} from "./eventHandlers";
-import {IBeaconChain} from "./interface";
-import {IChainOptions} from "./options";
-import {IStateRegenerator, QueuedStateRegenerator} from "./regen";
-import {LodestarForkChoice} from "./forkChoice";
-import {restoreStateCaches} from "./initState";
-
-export interface IBeaconChainModules {
-  opts: IChainOptions;
-  config: IBeaconConfig;
-  db: IBeaconDb;
-  logger: ILogger;
-  metrics?: IMetrics;
-  anchorState: TreeBacked<allForks.BeaconState>;
-}
+import {fromHexString} from "@chainsafe/ssz";
+import {GENESIS_EPOCH, ZERO_HASH} from "../constants/index.js";
+import {IBeaconDb} from "../db/index.js";
+import {CheckpointStateCache, StateContextCache} from "./stateCache/index.js";
+import {IMetrics} from "../metrics/index.js";
+import {BlockProcessor, PartiallyVerifiedBlockFlags} from "./blocks/index.js";
+import {IBeaconClock, LocalClock} from "./clock/index.js";
+import {ChainEventEmitter} from "./emitter.js";
+import {handleChainEvents} from "./eventHandlers.js";
+import {IBeaconChain, SSZObjectType, ProposerPreparationData} from "./interface.js";
+import {IChainOptions} from "./options.js";
+import {IStateRegenerator, QueuedStateRegenerator, RegenCaller} from "./regen/index.js";
+import {initializeForkChoice} from "./forkChoice/index.js";
+import {computeAnchorCheckpoint} from "./initState.js";
+import {IBlsVerifier, BlsSingleThreadVerifier, BlsMultiThreadWorkerPool} from "./bls/index.js";
+import {
+  SeenAttesters,
+  SeenAggregators,
+  SeenBlockProposers,
+  SeenSyncCommitteeMessages,
+  SeenContributionAndProof,
+} from "./seenCache/index.js";
+import {
+  AggregatedAttestationPool,
+  AttestationPool,
+  SyncCommitteeMessagePool,
+  SyncContributionAndProofPool,
+  OpPool,
+} from "./opPools/index.js";
+import {LightClientServer} from "./lightClient/index.js";
+import {Archiver} from "./archiver/index.js";
+import {IEth1ForBlockProduction} from "../eth1/index.js";
+import {IExecutionEngine} from "../executionEngine/index.js";
+import {PrecomputeNextEpochTransitionScheduler} from "./precomputeNextEpochTransition.js";
+import {ReprocessController} from "./reprocess.js";
+import {SeenAggregatedAttestations} from "./seenCache/seenAggregateAndProof.js";
+import {BeaconProposerCache} from "./beaconProposerCache.js";
 
 export class BeaconChain implements IBeaconChain {
-  readonly genesisTime: Number64;
+  readonly genesisTime: UintNum64;
   readonly genesisValidatorsRoot: Root;
+  readonly eth1: IEth1ForBlockProduction;
+  readonly executionEngine: IExecutionEngine;
+  // Expose config for convenience in modularized functions
+  readonly config: IBeaconConfig;
+  readonly anchorStateLatestBlockSlot: Slot;
 
+  bls: IBlsVerifier;
   forkChoice: IForkChoice;
   clock: IBeaconClock;
   emitter: ChainEventEmitter;
   stateCache: StateContextCache;
   checkpointStateCache: CheckpointStateCache;
   regen: IStateRegenerator;
-  pendingAttestations: AttestationPool;
-  pendingBlocks: BlockPool;
+  readonly lightClientServer: LightClientServer;
+  readonly reprocessController: ReprocessController;
 
-  protected attestationProcessor: AttestationProcessor;
-  protected blockProcessor: BlockProcessor;
-  protected readonly config: IBeaconConfig;
+  // Ops pool
+  readonly attestationPool = new AttestationPool();
+  readonly aggregatedAttestationPool = new AggregatedAttestationPool();
+  readonly syncCommitteeMessagePool = new SyncCommitteeMessagePool();
+  readonly syncContributionAndProofPool = new SyncContributionAndProofPool();
+  readonly opPool = new OpPool();
+
+  // Gossip seen cache
+  readonly seenAttesters = new SeenAttesters();
+  readonly seenAggregators = new SeenAggregators();
+  readonly seenAggregatedAttestations: SeenAggregatedAttestations;
+  readonly seenBlockProposers = new SeenBlockProposers();
+  readonly seenSyncCommitteeMessages = new SeenSyncCommitteeMessages();
+  readonly seenContributionAndProof: SeenContributionAndProof;
+
+  // Global state caches
+  readonly pubkey2index: PubkeyIndexMap;
+  readonly index2pubkey: Index2PubkeyCache;
+
+  readonly beaconProposerCache: BeaconProposerCache;
+
+  protected readonly blockProcessor: BlockProcessor;
   protected readonly db: IBeaconDb;
   protected readonly logger: ILogger;
-  protected readonly metrics?: IMetrics;
+  protected readonly metrics: IMetrics | null;
   protected readonly opts: IChainOptions;
-  /**
-   * Internal event emitter is used internally to the chain to update chain state
-   * Once event have been handled internally, they are re-emitted externally for downstream consumers
-   */
-  protected internalEmitter: ChainEventEmitter;
-  private abortController: AbortController;
+  private readonly archiver: Archiver;
+  private abortController = new AbortController();
 
-  constructor({opts, config, db, logger, metrics, anchorState}: IBeaconChainModules) {
+  constructor(
+    opts: IChainOptions,
+    {
+      config,
+      db,
+      logger,
+      metrics,
+      anchorState,
+      eth1,
+      executionEngine,
+    }: {
+      config: IBeaconConfig;
+      db: IBeaconDb;
+      logger: ILogger;
+      metrics: IMetrics | null;
+      anchorState: BeaconStateAllForks;
+      eth1: IEth1ForBlockProduction;
+      executionEngine: IExecutionEngine;
+    }
+  ) {
     this.opts = opts;
     this.config = config;
     this.db = db;
     this.logger = logger;
     this.metrics = metrics;
-
     this.genesisTime = anchorState.genesisTime;
-    this.genesisValidatorsRoot = anchorState.genesisValidatorsRoot.valueOf() as Uint8Array;
-    this.abortController = new AbortController();
+    this.anchorStateLatestBlockSlot = anchorState.latestBlockHeader.slot;
+    this.genesisValidatorsRoot = anchorState.genesisValidatorsRoot;
+    this.eth1 = eth1;
+    this.executionEngine = executionEngine;
 
-    this.emitter = new ChainEventEmitter();
-    this.internalEmitter = new ChainEventEmitter();
+    const signal = this.abortController.signal;
+    const emitter = new ChainEventEmitter();
+    // by default, verify signatures on both main threads and worker threads
+    const bls = opts.blsVerifyAllMainThread
+      ? new BlsSingleThreadVerifier({metrics})
+      : new BlsMultiThreadWorkerPool(opts, {logger, metrics, signal: this.abortController.signal});
 
-    this.clock = new LocalClock({
-      config: this.config,
-      emitter: this.internalEmitter,
-      genesisTime: this.genesisTime,
-      signal: this.abortController.signal,
-    });
-    this.stateCache = new StateContextCache();
-    this.checkpointStateCache = new CheckpointStateCache(this.config);
-    const cachedState = restoreStateCaches(config, this.stateCache, this.checkpointStateCache, anchorState);
-    this.forkChoice = new LodestarForkChoice({
+    const clock = new LocalClock({config, emitter, genesisTime: this.genesisTime, signal});
+    const stateCache = new StateContextCache({metrics});
+    const checkpointStateCache = new CheckpointStateCache({metrics});
+
+    this.seenAggregatedAttestations = new SeenAggregatedAttestations(metrics);
+    this.seenContributionAndProof = new SeenContributionAndProof(metrics);
+
+    // Initialize single global instance of state caches
+    this.pubkey2index = new PubkeyIndexMap();
+    this.index2pubkey = [];
+
+    this.beaconProposerCache = new BeaconProposerCache(opts);
+
+    // Restore state caches
+    const cachedState = createCachedBeaconState(anchorState, {
       config,
-      emitter: this.internalEmitter,
-      currentSlot: this.clock.currentSlot,
-      state: cachedState,
+      pubkey2index: this.pubkey2index,
+      index2pubkey: this.index2pubkey,
     });
-    this.regen = new QueuedStateRegenerator({
-      config: this.config,
-      emitter: this.internalEmitter,
-      forkChoice: this.forkChoice,
-      stateCache: this.stateCache,
-      checkpointStateCache: this.checkpointStateCache,
-      db: this.db,
-      signal: this.abortController.signal,
+    const {checkpoint} = computeAnchorCheckpoint(config, anchorState);
+    stateCache.add(cachedState);
+    checkpointStateCache.add(checkpoint, cachedState);
+
+    const forkChoice = initializeForkChoice(
+      config,
+      emitter,
+      clock.currentSlot,
+      cachedState,
+      opts.proposerBoostEnabled,
+      metrics
+    );
+    const regen = new QueuedStateRegenerator({
+      config,
+      forkChoice,
+      stateCache,
+      checkpointStateCache,
+      db,
+      metrics,
+      emitter,
+      signal,
     });
-    this.pendingAttestations = new AttestationPool({
-      config: this.config,
-    });
-    this.pendingBlocks = new BlockPool({
-      config: this.config,
-    });
-    this.attestationProcessor = new AttestationProcessor({
-      config: this.config,
-      forkChoice: this.forkChoice,
-      emitter: this.internalEmitter,
-      clock: this.clock,
-      regen: this.regen,
-    });
-    this.blockProcessor = new BlockProcessor({
-      config: this.config,
-      forkChoice: this.forkChoice,
-      clock: this.clock,
-      regen: this.regen,
-      metrics: this.metrics,
-      emitter: this.internalEmitter,
-      checkpointStateCache: this.checkpointStateCache,
-      signal: this.abortController.signal,
-    });
+
+    const lightClientServer = new LightClientServer({config, db, metrics, emitter, logger});
+
+    this.reprocessController = new ReprocessController(this.metrics);
+
+    this.blockProcessor = new BlockProcessor(
+      {
+        clock,
+        bls,
+        regen,
+        executionEngine,
+        eth1,
+        db,
+        forkChoice,
+        lightClientServer,
+        stateCache,
+        checkpointStateCache,
+        seenAggregatedAttestations: this.seenAggregatedAttestations,
+        beaconProposerCache: this.beaconProposerCache,
+        emitter,
+        config,
+        logger,
+        metrics,
+      },
+      opts,
+      signal
+    );
+
+    this.forkChoice = forkChoice;
+    this.clock = clock;
+    this.regen = regen;
+    this.bls = bls;
+    this.checkpointStateCache = checkpointStateCache;
+    this.stateCache = stateCache;
+    this.emitter = emitter;
+    this.lightClientServer = lightClientServer;
+
+    this.archiver = new Archiver(db, this, logger, signal, opts);
+    new PrecomputeNextEpochTransitionScheduler(this, this.config, metrics, this.logger, signal);
+
     handleChainEvents.bind(this)(this.abortController.signal);
   }
 
@@ -137,150 +229,102 @@ export class BeaconChain implements IBeaconChain {
     this.checkpointStateCache.clear();
   }
 
-  getGenesisTime(): Number64 {
-    return this.genesisTime;
+  /** Populate in-memory caches with persisted data. Call at least once on startup */
+  async loadFromDisk(): Promise<void> {
+    await this.opPool.fromPersisted(this.db);
   }
 
-  getHeadState(): CachedBeaconState<allForks.BeaconState> {
+  /** Persist in-memory data to the DB. Call at least once before stopping the process */
+  async persistToDisk(): Promise<void> {
+    await this.archiver.persistToDisk();
+    await this.opPool.toPersisted(this.db);
+  }
+
+  getHeadState(): CachedBeaconStateAllForks {
     // head state should always exist
     const head = this.forkChoice.getHead();
     const headState =
-      this.checkpointStateCache.getLatest({
-        root: head.blockRoot,
-        epoch: Infinity,
-      }) || this.stateCache.get(head.stateRoot);
+      this.checkpointStateCache.getLatest(head.blockRoot, Infinity) || this.stateCache.get(head.stateRoot);
     if (!headState) throw Error("headState does not exist");
     return headState;
   }
 
-  async getHeadStateAtCurrentEpoch(): Promise<CachedBeaconState<allForks.BeaconState>> {
-    const currentEpochStartSlot = computeStartSlotAtEpoch(this.config, this.clock.currentEpoch);
+  async getHeadStateAtCurrentEpoch(): Promise<CachedBeaconStateAllForks> {
+    const currentEpochStartSlot = computeStartSlotAtEpoch(this.clock.currentEpoch);
     const head = this.forkChoice.getHead();
     const bestSlot = currentEpochStartSlot > head.slot ? currentEpochStartSlot : head.slot;
-    return await this.regen.getBlockSlotState(head.blockRoot, bestSlot);
-  }
-
-  async getHeadStateAtCurrentSlot(): Promise<CachedBeaconState<allForks.BeaconState>> {
-    return await this.regen.getBlockSlotState(this.forkChoice.getHeadRoot(), this.clock.currentSlot);
-  }
-
-  async getHeadBlock(): Promise<allForks.SignedBeaconBlock | null> {
-    const headSummary = this.forkChoice.getHead();
-    const unfinalizedBlock = await this.db.block.get(headSummary.blockRoot, headSummary.slot);
-    if (unfinalizedBlock) {
-      return unfinalizedBlock;
-    }
-    return await this.db.blockArchive.get(headSummary.slot);
+    return await this.regen.getBlockSlotState(head.blockRoot, bestSlot, RegenCaller.getDuties);
   }
 
   async getCanonicalBlockAtSlot(slot: Slot): Promise<allForks.SignedBeaconBlock | null> {
-    const finalizedCheckpoint = this.forkChoice.getFinalizedCheckpoint();
-    if (finalizedCheckpoint.epoch > computeEpochAtSlot(this.config, slot)) {
+    const finalizedBlock = this.forkChoice.getFinalizedBlock();
+    if (finalizedBlock.slot > slot) {
       return this.db.blockArchive.get(slot);
     }
-    const summary = this.forkChoice.getCanonicalBlockSummaryAtSlot(slot);
-    if (!summary) {
+    const block = this.forkChoice.getCanonicalBlockAtSlot(slot);
+    if (!block) {
       return null;
     }
-    return await this.db.block.get(summary.blockRoot, summary.slot);
+    return await this.db.block.get(fromHexString(block.blockRoot));
   }
 
-  async getStateByBlockRoot(blockRoot: Root): Promise<CachedBeaconState<allForks.BeaconState> | null> {
-    const blockSummary = this.forkChoice.getBlock(blockRoot);
-    if (!blockSummary) {
-      return null;
-    }
-    try {
-      return await this.regen.getState(blockSummary.stateRoot);
-    } catch (e) {
-      return null;
-    }
+  async processBlock(block: allForks.SignedBeaconBlock, flags?: PartiallyVerifiedBlockFlags): Promise<void> {
+    return await this.blockProcessor.processBlockJob({...flags, block});
   }
 
-  /** Returned blocks have the same ordering as `slots` */
-  async getUnfinalizedBlocksAtSlots(slots: Slot[]): Promise<allForks.SignedBeaconBlock[]> {
-    if (slots.length === 0) {
-      return [];
-    }
-
-    const slotsSet = new Set(slots);
-    const blockRootsPerSlot = new Map<Slot, Promise<allForks.SignedBeaconBlock | null>>();
-
-    // these blocks are on the same chain to head
-    for (const summary of this.forkChoice.iterateBlockSummaries(this.forkChoice.getHeadRoot())) {
-      if (slotsSet.has(summary.slot)) {
-        blockRootsPerSlot.set(summary.slot, this.db.block.get(summary.blockRoot, summary.slot));
-      }
-    }
-
-    const unfinalizedBlocks = await Promise.all(slots.map((slot) => blockRootsPerSlot.get(slot)));
-    return unfinalizedBlocks.filter((block): block is allForks.SignedBeaconBlock => block != null);
-  }
-
-  getFinalizedCheckpoint(): phase0.Checkpoint {
-    return this.forkChoice.getFinalizedCheckpoint();
-  }
-
-  receiveAttestation(attestation: phase0.Attestation): void {
-    this.attestationProcessor
-      .processAttestationJob({attestation, validSignature: false})
-      .catch(() => /* unreachable */ ({}));
-  }
-
-  receiveBlock(signedBlock: allForks.SignedBeaconBlock, trusted = false): void {
-    this.blockProcessor
-      .processBlockJob({
-        signedBlock,
-        reprocess: false,
-        prefinalized: trusted,
-        validSignatures: trusted,
-        validProposerSignature: trusted,
-      })
-      .catch(() => /* unreachable */ ({}));
-  }
-
-  async processChainSegment(signedBlocks: allForks.SignedBeaconBlock[], trusted = false): Promise<void> {
-    return await this.blockProcessor.processChainSegment({
-      signedBlocks,
-      reprocess: false,
-      prefinalized: trusted,
-      validSignatures: trusted,
-      validProposerSignature: trusted,
-    });
-  }
-
-  getForkDigest(): ForkDigest {
-    const state = this.getHeadState();
-    return computeForkDigest(this.config, state.fork.currentVersion, this.genesisValidatorsRoot);
-  }
-
-  getForkName(): IForkName {
-    return computeForkNameFromForkDigest(this.config, this.genesisValidatorsRoot, this.getForkDigest());
-  }
-
-  getENRForkID(): phase0.ENRForkID {
-    const state = this.getHeadState();
-    const currentVersion = state.fork.currentVersion;
-
-    const forkDigest = this.getForkDigest();
-
-    return {
-      forkDigest,
-      // TODO figure out forking
-      nextForkVersion: currentVersion.valueOf() as Uint8Array,
-      nextForkEpoch: FAR_FUTURE_EPOCH,
-    };
+  async processChainSegment(blocks: allForks.SignedBeaconBlock[], flags?: PartiallyVerifiedBlockFlags): Promise<void> {
+    return await this.blockProcessor.processChainSegment(blocks.map((block) => ({...flags, block})));
   }
 
   getStatus(): phase0.Status {
     const head = this.forkChoice.getHead();
     const finalizedCheckpoint = this.forkChoice.getFinalizedCheckpoint();
     return {
-      forkDigest: this.getForkDigest(),
+      // fork_digest: The node's ForkDigest (compute_fork_digest(current_fork_version, genesis_validators_root)) where
+      // - current_fork_version is the fork version at the node's current epoch defined by the wall-clock time (not necessarily the epoch to which the node is sync)
+      // - genesis_validators_root is the static Root found in state.genesis_validators_root
+      forkDigest: this.config.forkName2ForkDigest(this.config.getForkName(this.clock.currentSlot)),
+      // finalized_root: state.finalized_checkpoint.root for the state corresponding to the head block (Note this defaults to Root(b'\x00' * 32) for the genesis finalized checkpoint).
       finalizedRoot: finalizedCheckpoint.epoch === GENESIS_EPOCH ? ZERO_HASH : finalizedCheckpoint.root,
       finalizedEpoch: finalizedCheckpoint.epoch,
-      headRoot: head.blockRoot,
+      // TODO: PERFORMANCE: Memoize to prevent re-computing every time
+      headRoot: fromHexString(head.blockRoot),
       headSlot: head.slot,
     };
+  }
+
+  /**
+   * Returns Promise that resolves either on block found or once 1 slot passes.
+   * Used to handle unknown block root for both unaggregated and aggregated attestations.
+   * @returns true if blockFound
+   */
+  waitForBlockOfAttestation(slot: Slot, root: RootHex): Promise<boolean> {
+    return this.reprocessController.waitForBlockOfAttestation(slot, root);
+  }
+
+  persistInvalidSszObject(type: SSZObjectType, bytes: Uint8Array, suffix = ""): string | null {
+    const now = new Date();
+    // yyyy-MM-dd
+    const date = now.toISOString().split("T")[0];
+    // by default store to lodestar_archive of current dir
+    const byDate = this.opts.persistInvalidSszObjectsDir
+      ? `${this.opts.persistInvalidSszObjectsDir}/${date}`
+      : `invalidSszObjects/${date}`;
+    if (!fs.existsSync(byDate)) {
+      fs.mkdirSync(byDate, {recursive: true});
+    }
+    const fileName = `${byDate}/${type}_${suffix}.ssz`;
+    // as of Feb 17 2022 there are a lot of duplicate files stored with different date suffixes
+    // remove date suffixes in file name, and check duplicate to avoid redundant persistence
+    if (!fs.existsSync(fileName)) {
+      fs.writeFileSync(fileName, bytes);
+    }
+    return fileName;
+  }
+
+  async updateBeaconProposerData(epoch: Epoch, proposers: ProposerPreparationData[]): Promise<void> {
+    proposers.forEach((proposer) => {
+      this.beaconProposerCache.add(epoch, proposer);
+    });
   }
 }

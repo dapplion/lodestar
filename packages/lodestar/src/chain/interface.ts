@@ -1,95 +1,89 @@
-import {allForks, Number64, Root, Slot} from "@chainsafe/lodestar-types";
-import {IForkName} from "@chainsafe/lodestar-config";
-import {phase0, CachedBeaconState} from "@chainsafe/lodestar-beacon-state-transition";
+import {allForks, UintNum64, Root, phase0, Slot, RootHex, Epoch} from "@chainsafe/lodestar-types";
+import {CachedBeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
 import {IForkChoice} from "@chainsafe/lodestar-fork-choice";
+import {IBeaconConfig} from "@chainsafe/lodestar-config";
 
-import {IBeaconClock} from "./clock/interface";
-import {ChainEventEmitter} from "./emitter";
-import {IStateRegenerator} from "./regen";
-import {BlockPool} from "./blocks";
-import {AttestationPool} from "./attestation";
-import {StateContextCache, CheckpointStateCache} from "./stateCache";
+import {IEth1ForBlockProduction} from "../eth1/index.js";
+import {IExecutionEngine} from "../executionEngine/index.js";
+import {IBeaconClock} from "./clock/interface.js";
+import {ChainEventEmitter} from "./emitter.js";
+import {IStateRegenerator} from "./regen/index.js";
+import {StateContextCache, CheckpointStateCache} from "./stateCache/index.js";
+import {IBlsVerifier} from "./bls/index.js";
+import {
+  SeenAttesters,
+  SeenAggregators,
+  SeenBlockProposers,
+  SeenSyncCommitteeMessages,
+  SeenContributionAndProof,
+} from "./seenCache/index.js";
+import {AttestationPool, OpPool, SyncCommitteeMessagePool, SyncContributionAndProofPool} from "./opPools/index.js";
+import {LightClientServer} from "./lightClient/index.js";
+import {AggregatedAttestationPool} from "./opPools/aggregatedAttestationPool.js";
+import {PartiallyVerifiedBlockFlags} from "./blocks/types.js";
+import {ReprocessController} from "./reprocess.js";
+import {SeenAggregatedAttestations} from "./seenCache/seenAggregateAndProof.js";
+import {BeaconProposerCache, ProposerPreparationData} from "./beaconProposerCache.js";
 
-interface IProcessBlock {
-  /**
-   * Metadata: lets a block thats already been processed to be processed again.
-   * After processing, the block will not be stored in the database
-   */
-  reprocess: boolean;
-  /**
-   * blocks fed to the processor that occur before the best known finalized checkpoint
-   */
-  prefinalized: boolean;
-  /**
-   * Metadata: `true` if only the block proposer signature has been verified
-   */
-  validProposerSignature: boolean;
-  /**
-   * Metadata: `true` if all the signatures including the proposer signature have been verified
-   */
-  validSignatures: boolean;
-}
+export type Eth2Context = {
+  activeValidatorCount: number;
+  currentSlot: number;
+  currentEpoch: number;
+};
 
-export interface IChainSegmentJob extends IProcessBlock {
-  signedBlocks: allForks.SignedBeaconBlock[];
-}
-
-export interface IBlockJob extends IProcessBlock {
-  signedBlock: allForks.SignedBeaconBlock;
-}
-
-export interface IAttestationJob {
-  attestation: phase0.Attestation;
-  /**
-   * `true` if the signature has already been verified
-   */
-  validSignature: boolean;
-}
+export {ProposerPreparationData};
 
 /**
  * The IBeaconChain service deals with processing incoming blocks, advancing a state transition
  * and applying the fork choice rule to update the chain head
  */
 export interface IBeaconChain {
-  readonly genesisTime: Number64;
+  readonly genesisTime: UintNum64;
   readonly genesisValidatorsRoot: Root;
-  emitter: ChainEventEmitter;
-  clock: IBeaconClock;
+  readonly eth1: IEth1ForBlockProduction;
+  readonly executionEngine: IExecutionEngine;
+  // Expose config for convenience in modularized functions
+  readonly config: IBeaconConfig;
+
+  /** The initial slot that the chain is started with */
+  readonly anchorStateLatestBlockSlot: Slot;
+
+  bls: IBlsVerifier;
   forkChoice: IForkChoice;
+  clock: IBeaconClock;
+  emitter: ChainEventEmitter;
   stateCache: StateContextCache;
   checkpointStateCache: CheckpointStateCache;
   regen: IStateRegenerator;
-  pendingBlocks: BlockPool;
-  pendingAttestations: AttestationPool;
+  readonly lightClientServer: LightClientServer;
+  readonly reprocessController: ReprocessController;
 
-  /**
-   * Stop beacon chain processing
-   */
+  // Ops pool
+  readonly attestationPool: AttestationPool;
+  readonly aggregatedAttestationPool: AggregatedAttestationPool;
+  readonly syncCommitteeMessagePool: SyncCommitteeMessagePool;
+  readonly syncContributionAndProofPool: SyncContributionAndProofPool;
+  readonly opPool: OpPool;
+
+  // Gossip seen cache
+  readonly seenAttesters: SeenAttesters;
+  readonly seenAggregators: SeenAggregators;
+  readonly seenAggregatedAttestations: SeenAggregatedAttestations;
+  readonly seenBlockProposers: SeenBlockProposers;
+  readonly seenSyncCommitteeMessages: SeenSyncCommitteeMessages;
+  readonly seenContributionAndProof: SeenContributionAndProof;
+
+  readonly beaconProposerCache: BeaconProposerCache;
+
+  /** Stop beacon chain processing */
   close(): void;
+  /** Populate in-memory caches with persisted data. Call at least once on startup */
+  loadFromDisk(): Promise<void>;
+  /** Persist in-memory data to the DB. Call at least once before stopping the process */
+  persistToDisk(): Promise<void>;
 
-  getHeadState(): CachedBeaconState<allForks.BeaconState>;
-  /**
-   * Get ForkDigest from the head state
-   */
-  getForkDigest(): phase0.ForkDigest;
-  /**
-   * Get the IForkName from the head state
-   */
-  getForkName(): IForkName;
-  /**
-   * Get ENRForkID from the head state
-   */
-  getENRForkID(): phase0.ENRForkID;
-  getGenesisTime(): Number64;
-  getStatus(): phase0.Status;
-
-  getHeadStateAtCurrentEpoch(): Promise<CachedBeaconState<allForks.BeaconState>>;
-  getHeadStateAtCurrentSlot(): Promise<CachedBeaconState<allForks.BeaconState>>;
-  getHeadBlock(): Promise<allForks.SignedBeaconBlock | null>;
-
-  getStateByBlockRoot(blockRoot: Root): Promise<CachedBeaconState<allForks.BeaconState> | null>;
-
-  getFinalizedCheckpoint(): phase0.Checkpoint;
+  getHeadState(): CachedBeaconStateAllForks;
+  getHeadStateAtCurrentEpoch(): Promise<CachedBeaconStateAllForks>;
 
   /**
    * Since we can have multiple parallel chains,
@@ -99,19 +93,26 @@ export interface IBeaconChain {
    */
   getCanonicalBlockAtSlot(slot: Slot): Promise<allForks.SignedBeaconBlock | null>;
 
-  getUnfinalizedBlocksAtSlots(slots: Slot[]): Promise<allForks.SignedBeaconBlock[]>;
+  /** Process a block until complete */
+  processBlock(signedBlock: allForks.SignedBeaconBlock, flags?: PartiallyVerifiedBlockFlags): Promise<void>;
+  /** Process a chain of blocks until complete */
+  processChainSegment(signedBlocks: allForks.SignedBeaconBlock[], flags?: PartiallyVerifiedBlockFlags): Promise<void>;
 
-  /**
-   * Add attestation to the fork-choice rule
-   */
-  receiveAttestation(attestation: phase0.Attestation): void;
+  getStatus(): phase0.Status;
 
-  /**
-   * Pre-process and run the per slot state transition function
-   */
-  receiveBlock(signedBlock: allForks.SignedBeaconBlock, trusted?: boolean): void;
-  /**
-   * Process a chain of blocks until complete.
-   */
-  processChainSegment(signedBlocks: allForks.SignedBeaconBlock[], trusted?: boolean): Promise<void>;
+  waitForBlockOfAttestation(slot: Slot, root: RootHex): Promise<boolean>;
+
+  /** Persist bad items to persistInvalidSszObjectsDir dir, for example invalid state, attestations etc. */
+  persistInvalidSszObject(type: SSZObjectType, bytes: Uint8Array, suffix: string): string | null;
+
+  updateBeaconProposerData(epoch: Epoch, proposers: ProposerPreparationData[]): Promise<void>;
 }
+
+export type SSZObjectType =
+  | "state"
+  | "signedBlock"
+  | "block"
+  | "attestation"
+  | "signedAggregatedAndProof"
+  | "syncCommittee"
+  | "contributionAndProof";

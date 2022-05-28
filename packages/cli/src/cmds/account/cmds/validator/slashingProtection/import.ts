@@ -1,10 +1,10 @@
-import fs from "fs";
-import {ICliCommand} from "../../../../../util";
-import {IGlobalArgs} from "../../../../../options";
-import {IAccountValidatorArgs} from "../options";
-import {ISlashingProtectionArgs} from "./options";
-import {getGenesisValidatorsRoot, getSlashingProtection} from "./utils";
-import {IInterchangeCompleteV4} from "@chainsafe/lodestar-validator/lib/slashingProtection/interchange/formats/completeV4";
+import fs from "node:fs";
+import {Interchange} from "@chainsafe/lodestar-validator";
+import {ICliCommand} from "../../../../../util/index.js";
+import {IGlobalArgs} from "../../../../../options/index.js";
+import {IAccountValidatorArgs} from "../options.js";
+import {ISlashingProtectionArgs} from "./options.js";
+import {getGenesisValidatorsRoot, getSlashingProtection} from "./utils.js";
 
 /* eslint-disable no-console */
 
@@ -19,7 +19,7 @@ export const importCmd: ICliCommand<IImportArgs, ISlashingProtectionArgs & IAcco
 
   examples: [
     {
-      command: "account validator slashing-protection import --network pyrmont --file interchange.json",
+      command: "account validator slashing-protection import --network prater --file interchange.json",
       description: "Import an interchange file to the slashing protection DB",
     },
   ],
@@ -37,7 +37,7 @@ export const importCmd: ICliCommand<IImportArgs, ISlashingProtectionArgs & IAcco
     const slashingProtection = getSlashingProtection(args);
 
     const importFile = await fs.promises.readFile(args.file, "utf8");
-    const importFileJson = JSON.parse(importFile) as IInterchangeCompleteV4;
+    const importFileJson = JSON.parse(importFile) as Interchange;
     await slashingProtection.importInterchange(importFileJson, genesisValidatorsRoot);
 
     console.log("Import completed successfully");

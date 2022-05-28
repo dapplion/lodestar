@@ -1,10 +1,12 @@
-import {TreeBacked, List} from "@chainsafe/ssz";
-import {allForks, phase0, Root} from "@chainsafe/lodestar-types";
+import {ssz} from "@chainsafe/lodestar-types";
+import {CachedBeaconStateAllForks} from "@chainsafe/lodestar-beacon-state-transition";
+import {CompositeViewDU, VectorCompositeType} from "@chainsafe/ssz";
+import {Eth1Block} from "../../eth1/interface.js";
 
 export interface IGenesisResult {
-  state: TreeBacked<allForks.BeaconState>;
-  depositTree: TreeBacked<List<Root>>;
-  block: phase0.Eth1Block;
+  state: CachedBeaconStateAllForks;
+  depositTree: CompositeViewDU<VectorCompositeType<typeof ssz.Root>>;
+  block: Eth1Block;
 }
 
 export interface IGenesisBuilder {

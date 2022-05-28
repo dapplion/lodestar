@@ -1,28 +1,39 @@
 import "mocha";
 import {expect} from "chai";
-import {AbortController} from "abort-controller";
-import {getTestnetConfig, testnet} from "../../utils/testnet";
-import {getDepositsStream, getDepositsAndBlockStreamForGenesis, Eth1Provider} from "../../../src/eth1";
+import {getTestnetConfig, medallaTestnetConfig} from "../../utils/testnet.js";
+import {getDepositsStream, getDepositsAndBlockStreamForGenesis} from "../../../src/eth1/stream.js";
+import {Eth1Provider} from "../../../src/eth1/provider/eth1Provider.js";
+import {getGoerliRpcUrl} from "../../testParams.js";
+import {Eth1Options} from "../../../src/eth1/options.js";
 
 describe("Eth1 streams", function () {
   this.timeout("2 min");
 
+  let controller: AbortController;
+  beforeEach(() => (controller = new AbortController()));
+  afterEach(() => controller.abort());
+
   const config = getTestnetConfig();
-  const eth1Provider = new Eth1Provider(config, {
-    enabled: true,
-    providerUrl: testnet.providerUrl,
-    depositContractDeployBlock: testnet.depositBlock,
-  });
+
+  // Compute lazily since getGoerliRpcUrl() throws if GOERLI_RPC_URL is not set
+  function getEth1Provider(): Eth1Provider {
+    const eth1Options: Eth1Options = {
+      enabled: true,
+      providerUrls: [getGoerliRpcUrl()],
+      depositContractDeployBlock: 0,
+      unsafeAllowDepositDataOverwrite: false,
+    };
+    return new Eth1Provider(config, eth1Options, controller.signal);
+  }
 
   const maxBlocksPerPoll = 1000;
   const depositsToFetch = 1000;
-  const eth1Params = {...config.params, maxBlocksPerPoll};
+  const eth1Params = {...config, maxBlocksPerPoll};
 
   it(`Should fetch ${depositsToFetch} deposits with getDepositsStream`, async function () {
-    const controller = new AbortController();
     const depositsStream = getDepositsStream(
-      testnet.blockWithDepositActivity,
-      eth1Provider,
+      medallaTestnetConfig.blockWithDepositActivity,
+      getEth1Provider(),
       eth1Params,
       controller.signal
     );
@@ -39,10 +50,9 @@ describe("Eth1 streams", function () {
   });
 
   it(`Should fetch ${depositsToFetch} deposits with getDepositsAndBlockStreamForGenesis`, async function () {
-    const controller = new AbortController();
     const stream = getDepositsAndBlockStreamForGenesis(
-      testnet.blockWithDepositActivity,
-      eth1Provider,
+      medallaTestnetConfig.blockWithDepositActivity,
+      getEth1Provider(),
       eth1Params,
       controller.signal
     );

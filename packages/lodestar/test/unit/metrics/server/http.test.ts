@@ -1,6 +1,7 @@
 import request from "supertest";
-import {createMetrics, HttpMetricsServer} from "../../../../src/metrics";
-import {testLogger} from "../../../utils/logger";
+import {HttpMetricsServer} from "../../../../src/metrics/index.js";
+import {testLogger} from "../../../utils/logger.js";
+import {createMetricsTest} from "../utils.js";
 
 describe("HttpMetricsServer", () => {
   const logger = testLogger();
@@ -8,11 +9,11 @@ describe("HttpMetricsServer", () => {
   let server: HttpMetricsServer | null = null;
 
   it("should serve metrics on /metrics", async () => {
-    const metrics = createMetrics();
-    server = new HttpMetricsServer({enabled: true, timeout: 5000, serverPort: 0}, {metrics, logger});
+    const metrics = createMetricsTest();
+    server = new HttpMetricsServer({port: 0}, {register: metrics.register, logger});
 
     await server.start();
-    await request(server.http).get("/metrics").expect(200);
+    await request(server["server"]).get("/metrics").expect(200);
   });
 
   after(async () => {

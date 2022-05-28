@@ -1,5 +1,3 @@
-import {Json} from "@chainsafe/ssz";
-
 /**
  * Generic Lodestar error with attached metadata
  */
@@ -10,14 +8,14 @@ export class LodestarError<T extends {code: string}> extends Error {
     this.type = type;
   }
 
-  getMetadata(): {[key: string]: Json} {
+  getMetadata(): Record<string, string | number | null> {
     return this.type;
   }
 
   /**
    * Get the metadata and the stacktrace for the error.
    */
-  toObject(): {[key: string]: Json} {
+  toObject(): Record<string, string | number | null> {
     return {
       // Ignore message since it's just type.code
       ...this.getMetadata(),
@@ -42,4 +40,19 @@ export class TimeoutError extends Error {
   constructor(message?: string) {
     super(`Timeout ${message || ""}`);
   }
+}
+
+/**
+ * Returns true if arg `e` is an instance of `ErrorAborted`
+ */
+export function isErrorAborted(e: unknown): e is ErrorAborted {
+  return e instanceof ErrorAborted;
+}
+
+/**
+ * Extend an existing error by appending a string to its `e.message`
+ */
+export function extendError(e: Error, appendMessage: string): Error {
+  e.message = `${e.message} - ${appendMessage}`;
+  return e;
 }

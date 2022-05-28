@@ -15,10 +15,22 @@ export interface IBeaconClock {
    */
   readonly currentSlotWithGossipDisparity: Slot;
   readonly currentEpoch: Epoch;
+  /** Returns the slot if the internal clock were advanced by `toleranceSec`. */
+  slotWithFutureTolerance(toleranceSec: number): Slot;
+  /** Returns the slot if the internal clock were reversed by `toleranceSec`. */
+  slotWithPastTolerance(toleranceSec: number): Slot;
+  /**
+   * Check if a slot is current slot given MAXIMUM_GOSSIP_CLOCK_DISPARITY.
+   */
+  isCurrentSlotGivenGossipDisparity(slot: Slot): boolean;
   /**
    * Returns a promise that waits until at least `slot` is reached
    * Resolves when the current slot >= `slot`
    * Rejects if the clock is aborted
    */
   waitForSlot(slot: Slot): Promise<void>;
+  /**
+   * Return second from a slot to either toSec or now.
+   */
+  secFromSlot(slot: Slot, toSec?: number): number;
 }

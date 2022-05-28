@@ -1,11 +1,12 @@
 import {IBeaconConfig} from "@chainsafe/lodestar-config";
 import {ErrorAborted, ILogger, sleep, prettyBytes} from "@chainsafe/lodestar-utils";
-import {AbortSignal} from "abort-controller";
-import {IBeaconChain} from "../chain";
-import {INetwork} from "../network";
-import {IBeaconSync, SyncMode} from "../sync";
-import {prettyTimeDiff} from "../util/time";
-import {TimeSeries} from "../util/timeSeries";
+import {EPOCHS_PER_SYNC_COMMITTEE_PERIOD, SLOTS_PER_EPOCH} from "@chainsafe/lodestar-params";
+import {computeEpochAtSlot, bellatrix} from "@chainsafe/lodestar-beacon-state-transition";
+import {IBeaconChain} from "../chain/index.js";
+import {INetwork} from "../network/index.js";
+import {IBeaconSync, SyncState} from "../sync/index.js";
+import {prettyTimeDiff} from "../util/time.js";
+import {TimeSeries} from "../util/timeSeries.js";
 
 /** Create a warning log whenever the peer count is at or below this value */
 const WARN_PEER_COUNT = 1;
@@ -28,6 +29,7 @@ export async function runNodeNotifier({
   logger: ILogger;
   signal: AbortSignal;
 }): Promise<void> {
+  const SLOTS_PER_SYNC_COMMITTEE_PERIOD = SLOTS_PER_EPOCH * EPOCHS_PER_SYNC_COMMITTEE_PERIOD;
   const timeSeries = new TimeSeries({maxPoints: 10});
   let hasLowPeerCount = false; // Only log once
 
@@ -44,7 +46,9 @@ export async function runNodeNotifier({
         hasLowPeerCount = false;
       }
 
-      const currentSlot = chain.clock.currentSlot;
+      const clockSlot = chain.clock.currentSlot;
+      const clockEpoch = computeEpochAtSlot(clockSlot);
+
       const headInfo = chain.forkChoice.getHead();
       const headState = chain.getHeadState();
       const finalizedEpoch = headState.finalizedCheckpoint.epoch;
@@ -53,41 +57,65 @@ export async function runNodeNotifier({
       timeSeries.addPoint(headSlot, Date.now());
 
       const peersRow = `peers: ${connectedPeerCount}`;
-      const finalizedCheckpointRow = `finalized: ${finalizedEpoch} ${prettyBytes(finalizedRoot)}`;
+      const finalizedCheckpointRow = `finalized: ${prettyBytes(finalizedRoot)}:${finalizedEpoch}`;
       const headRow = `head: ${headInfo.slot} ${prettyBytes(headInfo.blockRoot)}`;
-      const currentSlotRow = `currentSlot: ${currentSlot}`;
+      const isMergeTransitionComplete =
+        bellatrix.isBellatrixCachedStateType(headState) && bellatrix.isMergeTransitionComplete(headState);
+      const executionInfo = isMergeTransitionComplete
+        ? [
+            `execution: ${headInfo.executionStatus.toLowerCase()}(${prettyBytes(
+              headInfo.executionPayloadBlockHash ?? "empty"
+            )})`,
+          ]
+        : [];
 
-      let nodeState: string[] = [];
+      // Give info about empty slots if head < clock
+      const skippedSlots = clockSlot - headInfo.slot;
+      const clockSlotRow = `slot: ${clockSlot}` + (skippedSlots > 0 ? ` (skipped ${skippedSlots})` : "");
+
+      let nodeState: string[];
       switch (sync.state) {
-        case SyncMode.INITIAL_SYNCING:
-        case SyncMode.REGULAR_SYNCING: {
+        case SyncState.SyncingFinalized:
+        case SyncState.SyncingHead: {
           const slotsPerSecond = timeSeries.computeLinearSpeed();
-          const distance = Math.max(currentSlot - headSlot, 0);
+          const distance = Math.max(clockSlot - headSlot, 0);
           const secondsLeft = distance / slotsPerSecond;
           const timeLeft = isFinite(secondsLeft) ? prettyTimeDiff(1000 * secondsLeft) : "?";
+          // Syncing - time left - speed - head - finalized - clock - peers
           nodeState = [
             "Syncing",
             `${timeLeft} left`,
             `${slotsPerSecond.toPrecision(3)} slots/s`,
-            finalizedCheckpointRow,
+            clockSlotRow,
             headRow,
-            currentSlotRow,
+            ...executionInfo,
+            finalizedCheckpointRow,
             peersRow,
           ];
           break;
         }
 
-        case SyncMode.SYNCED: {
-          nodeState = ["Synced", finalizedCheckpointRow, headRow, peersRow];
+        case SyncState.Synced: {
+          // Synced - clock - head - finalized - peers
+          nodeState = ["Synced", clockSlotRow, headRow, ...executionInfo, finalizedCheckpointRow, peersRow];
           break;
         }
 
-        case SyncMode.STOPPED:
-        case SyncMode.WAITING_PEERS: {
-          nodeState = ["Searching for peers", peersRow, finalizedCheckpointRow, headRow, currentSlotRow];
+        case SyncState.Stalled: {
+          // Searching peers - peers - head - finalized - clock
+          nodeState = ["Searching peers", peersRow, clockSlotRow, headRow, ...executionInfo, finalizedCheckpointRow];
         }
       }
       logger.info(nodeState.join(" - "));
+
+      // Log important chain time-based events
+      // Log sync committee change
+      if (clockEpoch > config.ALTAIR_FORK_EPOCH) {
+        if (clockSlot % SLOTS_PER_SYNC_COMMITTEE_PERIOD === 0) {
+          const period = Math.floor(clockEpoch / EPOCHS_PER_SYNC_COMMITTEE_PERIOD);
+          logger.info(`New sync committee period ${period}`);
+        }
+      }
 
       // Log halfway through each slot
       await sleep(timeToNextHalfSlot(config, chain), signal);
@@ -96,14 +124,14 @@ export async function runNodeNotifier({
     if (e instanceof ErrorAborted) {
       return; // Ok
     } else {
-      logger.error("Node notifier error", {}, e);
+      logger.error("Node notifier error", {}, e as Error);
     }
   }
 }
 
 function timeToNextHalfSlot(config: IBeaconConfig, chain: IBeaconChain): number {
-  const msPerSlot = config.params.SECONDS_PER_SLOT * 1000;
-  const msFromGenesis = Date.now() - chain.getGenesisTime() * 1000;
+  const msPerSlot = config.SECONDS_PER_SLOT * 1000;
+  const msFromGenesis = Date.now() - chain.genesisTime * 1000;
   const msToNextSlot = msPerSlot - (msFromGenesis % msPerSlot);
   return msToNextSlot > msPerSlot / 2 ? msToNextSlot - msPerSlot / 2 : msToNextSlot + msPerSlot / 2;
 }

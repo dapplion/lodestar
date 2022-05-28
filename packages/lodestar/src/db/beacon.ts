@@ -2,14 +2,12 @@
  * @module db/api/beacon
  */
 
-import {phase0} from "@chainsafe/lodestar-types";
-import {DatabaseService, IDatabaseApiOptions} from "@chainsafe/lodestar-db";
-import {IBeaconDb} from "./interface";
+import {Registry} from "prom-client";
+import {DatabaseService, IDatabaseApiOptions, IDbMetrics} from "@chainsafe/lodestar-db";
+import {createDbMetrics} from "../metrics/metrics.js";
+import {IBeaconDb} from "./interface.js";
 import {
-  AggregateAndProofRepository,
-  AttestationRepository,
   AttesterSlashingRepository,
-  BadBlockRepository,
   BlockArchiveRepository,
   BlockRepository,
   DepositEventRepository,
@@ -18,21 +16,22 @@ import {
   ProposerSlashingRepository,
   StateArchiveRepository,
   VoluntaryExitRepository,
-} from "./repositories";
-import {PreGenesisState, PreGenesisStateLastProcessedBlock} from "./single";
-import {SeenAttestationCache} from "./seenAttestationCache";
-import {PendingBlockRepository} from "./repositories/pendingBlock";
+  BestPartialLightClientUpdateRepository,
+  CheckpointHeaderRepository,
+  SyncCommitteeRepository,
+  SyncCommitteeWitnessRepository,
+  BackfilledRanges,
+} from "./repositories/index.js";
+import {PreGenesisState, PreGenesisStateLastProcessedBlock} from "./single/index.js";
 
 export class BeaconDb extends DatabaseService implements IBeaconDb {
-  badBlock: BadBlockRepository;
+  metrics?: IDbMetrics;
+  metricsRegistry?: Registry;
+
   block: BlockRepository;
-  pendingBlock: PendingBlockRepository;
-  seenAttestationCache: SeenAttestationCache;
   blockArchive: BlockArchiveRepository;
   stateArchive: StateArchiveRepository;
 
-  attestation: AttestationRepository;
-  aggregateAndProof: AggregateAndProofRepository;
   voluntaryExit: VoluntaryExitRepository;
   proposerSlashing: ProposerSlashingRepository;
   attesterSlashing: AttesterSlashingRepository;
@@ -43,37 +42,43 @@ export class BeaconDb extends DatabaseService implements IBeaconDb {
   preGenesisState: PreGenesisState;
   preGenesisStateLastProcessedBlock: PreGenesisStateLastProcessedBlock;
 
-  constructor(opts: IDatabaseApiOptions) {
-    super(opts);
-    this.badBlock = new BadBlockRepository(this.config, this.db);
-    this.block = new BlockRepository(this.config, this.db);
-    this.pendingBlock = new PendingBlockRepository(this.config, this.db);
-    this.seenAttestationCache = new SeenAttestationCache(5000);
-    this.blockArchive = new BlockArchiveRepository(this.config, this.db);
-    this.stateArchive = new StateArchiveRepository(this.config, this.db);
-    this.attestation = new AttestationRepository(this.config, this.db);
-    this.aggregateAndProof = new AggregateAndProofRepository(this.config, this.db);
-    this.voluntaryExit = new VoluntaryExitRepository(this.config, this.db);
-    this.proposerSlashing = new ProposerSlashingRepository(this.config, this.db);
-    this.attesterSlashing = new AttesterSlashingRepository(this.config, this.db);
-    this.depositEvent = new DepositEventRepository(this.config, this.db);
-    this.depositDataRoot = new DepositDataRootRepository(this.config, this.db);
-    this.eth1Data = new Eth1DataRepository(this.config, this.db);
-    this.preGenesisState = new PreGenesisState(this.config, this.db);
-    this.preGenesisStateLastProcessedBlock = new PreGenesisStateLastProcessedBlock(this.config, this.db);
-  }
+  // lightclient
+  bestPartialLightClientUpdate: BestPartialLightClientUpdateRepository;
+  checkpointHeader: CheckpointHeaderRepository;
+  syncCommittee: SyncCommitteeRepository;
+  syncCommitteeWitness: SyncCommitteeWitnessRepository;
 
-  /**
-   * Remove stored operations based on a newly processed block
-   */
-  async processBlockOperations(signedBlock: phase0.SignedBeaconBlock): Promise<void> {
-    await Promise.all([
-      this.voluntaryExit.batchRemove(signedBlock.message.body.voluntaryExits),
-      this.depositEvent.deleteOld(signedBlock.message.body.eth1Data.depositCount),
-      this.proposerSlashing.batchRemove(signedBlock.message.body.proposerSlashings),
-      this.attesterSlashing.batchRemove(signedBlock.message.body.attesterSlashings),
-      this.aggregateAndProof.removeIncluded(signedBlock.message.body.attestations),
-    ]);
+  backfilledRanges: BackfilledRanges;
+
+  constructor(opts: Omit<IDatabaseApiOptions, "metrics"> & {metrics?: boolean}) {
+    if (opts.metrics) {
+      const {metrics, registry} = createDbMetrics();
+      super({...opts, metrics});
+      this.metrics = metrics;
+      this.metricsRegistry = registry;
+    } else {
+      super({...opts, metrics: undefined});
+    }
+    // Warning: If code is ever run in the constructor, must change this stub to not extend 'packages/lodestar/test/utils/stub/beaconDb.ts' -
+    this.block = new BlockRepository(this.config, this.db, this.metrics);
+    this.blockArchive = new BlockArchiveRepository(this.config, this.db, this.metrics);
+    this.stateArchive = new StateArchiveRepository(this.config, this.db, this.metrics);
+    this.voluntaryExit = new VoluntaryExitRepository(this.config, this.db, this.metrics);
+    this.proposerSlashing = new ProposerSlashingRepository(this.config, this.db, this.metrics);
+    this.attesterSlashing = new AttesterSlashingRepository(this.config, this.db, this.metrics);
+    this.depositEvent = new DepositEventRepository(this.config, this.db, this.metrics);
+    this.depositDataRoot = new DepositDataRootRepository(this.config, this.db, this.metrics);
+    this.eth1Data = new Eth1DataRepository(this.config, this.db, this.metrics);
+    this.preGenesisState = new PreGenesisState(this.config, this.db, this.metrics);
+    this.preGenesisStateLastProcessedBlock = new PreGenesisStateLastProcessedBlock(this.config, this.db, this.metrics);
+
+    // lightclient
+    this.bestPartialLightClientUpdate = new BestPartialLightClientUpdateRepository(this.config, this.db, this.metrics);
+    this.checkpointHeader = new CheckpointHeaderRepository(this.config, this.db, this.metrics);
+    this.syncCommittee = new SyncCommitteeRepository(this.config, this.db, this.metrics);
+    this.syncCommitteeWitness = new SyncCommitteeWitnessRepository(this.config, this.db, this.metrics);
+
+    this.backfilledRanges = new BackfilledRanges(this.config, this.db, this.metrics);
   }
 
   async stop(): Promise<void> {

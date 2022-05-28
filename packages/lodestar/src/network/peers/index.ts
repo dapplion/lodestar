@@ -1,4 +1,2 @@
-export * from "./metastore";
-export * from "./peerManager";
-export * from "./score";
-export {RequestedSubnet} from "./utils/subnetMap";
+export * from "./peerManager.js";
+export * from "./score.js";

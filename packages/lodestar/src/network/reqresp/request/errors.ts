@@ -1,6 +1,7 @@
 import {LodestarError} from "@chainsafe/lodestar-utils";
-import {Method, ReqRespEncoding, RpcResponseStatus, RpcResponseStatusError} from "../../../constants";
-import {ResponseError} from "../response";
+import {RespStatus, RpcResponseStatusError} from "../../../constants/index.js";
+import {Method, Encoding} from "../types.js";
+import {ResponseError} from "../response/index.js";
 
 export enum RequestErrorCode {
   // Declaring specific values of RpcResponseStatusError for error clarity downstream
@@ -8,6 +9,8 @@ export enum RequestErrorCode {
   INVALID_REQUEST = "REQUEST_ERROR_INVALID_REQUEST",
   /** `<response_chunk>` had `<result>` === SERVER_ERROR */
   SERVER_ERROR = "REQUEST_ERROR_SERVER_ERROR",
+  /** `<response_chunk>` had `<result>` === RESOURCE_UNAVAILABLE */
+  RESOURCE_UNAVAILABLE = "RESOURCE_UNAVAILABLE_ERROR",
   /** `<response_chunk>` had a `<result>` not known in the current spec */
   UNKNOWN_ERROR_STATUS = "REQUEST_ERROR_UNKNOWN_ERROR_STATUS",
   /** Could not open a stream with peer before DIAL_TIMEOUT */
@@ -18,6 +21,8 @@ export enum RequestErrorCode {
   REQUEST_TIMEOUT = "REQUEST_ERROR_REQUEST_TIMEOUT",
   /** Error when sending request to responder */
   REQUEST_ERROR = "REQUEST_ERROR_REQUEST_ERROR",
+  /** Reponder did not deliver a full reponse before max maxTotalResponseTimeout() */
+  RESPONSE_TIMEOUT = "REQUEST_ERROR_RESPONSE_TIMEOUT",
   /** A single-response method returned 0 chunks */
   EMPTY_RESPONSE = "REQUEST_ERROR_EMPTY_RESPONSE",
   /** Time to first byte timeout */
@@ -29,18 +34,20 @@ export enum RequestErrorCode {
 type RequestErrorType =
   | {code: RequestErrorCode.INVALID_REQUEST; errorMessage: string}
   | {code: RequestErrorCode.SERVER_ERROR; errorMessage: string}
+  | {code: RequestErrorCode.RESOURCE_UNAVAILABLE; errorMessage: string}
   | {code: RequestErrorCode.UNKNOWN_ERROR_STATUS; status: RpcResponseStatusError; errorMessage: string}
   | {code: RequestErrorCode.DIAL_TIMEOUT}
   | {code: RequestErrorCode.DIAL_ERROR; error: Error}
   | {code: RequestErrorCode.REQUEST_TIMEOUT}
   | {code: RequestErrorCode.REQUEST_ERROR; error: Error}
+  | {code: RequestErrorCode.RESPONSE_TIMEOUT}
   | {code: RequestErrorCode.EMPTY_RESPONSE}
   | {code: RequestErrorCode.TTFB_TIMEOUT}
   | {code: RequestErrorCode.RESP_TIMEOUT};
 
 export interface IRequestErrorMetadata {
   method: Method;
-  encoding: ReqRespEncoding;
+  encoding: Encoding;
   peer: string;
   // Do not include requestId in error metadata to make the errors deterministic for tests
 }
@@ -67,10 +74,12 @@ export class RequestError extends LodestarError<RequestErrorType & IRequestError
 export function responseStatusErrorToRequestError(e: ResponseError): RequestErrorType {
   const {errorMessage, status} = e;
   switch (status) {
-    case RpcResponseStatus.INVALID_REQUEST:
+    case RespStatus.INVALID_REQUEST:
       return {code: RequestErrorCode.INVALID_REQUEST, errorMessage};
-    case RpcResponseStatus.SERVER_ERROR:
+    case RespStatus.SERVER_ERROR:
       return {code: RequestErrorCode.SERVER_ERROR, errorMessage};
+    case RespStatus.RESOURCE_UNAVAILABLE:
+      return {code: RequestErrorCode.RESOURCE_UNAVAILABLE, errorMessage};
     default:
       return {code: RequestErrorCode.UNKNOWN_ERROR_STATUS, errorMessage, status};
   }
@@ -83,6 +92,7 @@ function renderErrorMessage(type: RequestErrorType): string | undefined {
   switch (type.code) {
     case RequestErrorCode.INVALID_REQUEST:
     case RequestErrorCode.SERVER_ERROR:
+    case RequestErrorCode.RESOURCE_UNAVAILABLE:
     case RequestErrorCode.UNKNOWN_ERROR_STATUS:
       return `${type.code}: ${type.errorMessage}`;
     default:

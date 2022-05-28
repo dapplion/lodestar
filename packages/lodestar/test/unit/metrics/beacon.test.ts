@@ -1,9 +1,9 @@
 import {expect} from "chai";
-import {createMetrics} from "../../../src/metrics";
+import {createMetricsTest} from "./utils.js";
 
 describe("BeaconMetrics", () => {
   it("updated metrics should be reflected in the register", async () => {
-    const metrics = createMetrics();
+    const metrics = createMetricsTest();
     const metricsAsArray = await metrics.register.getMetricsAsArray();
     const metricsAsText = await metrics.register.metrics();
 

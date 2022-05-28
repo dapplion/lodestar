@@ -1,6 +1,6 @@
-import {fromHexString, List} from "@chainsafe/ssz";
+import {fromHexString} from "@chainsafe/ssz";
 import {phase0} from "@chainsafe/lodestar-types";
-import {FAR_FUTURE_EPOCH} from "../../src/constants";
+import {FAR_FUTURE_EPOCH} from "../../src/constants/index.js";
 
 /**
  * Generates a single fake validator, for tests purposes only.
@@ -9,7 +9,7 @@ import {FAR_FUTURE_EPOCH} from "../../src/constants";
  */
 export function generateValidator(opts: Partial<phase0.Validator> = {}): phase0.Validator {
   const randNum = (): number => Math.floor(Math.random() * Math.floor(4));
-  const activationEpoch = opts.activationEpoch || opts.activationEpoch === 0 ? opts.activationEpoch : FAR_FUTURE_EPOCH;
+  const activationEpoch = opts.activationEpoch ?? FAR_FUTURE_EPOCH;
   return {
     pubkey:
       opts.pubkey ||
@@ -20,10 +20,10 @@ export function generateValidator(opts: Partial<phase0.Validator> = {}): phase0.
     withdrawalCredentials: Buffer.alloc(32),
     activationEpoch,
     activationEligibilityEpoch: activationEpoch,
-    exitEpoch: opts.exitEpoch || randNum(),
+    exitEpoch: opts.exitEpoch ?? randNum(),
     withdrawableEpoch: opts.withdrawableEpoch ?? randNum(),
     slashed: opts.slashed || false,
-    effectiveBalance: opts.effectiveBalance || BigInt(0),
+    effectiveBalance: opts.effectiveBalance ?? 0,
   };
 }
 
@@ -33,6 +33,6 @@ export function generateValidator(opts: Partial<phase0.Validator> = {}): phase0.
  * @param opts
  * @returns {Validator[]}
  */
-export function generateValidators(n: number, opts?: Partial<phase0.Validator>): List<phase0.Validator> {
-  return Array.from({length: n}, () => generateValidator(opts)) as List<phase0.Validator>;
+export function generateValidators(n: number, opts?: Partial<phase0.Validator>): phase0.Validator[] {
+  return Array.from({length: n}, () => generateValidator(opts));
 }

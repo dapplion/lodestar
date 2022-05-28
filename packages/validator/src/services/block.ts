@@ -1,187 +1,133 @@
-/**
- * @module validator
- */
-
-import {BLSPubkey, Epoch, Root, phase0, Slot} from "@chainsafe/lodestar-types";
-import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {SecretKey} from "@chainsafe/bls";
-import {ILogger, prettyBytes} from "@chainsafe/lodestar-utils";
+import {BLSPubkey, Slot, bellatrix} from "@chainsafe/lodestar-types";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
+import {ForkName} from "@chainsafe/lodestar-params";
+import {extendError, prettyBytes} from "@chainsafe/lodestar-utils";
 import {toHexString} from "@chainsafe/ssz";
-import {computeEpochAtSlot, computeSigningRoot, getDomain} from "@chainsafe/lodestar-beacon-state-transition";
-import {IApiClient} from "../api";
-import {BeaconEventType} from "../api/interface/events";
-import {ClockEventType} from "../api/interface/clock";
-import {ISlashingProtection} from "../slashingProtection";
-import {PublicKeyHex, ValidatorAndSecret} from "../types";
+import {Api} from "@chainsafe/lodestar-api";
+import {IClock, ILoggerVc} from "../util/index.js";
+import {ValidatorStore} from "./validatorStore.js";
+import {BlockDutiesService, GENESIS_SLOT} from "./blockDuties.js";
+import {PubkeyHex} from "../types.js";
+import {Metrics} from "../metrics.js";
+
+type BlockProposingServiceOpts = {
+  graffiti?: string;
+  strictFeeRecipientCheck?: boolean;
+};
 
 /**
  * Service that sets up and handles validator block proposal duties.
  */
-export default class BlockProposingService {
-  private readonly config: IBeaconConfig;
-  private readonly provider: IApiClient;
-  private readonly validators: Map<PublicKeyHex, ValidatorAndSecret>;
-  private readonly slashingProtection: ISlashingProtection;
-  private readonly logger: ILogger;
-  private readonly graffiti?: string;
-
-  private nextProposals: Map<Slot, BLSPubkey> = new Map<Slot, BLSPubkey>();
+export class BlockProposingService {
+  private readonly dutiesService: BlockDutiesService;
 
   constructor(
-    config: IBeaconConfig,
-    validators: Map<PublicKeyHex, ValidatorAndSecret>,
-    provider: IApiClient,
-    slashingProtection: ISlashingProtection,
-    logger: ILogger,
-    graffiti?: string
+    private readonly config: IChainForkConfig,
+    private readonly logger: ILoggerVc,
+    private readonly api: Api,
+    private readonly clock: IClock,
+    private readonly validatorStore: ValidatorStore,
+    private readonly metrics: Metrics | null,
+    private readonly opts: BlockProposingServiceOpts
   ) {
-    this.config = config;
-    this.validators = validators;
-    this.provider = provider;
-    this.slashingProtection = slashingProtection;
-    this.logger = logger;
-    this.graffiti = graffiti;
+    this.dutiesService = new BlockDutiesService(
+      logger,
+      api,
+      clock,
+      validatorStore,
+      metrics,
+      this.notifyBlockProductionFn
+    );
+  }
+
+  removeDutiesForKey(pubkey: PubkeyHex): void {
+    this.dutiesService.removeDutiesForKey(pubkey);
   }
 
   /**
-   * Starts the BlockService by updating the validator block proposal duties and turning on the relevant listeners for clock events.
+   * `BlockDutiesService` must call this fn to trigger block creation
+   * This function may run more than once at a time, rationale in `BlockDutiesService.pollBeaconProposers`
    */
-  start = async (): Promise<void> => {
-    const currentEpoch = this.provider.clock.currentEpoch;
-    // trigger getting duties for current epoch
-    await this.updateDuties(currentEpoch);
-
-    this.provider.on(ClockEventType.CLOCK_EPOCH, this.onClockEpoch);
-    this.provider.on(ClockEventType.CLOCK_SLOT, this.onClockSlot);
-    this.provider.on(BeaconEventType.HEAD, this.onHead);
-  };
-
-  /**
-   * Stops the BlockService by turning off the relevant listeners for clock events.
-   */
-  stop = async (): Promise<void> => {
-    this.provider.off(ClockEventType.CLOCK_EPOCH, this.onClockEpoch);
-    this.provider.off(ClockEventType.CLOCK_SLOT, this.onClockSlot);
-    this.provider.off(BeaconEventType.HEAD, this.onHead);
-  };
-
-  /**
-   * Update validator duties on each epoch.
-   */
-  onClockEpoch = async ({epoch}: {epoch: Epoch}): Promise<void> => {
-    await this.updateDuties(epoch);
-  };
-
-  /**
-   * Create and publish a block if the validator is a proposer for a given clock slot.
-   */
-  onClockSlot = async ({slot}: {slot: Slot}): Promise<void> => {
-    const proposerPubKey = this.nextProposals.get(slot);
-    if (proposerPubKey && slot !== 0) {
-      this.nextProposals.delete(slot);
-      this.logger.verbose("Validator is proposer!", {
-        slot,
-        validator: toHexString(proposerPubKey),
-      });
-      const fork = await this.provider.beacon.state.getFork("head");
-      if (!fork) {
-        return;
-      }
-      const validatorAndSecret = this.validators.get(toHexString(proposerPubKey));
-      if (!validatorAndSecret)
-        throw new Error("onClockSlot: Validator chosen for proposal not found in validator list!");
-      const validatorKeys = {publicKey: proposerPubKey, secretKey: validatorAndSecret.secretKey};
-      await this.createAndPublishBlock(validatorKeys, slot, fork, this.provider.genesisValidatorsRoot);
-    }
-  };
-
-  /**
-   * Update list of block proposal duties on head upate.
-   */
-  onHead = async ({slot, epochTransition}: {slot: Slot; epochTransition: boolean}): Promise<void> => {
-    if (epochTransition) {
-      // refetch this epoch's duties
-      await this.updateDuties(computeEpochAtSlot(this.config, slot));
-    }
-  };
-
-  /**
-   * Fetch validator block proposal duties from the validator api and update local list of block duties accordingly.
-   */
-  updateDuties = async (epoch: Epoch): Promise<void> => {
-    this.logger.debug("on new block epoch", {epoch, validator: toHexString(this.validators.keys().next().value)});
-    const proposerDuties = await this.provider.validator.getProposerDuties(epoch, []).catch((e) => {
-      this.logger.error("Failed to obtain proposer duties", e);
-      return null;
-    });
-    if (!proposerDuties) {
+  private notifyBlockProductionFn = (slot: Slot, proposers: BLSPubkey[]): void => {
+    if (slot <= GENESIS_SLOT) {
+      this.logger.debug("Not producing block before or at genesis slot");
       return;
     }
-    for (const duty of proposerDuties) {
-      if (!this.nextProposals.has(duty.slot) && this.validators.get(toHexString(duty.pubkey))) {
-        this.logger.debug("Next proposer duty", {slot: duty.slot, validator: toHexString(duty.pubkey)});
-        this.nextProposals.set(duty.slot, duty.pubkey);
-      }
+
+    if (proposers.length > 1) {
+      this.logger.warn("Multiple block proposers", {slot, count: proposers.length});
     }
+
+    Promise.all(proposers.map((pubkey) => this.createAndPublishBlock(pubkey, slot))).catch((e: Error) => {
+      this.logger.error("Error on block duties", {slot}, e);
+    });
   };
 
-  /**
-   * IFF a validator is selected, construct a block to propose.
-   */
-  async createAndPublishBlock(
-    validatorKeys: {publicKey: BLSPubkey; secretKey: SecretKey},
-    slot: Slot,
-    fork: phase0.Fork,
-    genesisValidatorsRoot: Root
-  ): Promise<phase0.SignedBeaconBlock | null> {
-    const epoch = computeEpochAtSlot(this.config, slot);
-    const randaoDomain = getDomain(
-      this.config,
-      {fork, genesisValidatorsRoot} as phase0.BeaconState,
-      this.config.params.DOMAIN_RANDAO,
-      epoch
-    );
-    const randaoSigningRoot = computeSigningRoot(this.config, this.config.types.Epoch, epoch, randaoDomain);
-    let block;
-    try {
-      block = await this.provider.validator.produceBlock(
-        slot,
-        validatorKeys.secretKey.sign(randaoSigningRoot).toBytes(),
-        this.graffiti || ""
-      );
-    } catch (e) {
-      this.logger.error("Failed to produce block", {slot}, e);
-    }
-    if (!block) {
-      return null;
-    }
-    const proposerDomain = getDomain(
-      this.config,
-      {fork, genesisValidatorsRoot} as phase0.BeaconState,
-      this.config.params.DOMAIN_BEACON_PROPOSER,
-      computeEpochAtSlot(this.config, slot)
-    );
-    const signingRoot = computeSigningRoot(this.config, this.config.types.phase0.BeaconBlock, block, proposerDomain);
+  /** Produce a block at the given slot for pubkey */
+  private async createAndPublishBlock(pubkey: BLSPubkey, slot: Slot): Promise<void> {
+    const pubkeyHex = toHexString(pubkey);
+    const logCtx = {slot, validator: prettyBytes(pubkeyHex)};
 
-    await this.slashingProtection.checkAndInsertBlockProposal(validatorKeys.publicKey, {
-      slot: block.slot,
-      signingRoot,
-    });
-
-    const signedBlock: phase0.SignedBeaconBlock = {
-      message: block,
-      signature: validatorKeys.secretKey.sign(signingRoot).toBytes(),
-    };
+    // Wrap with try catch here to re-use `logCtx`
     try {
-      await this.provider.beacon.blocks.publishBlock(signedBlock);
-      this.logger.info("Published block", {slot, validator: prettyBytes(validatorKeys.publicKey)});
+      const randaoReveal = await this.validatorStore.signRandao(pubkey, slot);
+      const graffiti = this.opts.graffiti || "";
+      const debugLogCtx = {...logCtx, validator: pubkeyHex};
+
+      this.logger.debug("Producing block", debugLogCtx);
+      this.metrics?.proposerStepCallProduceBlock.observe(this.clock.secFromSlot(slot));
+
+      const block = await this.produceBlock(slot, randaoReveal, graffiti).catch((e: Error) => {
+        this.metrics?.blockProposingErrors.inc({error: "produce"});
+        throw extendError(e, "Failed to produce block");
+      });
+      const blockFeeRecipient = (block.data as bellatrix.BeaconBlock).body.executionPayload?.feeRecipient;
+      const feeRecipient = blockFeeRecipient !== undefined ? toHexString(blockFeeRecipient) : undefined;
+      if (feeRecipient !== undefined) {
+        const expectedFeeRecipient = this.validatorStore.feeRecipientByValidatorPubkey.getOrDefault(pubkeyHex);
+        // In Mev Builder, the feeRecipeint could differ and rewards to the feeRecipeint
+        // might be included in the block transactions as indicated by the BuilderBid
+        // Address this appropriately in the Mev boost PR
+        //
+        // Even for engine, there isn't any clarity as of now how to proceed with the
+        // the divergence of feeRecipient, the argument being that the bn <> engine setup
+        // has implied trust and are user-agents of the same entity.
+        // A better approach would be to have engine also provide something akin to BuilderBid
+        //
+        // The following conversation in the interop R&D channel can provide some context
+        // https://discord.com/channels/595666850260713488/892088344438255616/978374892678426695
+        // For now providing a strick check flag to enable disable this
+        if (feeRecipient !== expectedFeeRecipient && this.opts.strictFeeRecipientCheck) {
+          throw Error(`Invalid feeRecipient=${feeRecipient}, expected=${expectedFeeRecipient}`);
+        }
+      }
+      this.logger.debug("Produced block", {...debugLogCtx, feeRecipient});
+      this.metrics?.blocksProduced.inc();
+
+      const signedBlock = await this.validatorStore.signBlock(pubkey, block.data, slot);
+
+      this.metrics?.proposerStepCallPublishBlock.observe(this.clock.secFromSlot(slot));
+
+      await this.api.beacon.publishBlock(signedBlock).catch((e: Error) => {
+        this.metrics?.blockProposingErrors.inc({error: "publish"});
+        throw extendError(e, "Failed to publish block");
+      });
+      this.logger.info("Published block", {...logCtx, graffiti, feeRecipient});
+      this.metrics?.blocksPublished.inc();
     } catch (e) {
-      this.logger.error("Failed to publish block", {slot}, e);
+      this.logger.error("Error proposing block", logCtx, e as Error);
     }
-    return signedBlock;
   }
 
-  getRpcClient(): IApiClient {
-    return this.provider;
-  }
+  /** Wrapper around the API's different methods for producing blocks across forks */
+  private produceBlock: Api["validator"]["produceBlock"] = (slot, randaoReveal, graffiti) => {
+    switch (this.config.getForkName(slot)) {
+      case ForkName.phase0:
+        return this.api.validator.produceBlock(slot, randaoReveal, graffiti);
+      // All subsequent forks are expected to use v2 too
+      case ForkName.altair:
+      default:
+        return this.api.validator.produceBlockV2(slot, randaoReveal, graffiti);
+    }
+  };
 }

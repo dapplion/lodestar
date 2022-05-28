@@ -1,12 +1,13 @@
-import {phase0} from "@chainsafe/lodestar-types";
-import {List} from "@chainsafe/ssz";
-import {IBlockSummary} from "@chainsafe/lodestar-fork-choice";
+import {ssz} from "@chainsafe/lodestar-types";
+import {config as defaultConfig} from "@chainsafe/lodestar-config/default";
+import {IChainForkConfig} from "@chainsafe/lodestar-config";
+import {allForks, phase0} from "@chainsafe/lodestar-types";
+import {IProtoBlock, ExecutionStatus} from "@chainsafe/lodestar-fork-choice";
 import {isPlainObject} from "@chainsafe/lodestar-utils";
 import {RecursivePartial} from "@chainsafe/lodestar-utils";
-
-import {EMPTY_SIGNATURE, ZERO_HASH} from "../../src/constants";
 import deepmerge from "deepmerge";
-import {IBlockJob} from "../../src/chain";
+import {EMPTY_SIGNATURE, ZERO_HASH} from "../../src/constants/index.js";
+import {ReqRespBlockResponse} from "../../src/network/reqresp/types.js";
 
 export function generateEmptyBlock(): phase0.BeaconBlock {
   return {
@@ -22,11 +23,11 @@ export function generateEmptyBlock(): phase0.BeaconBlock {
         depositCount: 0,
       },
       graffiti: Buffer.alloc(32),
-      proposerSlashings: ([] as phase0.ProposerSlashing[]) as List<phase0.ProposerSlashing>,
-      attesterSlashings: ([] as phase0.AttesterSlashing[]) as List<phase0.AttesterSlashing>,
-      attestations: ([] as phase0.Attestation[]) as List<phase0.Attestation>,
-      deposits: ([] as phase0.Deposit[]) as List<phase0.Deposit>,
-      voluntaryExits: ([] as phase0.SignedVoluntaryExit[]) as List<phase0.SignedVoluntaryExit>,
+      proposerSlashings: [],
+      attesterSlashings: [],
+      attestations: [],
+      deposits: [],
+      voluntaryExits: [],
     },
   };
 }
@@ -38,10 +39,46 @@ export function generateEmptySignedBlock(): phase0.SignedBeaconBlock {
   };
 }
 
+export function generateEmptyReqRespBlockResponse(): ReqRespBlockResponse {
+  return {
+    slot: 0,
+    bytes: Buffer.from(ssz.phase0.SignedBeaconBlock.serialize(generateEmptySignedBlock())),
+  };
+}
+
+export function blocksToReqRespBlockResponses(
+  blocks: allForks.SignedBeaconBlock[],
+  config?: IChainForkConfig
+): ReqRespBlockResponse[] {
+  return blocks.map((block) => {
+    const slot = block.message.slot;
+    const sszType = config
+      ? config.getForkTypes(slot).SignedBeaconBlock
+      : defaultConfig.getForkTypes(slot).SignedBeaconBlock;
+    return {
+      slot,
+      bytes: Buffer.from(sszType.serialize(block)),
+    };
+  });
+}
+
 export function generateEmptySignedBlockHeader(): phase0.SignedBeaconBlockHeader {
   return {
     message: {
       slot: 0,
+      proposerIndex: 0,
+      parentRoot: Buffer.alloc(32),
+      stateRoot: Buffer.alloc(32),
+      bodyRoot: Buffer.alloc(32),
+    },
+    signature: EMPTY_SIGNATURE,
+  };
+}
+
+export function generateSignedBlockHeaderBn(): phase0.SignedBeaconBlockHeaderBigint {
+  return {
+    message: {
+      slot: BigInt(0),
       proposerIndex: 0,
       parentRoot: Buffer.alloc(32),
       stateRoot: Buffer.alloc(32),
@@ -63,33 +100,26 @@ export function generateSignedBlock(
   );
 }
 
-export function generateEmptyBlockSummary(): IBlockSummary {
+export function generateEmptyProtoBlock(): IProtoBlock {
+  const rootHex = "0x" + "00".repeat(32);
   return {
     slot: 0,
-    blockRoot: Buffer.alloc(32),
-    parentRoot: Buffer.alloc(32),
-    stateRoot: Buffer.alloc(32),
-    targetRoot: Buffer.alloc(32),
+    blockRoot: rootHex,
+    parentRoot: rootHex,
+    stateRoot: rootHex,
+    targetRoot: rootHex,
+
     justifiedEpoch: 0,
+    justifiedRoot: rootHex,
     finalizedEpoch: 0,
+    finalizedRoot: rootHex,
+
+    ...{executionPayloadBlockHash: null, executionStatus: ExecutionStatus.PreMerge},
   };
 }
 
-export function generateBlockSummary(overrides: RecursivePartial<IBlockSummary> = {}): IBlockSummary {
-  return deepmerge<IBlockSummary, RecursivePartial<IBlockSummary>>(generateEmptyBlockSummary(), overrides, {
+export function generateProtoBlock(overrides: RecursivePartial<IProtoBlock> = {}): IProtoBlock {
+  return deepmerge<IProtoBlock, RecursivePartial<IProtoBlock>>(generateEmptyProtoBlock(), overrides, {
     isMergeableObject: isPlainObject,
   });
-}
-
-/**
- * Block job with all metadata set to false
- */
-export function getNewBlockJob(signedBlock: phase0.SignedBeaconBlock): IBlockJob {
-  return {
-    signedBlock,
-    reprocess: false,
-    prefinalized: false,
-    validSignatures: false,
-    validProposerSignature: false,
-  };
 }

@@ -1,7 +1,6 @@
-import {CommitteeIndex, Epoch, Slot, ValidatorIndex} from "@chainsafe/lodestar-types";
-import {LodestarError} from "@chainsafe/lodestar-utils";
-
-import {IAttestationJob} from "../interface";
+import {CommitteeIndex, Epoch, Slot, ValidatorIndex, RootHex} from "@chainsafe/lodestar-types";
+import {toHexString} from "@chainsafe/ssz";
+import {GossipActionError} from "./gossipValidation.js";
 
 export enum AttestationErrorCode {
   /**
@@ -37,15 +36,19 @@ export enum AttestationErrorCode {
   /**
    * There has already been an aggregation observed for this validator, we refuse to process a second.
    */
-  AGGREGATE_ALREADY_KNOWN = "ATTESTATION_ERROR_AGGREGATE_ALREADY_KNOWN",
+  AGGREGATOR_ALREADY_KNOWN = "ATTESTATION_ERROR_AGGREGATOR_ALREADY_KNOWN",
+  /**
+   * All of the attesters are known, we refuse to process subset of attesting indices since it brings no value.
+   */
+  ATTESTERS_ALREADY_KNOWN = "ATTESTATION_ERROR_ATTESTERS_ALREADY_KNOWN",
   /**
    * The aggregator index is higher than the maximum possible validator count.
    */
   AGGREGATOR_INDEX_TOO_HIGH = "ATTESTATION_ERROR_AGGREGATOR_INDEX_TOO_HIGH",
   /**
-   * The `attestation.data.beacon_block_root` block is unknown.
+   * The `attestation.data.beacon_block_root` block is unknown or prefinalized.
    */
-  UNKNOWN_BEACON_BLOCK_ROOT = "ATTESTATION_ERROR_UNKNOWN_BEACON_BLOCK_ROOT",
+  UNKNOWN_OR_PREFINALIZED_BEACON_BLOCK_ROOT = "ATTESTATION_ERROR_UNKNOWN_OR_PREFINALIZED_BEACON_BLOCK_ROOT",
   /**
    * The `attestation.data.slot` is not from the same epoch as `data.target.epoch`.
    */
@@ -92,14 +95,6 @@ export enum AttestationErrorCode {
    */
   INVALID_SUBNET_ID = "ATTESTATION_ERROR_INVALID_SUBNET_ID",
   /**
-   * The attestation failed the `state_processing` verification stage.
-   */
-  INVALID = "ATTESTATION_ERROR_INVALID",
-  /**
-   * There was an error whilst processing the attestation. It is not known if it is valid or invalid.
-   */
-  BEACON_CHAIN_ERROR = "ATTESTATION_ERROR_BEACON_CHAIN_ERROR",
-  /**
    * Number of aggregation bits does not match committee size
    */
   WRONG_NUMBER_OF_AGGREGATION_BITS = "ATTESTATION_ERROR_WRONG_NUMBER_OF_AGGREGATION_BITS",
@@ -110,7 +105,7 @@ export enum AttestationErrorCode {
   /**
    * The current finalized checkpoint is not an ancestor of the block defined by attestation.data.beacon_block_root.
    */
-  FINALIZED_CHECKPOINT_NOT_AN_ANCESTOR_OF_ROOT = "ATTESTATION_ERROR_FINALIZED_CHECKPOINT_NOT_AN_ANCESTOR_OF_ROOT",
+  INVALID_TARGET_ROOT = "ATTESTATION_ERROR_INVALID_TARGET_ROOT",
   /**
    * The The attestation target block is not an ancestor of the block named in the LMD vote.
    */
@@ -120,9 +115,9 @@ export enum AttestationErrorCode {
    */
   COMMITTEE_INDEX_OUT_OF_RANGE = "ATTESTATION_ERROR_COMMITTEE_INDEX_OUT_OF_RANGE",
   /**
-   * Missing attestation pre-state.
+   * Missing attestation head state
    */
-  MISSING_ATTESTATION_TARGET_STATE = "ATTESTATION_ERROR_MISSING_ATTESTATION_TARGET_STATE",
+  MISSING_ATTESTATION_HEAD_STATE = "ATTESTATION_ERROR_MISSING_ATTESTATION_HEAD_STATE",
   /**
    * Invalid aggregator.
    */
@@ -140,41 +135,43 @@ export type AttestationErrorType =
   | {code: AttestationErrorCode.EMPTY_AGGREGATION_BITFIELD}
   | {code: AttestationErrorCode.AGGREGATOR_NOT_IN_COMMITTEE}
   | {code: AttestationErrorCode.AGGREGATOR_PUBKEY_UNKNOWN; aggregatorIndex: ValidatorIndex}
-  | {code: AttestationErrorCode.ATTESTATION_ALREADY_KNOWN; root: Uint8Array}
-  | {code: AttestationErrorCode.AGGREGATE_ALREADY_KNOWN}
+  | {code: AttestationErrorCode.ATTESTATION_ALREADY_KNOWN; targetEpoch: Epoch; validatorIndex: number}
+  | {code: AttestationErrorCode.AGGREGATOR_ALREADY_KNOWN; targetEpoch: Epoch; aggregatorIndex: number}
+  | {code: AttestationErrorCode.ATTESTERS_ALREADY_KNOWN; targetEpoch: Epoch; aggregateRoot: RootHex}
   | {code: AttestationErrorCode.AGGREGATOR_INDEX_TOO_HIGH; aggregatorIndex: ValidatorIndex}
-  | {code: AttestationErrorCode.UNKNOWN_BEACON_BLOCK_ROOT; beaconBlockRoot: Uint8Array}
+  | {code: AttestationErrorCode.UNKNOWN_OR_PREFINALIZED_BEACON_BLOCK_ROOT; root: RootHex}
   | {code: AttestationErrorCode.BAD_TARGET_EPOCH}
   | {code: AttestationErrorCode.HEAD_NOT_TARGET_DESCENDANT}
   | {code: AttestationErrorCode.UNKNOWN_TARGET_ROOT; root: Uint8Array}
   | {code: AttestationErrorCode.INVALID_SIGNATURE}
   | {code: AttestationErrorCode.NO_COMMITTEE_FOR_SLOT_AND_INDEX; slot: Slot; index: CommitteeIndex}
-  | {code: AttestationErrorCode.NOT_EXACTLY_ONE_AGGREGATION_BIT_SET; numBits: number}
+  | {code: AttestationErrorCode.NOT_EXACTLY_ONE_AGGREGATION_BIT_SET}
   | {code: AttestationErrorCode.PRIOR_ATTESTATION_KNOWN; validatorIndex: ValidatorIndex; epoch: Epoch}
   | {code: AttestationErrorCode.FUTURE_EPOCH; attestationEpoch: Epoch; currentEpoch: Epoch}
   | {code: AttestationErrorCode.PAST_EPOCH; attestationEpoch: Epoch; currentEpoch: Epoch}
   | {code: AttestationErrorCode.ATTESTS_TO_FUTURE_BLOCK; block: Slot; attestation: Slot}
   | {code: AttestationErrorCode.INVALID_SUBNET_ID; received: number; expected: number}
-  | {code: AttestationErrorCode.INVALID; error: Error}
-  | {code: AttestationErrorCode.BEACON_CHAIN_ERROR; error: Error}
   | {code: AttestationErrorCode.WRONG_NUMBER_OF_AGGREGATION_BITS}
   | {code: AttestationErrorCode.KNOWN_BAD_BLOCK}
-  | {code: AttestationErrorCode.FINALIZED_CHECKPOINT_NOT_AN_ANCESTOR_OF_ROOT}
+  | {code: AttestationErrorCode.INVALID_TARGET_ROOT; targetRoot: RootHex; expected: string | null}
   | {code: AttestationErrorCode.TARGET_BLOCK_NOT_AN_ANCESTOR_OF_LMD_BLOCK}
   | {code: AttestationErrorCode.COMMITTEE_INDEX_OUT_OF_RANGE; index: number}
-  | {code: AttestationErrorCode.MISSING_ATTESTATION_TARGET_STATE; error: Error}
+  | {code: AttestationErrorCode.MISSING_ATTESTATION_HEAD_STATE; error: Error}
   | {code: AttestationErrorCode.INVALID_AGGREGATOR}
   | {code: AttestationErrorCode.INVALID_INDEXED_ATTESTATION};
 
-type IJobObject = {
-  job: IAttestationJob;
-};
+export class AttestationError extends GossipActionError<AttestationErrorType> {
+  getMetadata(): Record<string, string | number | null> {
+    const type = this.type;
+    switch (type.code) {
+      case AttestationErrorCode.UNKNOWN_TARGET_ROOT:
+        return {code: type.code, root: toHexString(type.root)};
+      case AttestationErrorCode.MISSING_ATTESTATION_HEAD_STATE:
+        // TODO: The stack trace gets lost here
+        return {code: type.code, error: type.error.message};
 
-export class AttestationError extends LodestarError<AttestationErrorType> {
-  job: IAttestationJob;
-
-  constructor({job, ...type}: AttestationErrorType & IJobObject) {
-    super(type);
-    this.job = job;
+      default:
+        return type;
+    }
   }
 }

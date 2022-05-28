@@ -1,13 +1,12 @@
 import PeerId from "peer-id";
-import {Json} from "@chainsafe/ssz";
-import {writeFile, readFile} from "../util";
+import {writeFile, readFile} from "../util/index.js";
 
 export async function createPeerId(): Promise<PeerId> {
   return await PeerId.create({keyType: "secp256k1"});
 }
 
 export function writePeerId(filepath: string, peerId: PeerId): void {
-  writeFile(filepath, peerId.toJSON() as Json);
+  writeFile(filepath, peerId.toJSON());
 }
 
 export async function readPeerId(filepath: string): Promise<PeerId> {

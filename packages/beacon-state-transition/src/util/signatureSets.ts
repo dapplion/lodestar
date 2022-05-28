@@ -1,5 +1,6 @@
-import bls, {PublicKey} from "@chainsafe/bls";
-import {BLSSignature, Root} from "@chainsafe/lodestar-types";
+import type {PublicKey} from "@chainsafe/bls/types";
+import bls from "@chainsafe/bls";
+import {Root} from "@chainsafe/lodestar-types";
 
 export enum SignatureSetType {
   single = "single",
@@ -11,24 +12,25 @@ export type ISignatureSet =
       type: SignatureSetType.single;
       pubkey: PublicKey;
       signingRoot: Root;
-      signature: BLSSignature;
+      signature: Uint8Array;
     }
   | {
       type: SignatureSetType.aggregate;
       pubkeys: PublicKey[];
       signingRoot: Root;
-      signature: BLSSignature;
+      signature: Uint8Array;
     };
 
 export function verifySignatureSet(signatureSet: ISignatureSet): boolean {
-  const signature = bls.Signature.fromBytes(signatureSet.signature.valueOf() as Uint8Array);
+  // All signatures are not trusted and must be group checked (p2.subgroup_check)
+  const signature = bls.Signature.fromBytes(signatureSet.signature, undefined, true);
 
   switch (signatureSet.type) {
     case SignatureSetType.single:
-      return signature.verify(signatureSet.pubkey, signatureSet.signingRoot as Uint8Array);
+      return signature.verify(signatureSet.pubkey, signatureSet.signingRoot);
 
     case SignatureSetType.aggregate:
-      return signature.verifyAggregate(signatureSet.pubkeys, signatureSet.signingRoot as Uint8Array);
+      return signature.verifyAggregate(signatureSet.pubkeys, signatureSet.signingRoot);
 
     default:
       throw Error("Unknown signature set type");

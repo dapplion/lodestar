@@ -1,11 +1,28 @@
-import {List, Vector} from "@chainsafe/ssz";
-import {phase0} from "@chainsafe/lodestar-types";
+import {config as minimalConfig} from "@chainsafe/lodestar-config/default";
+import {
+  EPOCHS_PER_HISTORICAL_VECTOR,
+  EPOCHS_PER_SLASHINGS_VECTOR,
+  GENESIS_EPOCH,
+  GENESIS_SLOT,
+  SLOTS_PER_HISTORICAL_ROOT,
+} from "@chainsafe/lodestar-params";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
+import {config} from "@chainsafe/lodestar-config/default";
 
-import {GENESIS_EPOCH, GENESIS_SLOT, ZERO_HASH} from "../../src/constants";
+import {ZERO_HASH} from "../../src/constants/index.js";
+import {newZeroedBigIntArray} from "../../src/util/index.js";
 
-import {generateEmptyBlock} from "./block";
-
-import {config} from "@chainsafe/lodestar-config/mainnet";
+import {generateEmptyBlock} from "./block.js";
+import {
+  BeaconStatePhase0,
+  CachedBeaconStateAllForks,
+  BeaconStateAllForks,
+  createCachedBeaconState,
+  PubkeyIndexMap,
+} from "../../src/index.js";
+import {createIBeaconConfig, IChainForkConfig} from "@chainsafe/lodestar-config";
+import {BeaconStateCache} from "../../src/cache/stateCache.js";
+import {EpochContextOpts} from "../../src/cache/epochContext.js";
 
 /**
  * Copy of BeaconState, but all fields are marked optional to allow for swapping out variables as needed.
@@ -18,14 +35,14 @@ type TestBeaconState = Partial<phase0.BeaconState>;
  * @param {TestBeaconState} opts
  * @returns {BeaconState}
  */
-export function generateState(opts?: TestBeaconState): phase0.BeaconState {
-  return {
+export function generateState(opts?: TestBeaconState): BeaconStatePhase0 {
+  return ssz.phase0.BeaconState.toViewDU({
     genesisTime: Math.floor(Date.now() / 1000),
     genesisValidatorsRoot: ZERO_HASH,
     slot: GENESIS_SLOT,
     fork: {
-      previousVersion: config.params.GENESIS_FORK_VERSION,
-      currentVersion: config.params.GENESIS_FORK_VERSION,
+      previousVersion: config.GENESIS_FORK_VERSION,
+      currentVersion: config.GENESIS_FORK_VERSION,
       epoch: GENESIS_EPOCH,
     },
     latestBlockHeader: {
@@ -33,25 +50,25 @@ export function generateState(opts?: TestBeaconState): phase0.BeaconState {
       proposerIndex: 0,
       parentRoot: Buffer.alloc(32),
       stateRoot: Buffer.alloc(32),
-      bodyRoot: config.types.phase0.BeaconBlockBody.hashTreeRoot(generateEmptyBlock().body),
+      bodyRoot: ssz.phase0.BeaconBlockBody.hashTreeRoot(generateEmptyBlock().body),
     },
-    blockRoots: Array.from({length: config.params.SLOTS_PER_HISTORICAL_ROOT}, () => ZERO_HASH),
-    stateRoots: Array.from({length: config.params.SLOTS_PER_HISTORICAL_ROOT}, () => ZERO_HASH),
-    historicalRoots: ([] as Vector<number>[]) as List<Vector<number>>,
+    blockRoots: Array.from({length: SLOTS_PER_HISTORICAL_ROOT}, () => ZERO_HASH),
+    stateRoots: Array.from({length: SLOTS_PER_HISTORICAL_ROOT}, () => ZERO_HASH),
+    historicalRoots: [],
     eth1Data: {
       depositRoot: Buffer.alloc(32),
       blockHash: Buffer.alloc(32),
       depositCount: 0,
     },
-    eth1DataVotes: ([] as phase0.Eth1Data[]) as List<phase0.Eth1Data>,
+    eth1DataVotes: [],
     eth1DepositIndex: 0,
-    validators: ([] as phase0.Validator[]) as List<phase0.Validator>,
-    balances: ([] as bigint[]) as List<bigint>,
-    randaoMixes: Array.from({length: config.params.EPOCHS_PER_HISTORICAL_VECTOR}, () => ZERO_HASH),
-    slashings: Array.from({length: config.params.EPOCHS_PER_SLASHINGS_VECTOR}, () => BigInt(0)),
-    previousEpochAttestations: ([] as phase0.PendingAttestation[]) as List<phase0.PendingAttestation>,
-    currentEpochAttestations: ([] as phase0.PendingAttestation[]) as List<phase0.PendingAttestation>,
-    justificationBits: [false, false, false, false],
+    validators: [],
+    balances: [],
+    randaoMixes: Array.from({length: EPOCHS_PER_HISTORICAL_VECTOR}, () => ZERO_HASH),
+    slashings: newZeroedBigIntArray(EPOCHS_PER_SLASHINGS_VECTOR),
+    previousEpochAttestations: [],
+    currentEpochAttestations: [],
+    justificationBits: ssz.phase0.JustificationBits.defaultValue(),
     previousJustifiedCheckpoint: {
       epoch: GENESIS_EPOCH,
       root: ZERO_HASH,
@@ -65,5 +82,35 @@ export function generateState(opts?: TestBeaconState): phase0.BeaconState {
       root: ZERO_HASH,
     },
     ...opts,
-  };
+  });
+}
+
+export function generateCachedState(
+  config: IChainForkConfig = minimalConfig,
+  opts: TestBeaconState = {}
+): CachedBeaconStateAllForks {
+  const state = generateState(opts);
+  return createCachedBeaconState(state, {
+    config: createIBeaconConfig(config, state.genesisValidatorsRoot),
+    // This is a test state, there's no need to have a global shared cache of keys
+    pubkey2index: new PubkeyIndexMap(),
+    index2pubkey: [],
+  });
+}
+
+export function createCachedBeaconStateTest<T extends BeaconStateAllForks>(
+  state: T,
+  configCustom: IChainForkConfig = config,
+  opts?: EpochContextOpts
+): T & BeaconStateCache {
+  return createCachedBeaconState<T>(
+    state,
+    {
+      config: createIBeaconConfig(configCustom, state.genesisValidatorsRoot),
+      // This is a test state, there's no need to have a global shared cache of keys
+      pubkey2index: new PubkeyIndexMap(),
+      index2pubkey: [],
+    },
+    opts
+  );
 }

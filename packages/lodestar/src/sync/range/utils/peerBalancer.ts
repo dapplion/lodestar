@@ -1,8 +1,8 @@
 import PeerId from "peer-id";
-import {PeerMap} from "../../../util/peerMap";
-import {shuffle} from "../../../util/shuffle";
-import {sortBy} from "../../../util/sortBy";
-import {Batch, BatchStatus} from "../batch";
+import {PeerMap} from "../../../util/peerMap.js";
+import {shuffle} from "../../../util/shuffle.js";
+import {sortBy} from "../../../util/sortBy.js";
+import {Batch, BatchStatus} from "../batch.js";
 
 /**
  * Balance and organize peers to perform requests with a SyncChain
@@ -31,8 +31,8 @@ export class ChainPeersBalancer {
     const failedPeers = PeerMap.from(batch.getFailedPeers());
     const sortedBestPeers = sortBy(
       this.peers,
-      (peer) => (failedPeers.has(peer) ? 1 : 0),
-      (peer) => this.activeRequestsByPeer.get(peer) ?? 0
+      (peer) => (failedPeers.has(peer) ? 1 : 0), // Sort by no failed first = 0
+      (peer) => this.activeRequestsByPeer.get(peer) ?? 0 // Sort by least active req
     );
     return sortedBestPeers[0];
   }
@@ -41,6 +41,9 @@ export class ChainPeersBalancer {
    * Return peers with 0 or no active requests
    */
   idlePeers(): PeerId[] {
-    return this.peers.filter((peer) => !this.activeRequestsByPeer.get(peer));
+    return this.peers.filter((peer) => {
+      const activeRequests = this.activeRequestsByPeer.get(peer);
+      return activeRequests === undefined || activeRequests === 0;
+    });
   }
 }

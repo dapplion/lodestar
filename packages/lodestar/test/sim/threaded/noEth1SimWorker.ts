@@ -2,39 +2,45 @@
 // NOTE: @typescript*no-unsafe* rules are disabled above because `workerData` is typed as `any`
 import {parentPort, workerData} from "worker_threads";
 
-import {init} from "@chainsafe/bls";
-import {phase0} from "@chainsafe/lodestar-types";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
 
-import {getDevBeaconNode} from "../../utils/node/beacon";
-import {getDevValidator} from "../../utils/node/validator";
-import {testLogger, LogLevel} from "../../utils/logger";
-import {connect} from "../../utils/network";
-import {Network} from "../../../src/network";
-import {NodeWorkerOptions, Message} from "./types";
-import Multiaddr from "multiaddr";
-import {sleep, withTimeout} from "@chainsafe/lodestar-utils";
+import {getDevBeaconNode} from "../../utils/node/beacon.js";
+import {getAndInitDevValidators} from "../../utils/node/validator.js";
+import {testLogger, LogLevel, TestLoggerOpts} from "../../utils/logger.js";
+import {connect} from "../../utils/network.js";
+import {Network} from "../../../src/network/index.js";
+import {NodeWorkerOptions, Message} from "./types.js";
+import {Multiaddr} from "multiaddr";
+import {sleep, TimestampFormatCode, withTimeout} from "@chainsafe/lodestar-utils";
 import {fromHexString} from "@chainsafe/ssz";
 import {createFromPrivKey} from "peer-id";
+import {simTestInfoTracker} from "../../utils/node/simTest.js";
+import {SLOTS_PER_EPOCH} from "@chainsafe/lodestar-params";
+
+/* eslint-disable no-console */
 
 async function runWorker(): Promise<void> {
   const parent = parentPort;
   if (!parent) throw Error("Must be run in worker_thread");
 
-  // blst Native bindings don't work right on worker threads. It errors with
-  // (node:1692547) UnhandledPromiseRejectionWarning: Error: Module did not self-register: '/home/cayman/Code/bls/node_modules/@chainsafe/blst/prebuild/linux-x64-72-binding.node'.
-  // Related issue: https://github.com/nodejs/node/issues/21783#issuecomment-429637117
-  await init("herumi");
-
   const options = workerData.options as NodeWorkerOptions;
   const {nodeIndex, validatorsPerNode, startIndex, checkpointEvent, logFile, nodes} = options;
-  const endIndex = startIndex + validatorsPerNode - 1;
 
-  const loggerNode = testLogger(`Node ${nodeIndex}`, LogLevel.info, logFile);
-  const loggerVali = testLogger(`Vali ${startIndex}-${endIndex}`, LogLevel.info, logFile);
+  const testLoggerOpts: TestLoggerOpts = {
+    logLevel: LogLevel.info,
+    logFile: logFile,
+    timestampFormat: {
+      format: TimestampFormatCode.EpochSlot,
+      genesisTime: options.genesisTime,
+      slotsPerEpoch: SLOTS_PER_EPOCH,
+      secondsPerSlot: options.params.SECONDS_PER_SLOT,
+    },
+  };
+  const loggerNode = testLogger(`Node ${nodeIndex}`, testLoggerOpts);
   loggerNode.info("Thread started", {
     now: Math.floor(Date.now() / 1000),
     genesisTime: options.genesisTime,
-    localMultiaddrs: options.options.network?.localMultiaddrs || [],
+    localMultiaddrs: (options.options.network?.localMultiaddrs || []).join(","),
   });
 
   const node = await getDevBeaconNode({
@@ -46,39 +52,46 @@ async function runWorker(): Promise<void> {
     peerId: await createFromPrivKey(fromHexString(options.peerIdPrivkey)),
   });
 
-  const validator = getDevValidator({
-    node,
-    startIndex,
-    count: validatorsPerNode,
-    logger: loggerVali,
-  });
-
-  await validator.start();
+  // Only run for the first node
+  const stopInfoTracker = nodeIndex === 0 ? simTestInfoTracker(node, loggerNode) : null;
 
   // wait a bit before attempting to connect to the nodes
-  await sleep(Math.max(0, (1000 * options.genesisTime - Date.now()) / 2));
-  await Promise.all(
-    nodes.map(async (nodeToConnect, i) => {
-      if (i === nodeIndex) return; // Don't dial self
-      loggerNode.info(`Connecting to node ${i}`);
-      const multiaddrs = nodeToConnect.localMultiaddrs.map(Multiaddr);
-      const peerIdToConn = await createFromPrivKey(fromHexString(nodeToConnect.peerIdPrivkey));
-      await withTimeout(() => connect(node.network as Network, peerIdToConn, multiaddrs), 10 * 1000);
-      loggerNode.info(`Connected to node ${i}`);
-    })
+  const waitMsBeforeConnecting = Math.max(0, (1000 * options.genesisTime - Date.now()) / 2);
+  loggerNode.info(`Waiting ${waitMsBeforeConnecting} ms before connecting to nodes...`);
+  sleep(waitMsBeforeConnecting).then(() =>
+    Promise.all(
+      nodes.map(async (nodeToConnect, i) => {
+        if (i === nodeIndex) return; // Don't dial self
+        loggerNode.info(`Connecting node ${nodeIndex} -> ${i}`);
+        const multiaddrs = nodeToConnect.localMultiaddrs.map((s) => new Multiaddr(s));
+        const peerIdToConn = await createFromPrivKey(fromHexString(nodeToConnect.peerIdPrivkey));
+        await withTimeout(() => connect(node.network as Network, peerIdToConn, multiaddrs), 10 * 1000);
+        loggerNode.info(`Connected node ${nodeIndex} -> ${i}`);
+      })
+    )
   );
 
   node.chain.emitter.on(checkpointEvent, async (checkpoint) => {
-    await validator.stop();
+    await Promise.all(validators.map((validator) => validator.stop()));
+    if (stopInfoTracker) stopInfoTracker();
     await node.close();
     parent.postMessage({
       event: checkpointEvent,
-      checkpoint: node.config.types.phase0.Checkpoint.toJson(checkpoint as phase0.Checkpoint),
+      checkpoint: ssz.phase0.Checkpoint.toJson(checkpoint as phase0.Checkpoint),
     } as Message);
   });
+
+  const {validators} = await getAndInitDevValidators({
+    node,
+    validatorClientCount: 1,
+    validatorsPerClient: validatorsPerNode,
+    startIndex,
+    testLoggerOpts,
+  });
+  await Promise.all(validators.map((validator) => validator.start()));
 }
 
-runWorker().catch((e) => {
+runWorker().catch((e: Error) => {
   console.error("Worker error", e);
   process.exit(1);
 });
