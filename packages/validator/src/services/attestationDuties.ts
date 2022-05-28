@@ -1,15 +1,15 @@
 import {SLOTS_PER_EPOCH} from "@chainsafe/lodestar-params";
-import {sleep} from "@chainsafe/lodestar-utils";
+import {extendError, sleep} from "@chainsafe/lodestar-utils";
 import {computeEpochAtSlot, isAggregatorFromCommitteeLength} from "@chainsafe/lodestar-beacon-state-transition";
 import {BLSSignature, Epoch, Slot, ValidatorIndex, RootHex} from "@chainsafe/lodestar-types";
 import {Api, routes} from "@chainsafe/lodestar-api";
 import {toHexString} from "@chainsafe/ssz";
-import {IndicesService} from "./indices";
-import {IClock, extendError, ILoggerVc} from "../util";
-import {ValidatorStore} from "./validatorStore";
-import {ChainHeaderTracker, HeadEventData} from "./chainHeaderTracker";
-import {PubkeyHex} from "../types";
-import {Metrics} from "../metrics";
+import {IndicesService} from "./indices.js";
+import {IClock, ILoggerVc} from "../util/index.js";
+import {ValidatorStore} from "./validatorStore.js";
+import {ChainHeaderTracker, HeadEventData} from "./chainHeaderTracker.js";
+import {PubkeyHex} from "../types.js";
+import {Metrics} from "../metrics.js";
 
 /** Only retain `HISTORICAL_DUTIES_EPOCHS` duties prior to the current epoch. */
 const HISTORICAL_DUTIES_EPOCHS = 2;

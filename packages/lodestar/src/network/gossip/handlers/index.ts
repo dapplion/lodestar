@@ -1,11 +1,11 @@
 import {toHexString} from "@chainsafe/ssz";
 import PeerId from "peer-id";
 import {IBeaconConfig} from "@chainsafe/lodestar-config";
-import {phase0, ssz, ValidatorIndex} from "@chainsafe/lodestar-types";
+import {phase0, ssz} from "@chainsafe/lodestar-types";
 import {ILogger, prettyBytes} from "@chainsafe/lodestar-utils";
-import {IMetrics} from "../../../metrics";
-import {OpSource} from "../../../metrics/validatorMonitor";
-import {IBeaconChain} from "../../../chain";
+import {IMetrics} from "../../../metrics/index.js";
+import {OpSource} from "../../../metrics/validatorMonitor.js";
+import {IBeaconChain} from "../../../chain/index.js";
 import {
   AttestationError,
   AttestationErrorCode,
@@ -14,8 +14,8 @@ import {
   BlockGossipError,
   GossipAction,
   SyncCommitteeError,
-} from "../../../chain/errors";
-import {GossipHandlers, GossipType} from "../interface";
+} from "../../../chain/errors/index.js";
+import {GossipHandlers, GossipType} from "../interface.js";
 import {
   validateGossipAggregateAndProof,
   validateGossipAttestation,
@@ -25,10 +25,10 @@ import {
   validateGossipSyncCommittee,
   validateSyncCommitteeGossipContributionAndProof,
   validateGossipVoluntaryExit,
-} from "../../../chain/validation";
-import {INetwork} from "../../interface";
-import {NetworkEvent} from "../../events";
-import {PeerAction} from "../../peers";
+} from "../../../chain/validation/index.js";
+import {INetwork} from "../../interface.js";
+import {NetworkEvent} from "../../events.js";
+import {PeerAction} from "../../peers/index.js";
 
 /**
  * Gossip handler options as part of network options
@@ -76,11 +76,13 @@ export function getGossipHandlers(modules: ValidatorFnsModules, options: GossipH
     [GossipType.beacon_block]: async (signedBlock, topic, peerIdStr, seenTimestampSec) => {
       const slot = signedBlock.message.slot;
       const blockHex = prettyBytes(config.getForkTypes(slot).BeaconBlock.hashTreeRoot(signedBlock.message));
+      const delaySec = chain.clock.secFromSlot(slot, seenTimestampSec);
       logger.verbose("Received gossip block", {
         slot: slot,
         root: blockHex,
         curentSlot: chain.clock.currentSlot,
         peerId: peerIdStr,
+        delaySec,
       });
 
       try {
@@ -120,8 +122,8 @@ export function getGossipHandlers(modules: ValidatorFnsModules, options: GossipH
         .processBlock(signedBlock, {validProposerSignature: true, blsVerifyOnMainThread: true})
         .then(() => {
           // Returns the delay between the start of `block.slot` and `current time`
-          const delaySec = Date.now() / 1000 - (chain.genesisTime + slot * config.SECONDS_PER_SLOT);
-          metrics?.gossipBlock.elappsedTimeTillProcessed.observe(delaySec);
+          const delaySec = chain.clock.secFromSlot(slot);
+          metrics?.gossipBlock.elapsedTimeTillProcessed.observe(delaySec);
         })
         .catch((e) => {
           if (e instanceof BlockError) {
@@ -166,7 +168,7 @@ export function getGossipHandlers(modules: ValidatorFnsModules, options: GossipH
 
       chain.aggregatedAttestationPool.add(
         aggregatedAttestation,
-        indexedAttestation.attestingIndices as ValidatorIndex[],
+        indexedAttestation.attestingIndices.length,
         committeeIndices
       );
 

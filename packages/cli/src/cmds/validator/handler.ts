@@ -1,26 +1,24 @@
-import {AbortController} from "@chainsafe/abort-controller";
 import {LevelDbController} from "@chainsafe/lodestar-db";
 import {SignerType, Signer, SlashingProtection, Validator} from "@chainsafe/lodestar-validator";
 import {getMetrics, MetricsRegister} from "@chainsafe/lodestar-validator";
 import {KeymanagerServer, KeymanagerApi} from "@chainsafe/lodestar-keymanager-server";
 import {RegistryMetricCreator, collectNodeJSMetrics, HttpMetricsServer} from "@chainsafe/lodestar";
-import {getBeaconConfigFromArgs} from "../../config";
-import {IGlobalArgs} from "../../options";
-import {YargsError, getDefaultGraffiti, initBLS, mkdir, getCliLogger} from "../../util";
-import {onGracefulShutdown} from "../../util";
-import {getVersion, getVersionGitData} from "../../util/version";
-import {getBeaconPaths} from "../beacon/paths";
-import {getValidatorPaths} from "./paths";
-import {IValidatorCliArgs, validatorMetricsDefaultOptions} from "./options";
-import {getLocalSecretKeys, getExternalSigners, groupExternalSignersByUrl} from "./keys";
+import {getBeaconConfigFromArgs} from "../../config/index.js";
+import {IGlobalArgs} from "../../options/index.js";
+import {YargsError, getDefaultGraffiti, mkdir, getCliLogger} from "../../util/index.js";
+import {onGracefulShutdown, parseFeeRecipient} from "../../util/index.js";
+import {getVersionData} from "../../util/version.js";
+import {getBeaconPaths} from "../beacon/paths.js";
+import {getValidatorPaths} from "./paths.js";
+import {IValidatorCliArgs, validatorMetricsDefaultOptions, defaultDefaultFeeRecipient} from "./options.js";
+import {getLocalSecretKeys, getExternalSigners, groupExternalSignersByUrl} from "./keys.js";
 
 /**
  * Runs a validator client.
  */
 export async function validatorHandler(args: IValidatorCliArgs & IGlobalArgs): Promise<void> {
-  await initBLS();
-
   const graffiti = args.graffiti || getDefaultGraffiti();
+  const defaultFeeRecipient = parseFeeRecipient(args.defaultFeeRecipient ?? defaultDefaultFeeRecipient);
 
   const validatorPaths = getValidatorPaths(args);
   const beaconPaths = getBeaconPaths(args);
@@ -28,9 +26,8 @@ export async function validatorHandler(args: IValidatorCliArgs & IGlobalArgs): P
 
   const logger = getCliLogger(args, beaconPaths, config);
 
-  const version = getVersion();
-  const gitData = getVersionGitData();
-  logger.info("Lodestar", {version: version, network: args.network});
+  const {version, commit} = getVersionData();
+  logger.info("Lodestar", {network: args.network, version, commit});
 
   const dbPath = validatorPaths.validatorsDbDir;
   mkdir(dbPath);
@@ -102,14 +99,7 @@ export async function validatorHandler(args: IValidatorCliArgs & IGlobalArgs): P
 
   const register = args["metrics.enabled"] ? new RegistryMetricCreator() : null;
   const metrics =
-    register &&
-    getMetrics((register as unknown) as MetricsRegister, {
-      semver: gitData.semver ?? "-",
-      branch: gitData.branch ?? "-",
-      commit: gitData.commit ?? "-",
-      version,
-      network: args.network,
-    });
+    register && getMetrics((register as unknown) as MetricsRegister, {version, commit, network: args.network});
 
   // Start metrics server if metrics are enabled.
   // Collect NodeJS metrics defined in the Lodestar repo
@@ -137,6 +127,7 @@ export async function validatorHandler(args: IValidatorCliArgs & IGlobalArgs): P
       signers,
       graffiti,
       afterBlockDelaySlotFraction: args.afterBlockDelaySlotFraction,
+      defaultFeeRecipient,
     },
     controller.signal,
     metrics

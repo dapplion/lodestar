@@ -2,11 +2,11 @@ import crypto from "node:crypto";
 import bls from "@chainsafe/bls";
 import {config} from "@chainsafe/lodestar-config/default";
 import {ValidatorIndex, BLSSignature} from "@chainsafe/lodestar-types";
-import {ZERO_HASH} from "../../../src/constants";
-import {generateCachedState} from "../../utils/state";
-import {generateValidators} from "../../utils/validator";
+import {ZERO_HASH} from "../../../src/constants/index.js";
+import {generateCachedState} from "../../utils/state.js";
+import {generateValidators} from "../../utils/validator.js";
 import {expect} from "chai";
-import {phase0, allForks} from "../../../src";
+import {phase0, allForks} from "../../../src/index.js";
 import {FAR_FUTURE_EPOCH, MAX_EFFECTIVE_BALANCE} from "@chainsafe/lodestar-params";
 import {BitArray} from "@chainsafe/ssz";
 
@@ -88,12 +88,12 @@ interface IBlockProposerData {
 
 function getMockProposerSlashings(data1: IBlockProposerData, data2: IBlockProposerData): phase0.ProposerSlashing {
   return {
-    signedHeader1: getMockSignedBeaconBlockHeaderBn(data1),
-    signedHeader2: getMockSignedBeaconBlockHeaderBn(data2),
+    signedHeader1: getMockSignedBeaconBlockHeaderBigint(data1),
+    signedHeader2: getMockSignedBeaconBlockHeaderBigint(data2),
   };
 }
 
-function getMockSignedBeaconBlockHeaderBn(data: IBlockProposerData): phase0.SignedBeaconBlockHeaderBn {
+function getMockSignedBeaconBlockHeaderBigint(data: IBlockProposerData): phase0.SignedBeaconBlockHeaderBigint {
   return {
     message: {
       slot: BigInt(0),
@@ -118,10 +118,10 @@ function getMockAttesterSlashings(data1: IIndexAttestationData, data2: IIndexAtt
   };
 }
 
-function getMockIndexAttestationBn(data: IIndexAttestationData): phase0.IndexedAttestationBn {
+function getMockIndexAttestationBn(data: IIndexAttestationData): phase0.IndexedAttestationBigint {
   return {
     attestingIndices: data.attestingIndices,
-    data: getAttestationDataBn(),
+    data: getAttestationDataBigint(),
     signature: data.signature,
   };
 }
@@ -136,7 +136,7 @@ function getAttestationData(): phase0.AttestationData {
   };
 }
 
-function getAttestationDataBn(): phase0.AttestationDataBn {
+function getAttestationDataBigint(): phase0.AttestationDataBigint {
   return {
     slot: BigInt(0),
     index: BigInt(0),

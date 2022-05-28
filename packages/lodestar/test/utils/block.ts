@@ -6,8 +6,8 @@ import {IProtoBlock, ExecutionStatus} from "@chainsafe/lodestar-fork-choice";
 import {isPlainObject} from "@chainsafe/lodestar-utils";
 import {RecursivePartial} from "@chainsafe/lodestar-utils";
 import deepmerge from "deepmerge";
-import {EMPTY_SIGNATURE, ZERO_HASH} from "../../src/constants";
-import {ReqRespBlockResponse} from "../../src/network/reqresp/types";
+import {EMPTY_SIGNATURE, ZERO_HASH} from "../../src/constants/index.js";
+import {ReqRespBlockResponse} from "../../src/network/reqresp/types.js";
 
 export function generateEmptyBlock(): phase0.BeaconBlock {
   return {
@@ -75,7 +75,7 @@ export function generateEmptySignedBlockHeader(): phase0.SignedBeaconBlockHeader
   };
 }
 
-export function generateSignedBlockHeaderBn(): phase0.SignedBeaconBlockHeaderBn {
+export function generateSignedBlockHeaderBn(): phase0.SignedBeaconBlockHeaderBigint {
   return {
     message: {
       slot: BigInt(0),

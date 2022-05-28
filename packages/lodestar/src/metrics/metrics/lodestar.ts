@@ -1,6 +1,6 @@
 import {allForks} from "@chainsafe/lodestar-types";
-import {RegistryMetricCreator} from "../utils/registryMetricCreator";
-import {LodestarMetadata} from "../options";
+import {RegistryMetricCreator} from "../utils/registryMetricCreator.js";
+import {LodestarMetadata} from "../options.js";
 
 export type ILodestarMetrics = ReturnType<typeof createLodestarMetrics>;
 
@@ -523,17 +523,22 @@ export function createLodestarMetrics(
 
     // Gossip block
     gossipBlock: {
-      elappsedTimeTillReceived: register.histogram({
+      elapsedTimeTillReceived: register.histogram({
         name: "lodestar_gossip_block_elappsed_time_till_received",
         help: "Time elappsed between block slot time and the time block received via gossip",
-        buckets: [0.1, 1, 10],
+        buckets: [0.5, 1, 2, 4, 6, 12],
       }),
-      elappsedTimeTillProcessed: register.histogram({
+      elapsedTimeTillProcessed: register.histogram({
         name: "lodestar_gossip_block_elappsed_time_till_processed",
         help: "Time elappsed between block slot time and the time block processed",
-        buckets: [0.1, 1, 10],
+        buckets: [0.5, 1, 2, 4, 6, 12],
       }),
     },
+    elapsedTimeTillBecomeHead: register.histogram({
+      name: "lodestar_gossip_block_elapsed_time_till_become_head",
+      help: "Time elappsed between block slot time and the time block becomes head",
+      buckets: [0.5, 1, 2, 4, 6, 12],
+    }),
 
     backfillSync: {
       backfilledTillSlot: register.gauge({
@@ -802,6 +807,39 @@ export function createLodestarMetrics(
         name: "lodestar_cp_state_epoch_seconds_since_last_read",
         help: "Avg min max of all state cache items seconds since last reads",
       }),
+    },
+
+    seenCache: {
+      aggregatedAttestations: {
+        superSetCheckTotal: register.histogram({
+          name: "lodestar_seen_cache_aggregated_attestations_super_set_check_total",
+          help: "Number of times to call isNonStrictSuperSet in SeenAggregatedAttestations",
+          buckets: [1, 4, 10],
+        }),
+        isKnownCalls: register.gauge({
+          name: "lodestar_seen_cache_aggregated_attestations_is_known_call_total",
+          help: "Total times calling SeenAggregatedAttestations.isKnown",
+        }),
+        isKnownHits: register.gauge({
+          name: "lodestar_seen_cache_aggregated_attestations_is_known_hit_total",
+          help: "Total times SeenAggregatedAttestations.isKnown returning true",
+        }),
+      },
+      committeeContributions: {
+        superSetCheckTotal: register.histogram({
+          name: "lodestar_seen_cache_committee_contributions_super_set_check_total",
+          help: "Number of times to call isNonStrictSuperSet in SeenContributionAndProof",
+          buckets: [1, 4, 10],
+        }),
+        isKnownCalls: register.gauge({
+          name: "lodestar_seen_cache_committee_contributions_is_known_call_total",
+          help: "Total times calling SeenContributionAndProof.isKnown",
+        }),
+        isKnownHits: register.gauge({
+          name: "lodestar_seen_cache_committee_contributions_is_known_hit_total",
+          help: "Total times SeenContributionAndProof.isKnown returning true",
+        }),
+      },
     },
 
     regenFnCallTotal: register.gauge<"entrypoint" | "caller">({
