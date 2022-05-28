@@ -25,5 +25,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Install
+        run: yarn install --frozen-lockfile --ignore-optional && yarn build
       - name: Create RC
         run: yarn release:create_rc ${{ github.event.inputs.version }} ${{ github.event.inputs.commit }}
