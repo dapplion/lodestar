@@ -61,14 +61,17 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
 
   // Log variables for debug
   console.log(`
-  User provided version: ${versionMMP}
-  User provided commit: ${commit}
-  Current version: ${currentVersion}
-  RC branch: ${rcBranchName}
-  Package version: ${packageVersion}
+Selected version: ${versionMMP}
+RC branch: ${rcBranchName}
+Current version: ${currentVersion}
+
+Selected commit: ${commit}
+Commit details:
+
+${getCommitDetails(commit)}
   `);
 
-  if (!(await confirm("Do you to proceed with the release? It will commit and push to a remote repo"))) {
+  if (!(await confirm(`Do you want to start a release process for ${versionMMP} at commit ${commit}?`))) {
     process.exit(1);
   }
 
@@ -320,4 +323,16 @@ function readMainPackageJson() {
   if (!json.version) throw Error(`Empty .version in ${packageJsonPath}`);
 
   return json;
+}
+
+/**
+ * Returns formated details about the commit
+ * @param {string} commit
+ * @returns {string}
+ */
+function getCommitDetails(commit) {
+  // f59814ab91 | 13 minutes ago
+  //
+  // Push only branch
+  return shell(`git log -n 1 ${commit} --date=relative --pretty=format:"%h | %ad %n%n%s %n%b"`);
 }
