@@ -7,7 +7,8 @@ import semver from "semver";
 import inquirer from "inquirer";
 
 const UNSTABLE_BRANCH = "unstable";
-const GIT_REPO_URL = "git@github.com:ChainSafe/lodestar.git";
+const REPO_SLUG = "dapplion/lodestar";
+const GIT_REPO_URL = `git@github.com:${REPO_SLUG}.git`;
 const MAIN_PACKAGE_PATH = "packages/lodestar";
 
 /* eslint-disable
@@ -27,8 +28,8 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
 
   // TODO: Generalize to bump rc.0 to rc.1
   const rcBranchName = `rc/v${versionMMP}`;
-  const packageVersion = `${versionMMP}-rc.0`;
-  const tagName = `v${packageVersion}`;
+  const packageVersion = `${versionMMP}`;
+  const tagName = `v${packageVersion}-rc.0`;
 
   // Asserts script is run in root directory
   const mainPackageJson = readMainPackageJson();
@@ -54,11 +55,9 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
   const rcBranchCommitRemote = checkBranchExistsRemote(rcBranchName);
   if (rcBranchCommitRemote !== null) throw Error(`RC branch ${rcBranchName} already exists in remote`);
 
-  // Assert tag does not exist in local nor remote
-  const tagCommitLocal = checkTagExistsLocal(tagName);
-  if (tagCommitLocal !== null) throw Error(`tag ${tagName} already exists in local`);
-  const tagCommitRemote = checkTagExistsRemote(tagName);
-  if (tagCommitRemote !== null) throw Error(`tag ${tagName} already exists in remote`);
+  // Must ensure git directory is clean before doing any changes.
+  // Otherwise the lerna version + commit step below could mix in changes by the user.
+  assertGitDirectoryIsClean();
 
   // Log variables for debug
   console.log(`
@@ -67,10 +66,11 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
   Current version: ${currentVersion}
   RC branch: ${rcBranchName}
   Package version: ${packageVersion}
-  Tag: ${tagName}
   `);
 
-  await confirm("This action will commit and push to remote repo");
+  if (!(await confirm("Do you to proceed with the release? It will commit and push to a remote repo"))) {
+    process.exit(1);
+  }
 
   // Create a new release branch `rc/v1.1.0` at commit `9fceb02`
   shell(`git checkout -b ${rcBranchName} ${commit}`);
@@ -79,13 +79,31 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
   shell(`lerna version ${packageVersion} --no-git-tag-version --force-publish --yes`);
 
   // Commit changes
-  shell(`git commit -am "${tagName}"`);
+  shell(`git commit -am "v${versionMMP}"`);
 
-  // Tag resulting commit as `v1.1.0-rc.0` with an annotated tag, push branch and tag
-  shell(`git tag -am "${tagName}" ${tagName}`);
-  shell("git push --tag");
+  // Push branch, specifying upstream
+  shell(`git push ${GIT_REPO_URL} ${rcBranchName}`);
 
-  // Open draft PR from `rc/v1.1.0` to `stable` with title `v1.1.0 release`
+  // TODO: Open draft PR from `rc/v1.1.0` to `stable` with title `v1.1.0 release`
+  console.log(`
+  
+  Pushed ${rcBranchName} to Github, open a release PR:
+
+  https://github.com/${REPO_SLUG}/compare/stable...${rcBranchName}
+  
+  `);
+
+  if (await confirm(`Do you want to create and publish a release candidate ${tagName}?`)) {
+    // Assert tag does not exist in local nor remote
+    const tagCommitLocal = checkTagExistsLocal(tagName);
+    if (tagCommitLocal !== null) throw Error(`tag ${tagName} already exists in local`);
+    const tagCommitRemote = checkTagExistsRemote(tagName);
+    if (tagCommitRemote !== null) throw Error(`tag ${tagName} already exists in remote`);
+
+    // Tag resulting commit as `v1.1.0-rc.0` with an annotated tag, push branch and tag
+    shell(`git tag -am "${tagName}" ${tagName}`);
+    shell("git push --tag");
+  }
 }
 
 /////////////////////////////
@@ -172,19 +190,18 @@ function assertCommitExistsInBranch(commit, branch) {
 async function confirm(message) {
   // CI is never interactive, skip checks
   if (process.env.CI) {
-    return;
+    return true;
   }
 
   const input = await inquirer.prompt([
     {
       name: "yes",
       type: "confirm",
-      message: `Do you want to proceed? ${message}`,
+      message,
     },
   ]);
-  if (!input.yes) {
-    process.exit(1);
-  }
+
+  return Boolean(input.yes);
 }
 
 /**
@@ -263,6 +280,17 @@ function checkTagExistsRemote(tag) {
     return out.split(/\s+/)[0];
   } catch (e) {
     return null;
+  }
+}
+
+/**
+ * Throws if there are any tracked or untracked changes
+ */
+function assertGitDirectoryIsClean() {
+  // From https://unix.stackexchange.com/questions/155046/determine-if-git-working-directory-is-clean-from-a-script
+  const changedFileList = shell("git status --porcelain");
+  if (changedFileList) {
+    throw Error(`git directory must be clean, changed files:\n${changedFileList}`);
   }
 }
 
