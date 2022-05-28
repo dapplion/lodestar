@@ -171,7 +171,7 @@ function assertCommitExistsInBranch(commit, branch) {
  */
 async function confirm(message) {
   // CI is never interactive, skip checks
-  if (process.CI) {
+  if (process.env.CI) {
     return;
   }
 
