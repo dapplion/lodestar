@@ -100,9 +100,9 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
     const tagCommitRemote = checkTagExistsRemote(tagName);
     if (tagCommitRemote !== null) throw Error(`tag ${tagName} already exists in remote`);
 
-    // Tag resulting commit as `v1.1.0-rc.0` with an annotated tag, push branch and tag
+    // Tag resulting commit as `v1.1.0-rc.0` with an annotated tag, push new tag only
     shell(`git tag -am "${tagName}" ${tagName}`);
-    shell("git push --tag");
+    shell(`git push ${GIT_REPO_URL} ${tagName}`);
   }
 }
 
