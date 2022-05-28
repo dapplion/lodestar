@@ -46,7 +46,7 @@ const MAIN_PACKAGE_PATH = "packages/lodestar";
     throw Error(`Must be run in branch '${UNSTABLE_BRANCH}' but is in '${currentBranch}'`);
   }
 
-  ensureCommitExistsInBranch(commit, UNSTABLE_BRANCH);
+  assertCommitExistsInBranch(commit, UNSTABLE_BRANCH);
 
   // Assert rc branch does not exist in local nor remote
   const rcBranchCommitLocal = checkBranchExistsLocal(rcBranchName);
@@ -141,18 +141,26 @@ function parseCmdArgs() {
  * @param {string} commit
  * @param {string} branch
  */
-function ensureCommitExistsInBranch(commit, branch) {
-  // Ensure the branch exists
+function assertCommitExistsInBranch(commit, branch) {
+  /** @type {string} */
+  let headCommit;
   try {
-    shell(`git show-branch --no-name ${branch}`);
+    // Also, ensure the branch exists first
+    headCommit = shell(`git rev-parse refs/heads/${branch}`);
   } catch (e) {
     throw Error(`Branch ${branch} does not exist: ${e.message}`);
   }
 
-  // Ensure the commit exists in the branch's last 100 commits
-  const last10Commits = shell(`git --no-pager log --oneline -n 100 --pretty=format:"%h" ${branch}`);
-  const commitMatch = last10Commits.match(commit);
-  if (commitMatch == null) {
+  // Best, safest strategy to assert ancestor-ship
+  // From https://stackoverflow.com/questions/43535132/given-a-commit-id-how-to-determine-if-current-branch-contains-the-commit
+  //
+  // git merge-base --is-ancestor parent child -> exit code 0 (YES)
+  // git merge-base --is-ancestor child parent -> exit code 1 (NO)
+  // git merge-base --is-ancestor child child  -> exit code 0 (YES)
+
+  try {
+    shell(`git merge-base --is-ancestor ${commit} ${headCommit}`);
+  } catch (e) {
     throw Error(`Commit ${commit} does not belong to branch ${branch}`);
   }
 }
